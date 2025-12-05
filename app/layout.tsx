@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import DatabaseInitializer from '@/components/DatabaseInitializer';
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
@@ -42,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="cs">
       <body className={`${inter.variable} font-sans antialiased`}>
+        <DatabaseInitializer />
         <Header />
         {children}
         <Footer />

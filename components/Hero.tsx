@@ -1,9 +1,33 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { pageContent } from '@/data/content';
 
 export default function Hero() {
+  const [heroData, setHeroData] = useState(pageContent.hero);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        const response = await fetch('/api/content?page=home');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data.hero) {
+            setHeroData(result.data.hero);
+          }
+        }
+      } catch (error) {
+        console.log('Failed to fetch hero data, using static content');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHeroData();
+  }, []);
+
   const scrollToAbout = () => {
     const aboutSection = document.getElementById('about-section');
     if (aboutSection) {
@@ -26,13 +50,14 @@ export default function Hero() {
 
       {/* Hero Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
-          {pageContent.hero.title}
-        </h1>
-        <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed drop-shadow-lg font-medium">
-          Demokratický, dobrovolný spolek dětí, mládeže a dospělých
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="bg-black/60 backdrop-blur-sm rounded-2xl px-8 py-12 mx-4">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
+            {heroData.title}
+          </h1>
+          <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed drop-shadow-lg font-medium">
+            {heroData.subtitle || 'Demokratický, dobrovolný spolek dětí, mládeže a dospělých'}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={scrollToAbout}
             className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
@@ -45,6 +70,7 @@ export default function Hero() {
           >
             Kontakt
           </Link>
+          </div>
         </div>
       </div>
 

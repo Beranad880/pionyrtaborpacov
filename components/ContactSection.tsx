@@ -1,6 +1,31 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { siteData } from '@/data/content';
 
 export default function ContactSection() {
+  const [data, setData] = useState(siteData);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/content?page=siteData');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            setData(result.data);
+          }
+        }
+      } catch (error) {
+        console.log('Failed to fetch site data, using static data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
   return (
     <section className="py-16 bg-slate-50">
       <div className="container mx-auto px-4">
@@ -37,7 +62,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-800 mb-1">Pionýr, z.s. - Pionýrská skupina Pacov</h3>
-                  <p className="text-slate-700">{siteData.contact.address}</p>
+                  <p className="text-slate-700">{data.contact.address}</p>
                 </div>
               </div>
 
@@ -51,7 +76,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-800 mb-1">Číslo účtu</h3>
-                  <p className="text-slate-700">{siteData.contact.bankAccount}</p>
+                  <p className="text-slate-700">{data.contact.bankAccount}</p>
                 </div>
               </div>
 
@@ -64,8 +89,8 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-800 mb-1">Identifikační údaje</h3>
-                  <p className="text-slate-700">IČ: {siteData.contact.ico}</p>
-                  <p className="text-slate-700">DIČ: {siteData.contact.dic}</p>
+                  <p className="text-slate-700">IČ: {data.contact.ico}</p>
+                  <p className="text-slate-700">DIČ: {data.contact.dic}</p>
                 </div>
               </div>
             </div>
@@ -78,15 +103,15 @@ export default function ContactSection() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <div className="p-4 bg-slate-50 rounded-lg">
                 <h4 className="font-semibold text-slate-800 mb-2">Vedoucí PS:</h4>
-                <p className="text-slate-700 text-sm">{siteData.leadership.leader}</p>
+                <p className="text-slate-700 text-sm">{data.leadership.leader}</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-lg">
                 <h4 className="font-semibold text-slate-800 mb-2">Hospodář PS:</h4>
-                <p className="text-slate-700 text-sm">{siteData.leadership.treasurer}</p>
+                <p className="text-slate-700 text-sm">{data.leadership.treasurer}</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-lg">
                 <h4 className="font-semibold text-slate-800 mb-2">Revizor PS:</h4>
-                <p className="text-slate-700 text-sm">{siteData.leadership.auditor}</p>
+                <p className="text-slate-700 text-sm">{data.leadership.auditor}</p>
               </div>
             </div>
 
@@ -94,14 +119,14 @@ export default function ContactSection() {
               <div className="p-4 bg-slate-50 rounded-lg">
                 <h4 className="font-semibold text-slate-800 mb-2">Delegáti PS – členové KRP:</h4>
                 <ul className="text-slate-700 text-sm space-y-1">
-                  {siteData.leadership.delegates.map((delegate, index) => (
+                  {data.leadership.delegates.map((delegate, index) => (
                     <li key={index}>{delegate}</li>
                   ))}
                 </ul>
               </div>
               <div className="p-4 bg-slate-50 rounded-lg">
                 <h4 className="font-semibold text-slate-800 mb-2">Delegát PS krajské schůze delegátů:</h4>
-                <p className="text-slate-700 text-sm">{siteData.leadership.delegates[0]}</p>
+                <p className="text-slate-700 text-sm">{data.leadership.delegates[0]}</p>
               </div>
             </div>
 
@@ -110,7 +135,7 @@ export default function ContactSection() {
               <h4 className="text-xl font-bold text-slate-800 mb-6">Věkové složení skupiny (2025)</h4>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-                {siteData.statistics.ageGroups.map((group, index) => (
+                {data.statistics.ageGroups.map((group, index) => (
                   <div key={index} className="text-center p-4 bg-red-50 rounded-lg">
                     <div className="text-2xl font-bold text-red-600 mb-1">{group.count}</div>
                     <div className="text-xs text-slate-600">{group.range}</div>
@@ -120,26 +145,26 @@ export default function ContactSection() {
 
               <div className="text-center mb-8">
                 <div className="inline-flex items-center justify-center w-24 h-24 bg-red-600 rounded-full">
-                  <span className="text-3xl font-bold text-white">{siteData.statistics.total}</span>
+                  <span className="text-3xl font-bold text-white">{data.statistics.total}</span>
                 </div>
                 <p className="text-lg font-semibold text-slate-800 mt-2">Celkem členů</p>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
-                  <div className="text-xl font-bold text-slate-800 mb-1">{siteData.statistics.councilMembers}</div>
+                  <div className="text-xl font-bold text-slate-800 mb-1">{data.statistics.councilMembers}</div>
                   <div className="text-sm text-slate-600">Členů rady PS</div>
                 </div>
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
-                  <div className="text-xl font-bold text-slate-800 mb-1">{siteData.statistics.leadershipMembers}</div>
+                  <div className="text-xl font-bold text-slate-800 mb-1">{data.statistics.leadershipMembers}</div>
                   <div className="text-sm text-slate-600">Členů vedení PS</div>
                 </div>
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
-                  <div className="text-xl font-bold text-slate-800 mb-1">{siteData.statistics.krpDelegates}</div>
+                  <div className="text-xl font-bold text-slate-800 mb-1">{data.statistics.krpDelegates}</div>
                   <div className="text-sm text-slate-600">Delegátů do KRP</div>
                 </div>
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
-                  <div className="text-xl font-bold text-slate-800 mb-1">{siteData.statistics.foundedGroups}</div>
+                  <div className="text-xl font-bold text-slate-800 mb-1">{data.statistics.foundedGroups}</div>
                   <div className="text-sm text-slate-600">Založených oddílů</div>
                 </div>
               </div>

@@ -1,6 +1,31 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { pageContent } from '@/data/content';
 
 export default function AboutSection() {
+  const [content, setContent] = useState(pageContent);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch('/api/content?page=home');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            setContent(result.data);
+          }
+        }
+      } catch (error) {
+        console.log('Failed to fetch content, using static data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, []);
   return (
     <section id="about-section" className="py-16 bg-gradient-to-b from-white to-slate-50">
       <div className="container mx-auto px-4">
@@ -8,16 +33,16 @@ export default function AboutSection() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-6">
-              {pageContent.about.title}
+              {content.about?.title || pageContent.about.title}
             </h2>
             <blockquote className="text-xl md:text-2xl text-slate-600 italic leading-relaxed max-w-4xl mx-auto border-l-4 border-red-600 pl-6 bg-red-50 p-6 rounded-r-lg shadow-sm">
-              {pageContent.about.subtitle}
+              {content.about?.subtitle || pageContent.about.subtitle}
             </blockquote>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              {pageContent.about.content.map((paragraph, index) => (
+              {(content.about?.content || pageContent.about.content).map((paragraph, index) => (
                 <p key={index} className="text-slate-700 leading-relaxed text-justify">
                   {paragraph}
                 </p>
@@ -54,18 +79,18 @@ export default function AboutSection() {
                 Pionýr
               </h3>
               <p className="text-slate-700 leading-relaxed mb-8">
-                {pageContent.pioneer.description}
+                {content.pioneer?.description || pageContent.pioneer.description}
               </p>
 
               <h4 className="text-xl md:text-2xl font-bold text-slate-800 mb-4">
-                {pageContent.pioneer.ideals.title}
+                {content.pioneer?.ideals?.title || pageContent.pioneer.ideals.title}
               </h4>
               <p className="text-slate-700 leading-relaxed mb-6">
-                {pageContent.pioneer.ideals.description}
+                {content.pioneer?.ideals?.description || pageContent.pioneer.ideals.description}
               </p>
 
               <div className="space-y-4">
-                {pageContent.pioneer.ideals.content.map((paragraph, index) => (
+                {(content.pioneer?.ideals?.content || pageContent.pioneer.ideals.content).map((paragraph, index) => (
                   <p key={index} className="text-slate-700 leading-relaxed text-justify">
                     {paragraph}
                   </p>
@@ -97,10 +122,10 @@ export default function AboutSection() {
         <div className="max-w-6xl mx-auto mt-20">
           <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
             <h3 className="text-2xl md:text-3xl font-bold text-slate-800 mb-6">
-              {pageContent.history.title}
+              {content.history?.title || pageContent.history.title}
             </h3>
             <p className="text-slate-700 leading-relaxed text-justify">
-              {pageContent.history.content}
+              {content.history?.content || pageContent.history.content}
             </p>
 
             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
