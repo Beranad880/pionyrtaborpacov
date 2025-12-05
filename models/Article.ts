@@ -5,7 +5,7 @@ export interface IArticle extends Document {
   slug: string;
   content: string;
   excerpt: string;
-  author: mongoose.Types.ObjectId;
+  author: string;
   category: 'news' | 'event-report' | 'general' | 'announcement';
   tags: string[];
   featuredImage?: string;
@@ -15,7 +15,7 @@ export interface IArticle extends Document {
   views: number;
   likes: number;
   comments: {
-    author: mongoose.Types.ObjectId;
+    author: string;
     content: string;
     createdAt: Date;
   }[];
@@ -48,8 +48,7 @@ const ArticleSchema = new Schema<IArticle>(
       maxlength: [300, 'Výtah článku nemůže být delší než 300 znaků'],
     },
     author: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
+      type: String,
       required: [true, 'Autor článku je povinný'],
     },
     category: {
@@ -82,8 +81,7 @@ const ArticleSchema = new Schema<IArticle>(
     },
     comments: [{
       author: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+        type: String,
         required: true,
       },
       content: {

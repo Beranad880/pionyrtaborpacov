@@ -60,6 +60,13 @@ const adminCards = [
     icon: '📞',
     color: 'bg-yellow-50 border-yellow-200 text-yellow-700'
   },
+  {
+    title: 'Žádosti o pronájem',
+    description: 'Správa žádostí o pronájem Hájenky Bělá',
+    href: '/admin/rental-requests',
+    icon: '🏡',
+    color: 'bg-red-50 border-red-200 text-red-700'
+  },
 ];
 
 const recentActivity = [

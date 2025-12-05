@@ -1,17 +1,37 @@
 'use client';
 
-import { useState } from 'react';
-import { allPagesContent } from '@/data/content';
+import { useState, useEffect } from 'react';
+import { allPagesContent, siteData } from '@/data/content';
 
 export default function HomeAdminPage() {
   const [homeContent, setHomeContent] = useState(allPagesContent.home);
+  const [contactData, setContactData] = useState(siteData);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    fetchContactData();
+  }, []);
+
+  const fetchContactData = async () => {
+    try {
+      const response = await fetch('/api/content?page=siteData');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          setContactData(result.data);
+        }
+      }
+    } catch (error) {
+      console.log('Failed to fetch contact data, using static data');
+    }
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/admin/content', {
+      // Save home content
+      const homeResponse = await fetch('/api/admin/content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,8 +42,20 @@ export default function HomeAdminPage() {
         }),
       });
 
-      if (response.ok) {
-        setMessage('Obsah byl úspěšně uložen!');
+      // Save contact data (statistics)
+      const contactResponse = await fetch('/api/content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          page: 'siteData',
+          data: contactData,
+        }),
+      });
+
+      if (homeResponse.ok && contactResponse.ok) {
+        setMessage('Obsah i statistiky byly úspěšně uloženy!');
         setTimeout(() => setMessage(''), 3000);
       } else {
         setMessage('Chyba při ukládání obsahu.');
@@ -111,6 +143,52 @@ export default function HomeAdminPage() {
     }));
   };
 
+  const updateStatistics = (field: string, value: number) => {
+    setContactData(prev => ({
+      ...prev,
+      statistics: {
+        ...prev.statistics,
+        [field]: value
+      }
+    }));
+  };
+
+  const updateAgeGroup = (index: number, field: 'range' | 'count', value: string | number) => {
+    const newAgeGroups = [...contactData.statistics.ageGroups];
+    newAgeGroups[index] = {
+      ...newAgeGroups[index],
+      [field]: value
+    };
+    setContactData(prev => ({
+      ...prev,
+      statistics: {
+        ...prev.statistics,
+        ageGroups: newAgeGroups
+      }
+    }));
+  };
+
+  const addAgeGroup = () => {
+    setContactData(prev => ({
+      ...prev,
+      statistics: {
+        ...prev.statistics,
+        ageGroups: [...prev.statistics.ageGroups, { range: '', count: 0 }]
+      }
+    }));
+  };
+
+  const removeAgeGroup = (index: number) => {
+    const newAgeGroups = contactData.statistics.ageGroups.filter((_, i) => i !== index);
+    setContactData(prev => ({
+      ...prev,
+      statistics: {
+        ...prev.statistics,
+        ageGroups: newAgeGroups
+      }
+    }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -178,9 +256,9 @@ export default function HomeAdminPage() {
         </div>
       </div>
 
-      {/* About Section */}
+      {/* Section 1 */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Sekce "O nás"</h2>
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Sekce 1</h2>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -227,13 +305,13 @@ export default function HomeAdminPage() {
         </div>
       </div>
 
-      {/* Pioneer Section */}
+      {/* Section 2 */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Sekce "Pionýr"</h2>
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Sekce 2</h2>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Popis Pionýra
+              Obecný popis
             </label>
             <textarea
               value={homeContent.pioneer.description}
@@ -245,7 +323,7 @@ export default function HomeAdminPage() {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Nadpis ideálů
+              Nadpis sekce
             </label>
             <input
               type="text"
@@ -257,7 +335,7 @@ export default function HomeAdminPage() {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Popis ideálů
+              Popis sekce
             </label>
             <textarea
               value={homeContent.pioneer.ideals.description}
@@ -269,7 +347,7 @@ export default function HomeAdminPage() {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Obsah ideálů
+              Obsah sekce
             </label>
             {homeContent.pioneer.ideals.content.map((paragraph, index) => (
               <div key={index} className="mb-3">
@@ -288,9 +366,9 @@ export default function HomeAdminPage() {
         </div>
       </div>
 
-      {/* History Section */}
+      {/* Section 3 */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Sekce "Historie"</h2>
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Sekce 3</h2>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -313,6 +391,112 @@ export default function HomeAdminPage() {
               onChange={(e) => updateHistoryContent('content', e.target.value)}
               rows={5}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Statistics Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Statistiky</h2>
+
+        {/* Age Groups */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-medium text-slate-700">Věkové skupiny</h3>
+            <button
+              onClick={addAgeGroup}
+              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+            >
+              Přidat skupinu
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {contactData.statistics.ageGroups.map((group, index) => (
+              <div key={index} className="border border-slate-200 rounded-lg p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium">Skupina {index + 1}</span>
+                  <button
+                    onClick={() => removeAgeGroup(index)}
+                    className="text-red-600 hover:text-red-700 text-sm"
+                  >
+                    ×
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Věkové rozpětí (např. 6-10 let)"
+                  value={group.range}
+                  onChange={(e) => updateAgeGroup(index, 'range', e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded mb-2 focus:ring-red-500 focus:border-red-500"
+                />
+                <input
+                  type="number"
+                  placeholder="Počet"
+                  value={group.count}
+                  onChange={(e) => updateAgeGroup(index, 'count', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-red-500 focus:border-red-500"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Other Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Celkem členů
+            </label>
+            <input
+              type="number"
+              value={contactData.statistics.total}
+              onChange={(e) => updateStatistics('total', parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Členů rady PS
+            </label>
+            <input
+              type="number"
+              value={contactData.statistics.councilMembers}
+              onChange={(e) => updateStatistics('councilMembers', parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Členů vedení PS
+            </label>
+            <input
+              type="number"
+              value={contactData.statistics.leadershipMembers}
+              onChange={(e) => updateStatistics('leadershipMembers', parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Delegátů do KRP
+            </label>
+            <input
+              type="number"
+              value={contactData.statistics.krpDelegates}
+              onChange={(e) => updateStatistics('krpDelegates', parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Založených oddílů
+            </label>
+            <input
+              type="number"
+              value={contactData.statistics.foundedGroups}
+              onChange={(e) => updateStatistics('foundedGroups', parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
             />
           </div>
         </div>

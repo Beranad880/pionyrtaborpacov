@@ -67,7 +67,7 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
         category: formData.category,
         tags: tagsArray,
         status: formData.status,
-        author: '675155d09b32dac8ac9c1b97' // Temporary author ID - should be dynamic
+        author: 'Admin' // Static author for now - will be dynamic later
       };
 
       const response = await fetch('/api/articles', {

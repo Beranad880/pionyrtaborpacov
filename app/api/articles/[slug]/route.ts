@@ -13,7 +13,6 @@ export async function GET(
       slug: params.slug,
       status: 'published'
     })
-      .populate('author', 'name')
       .lean();
 
     if (!article) {

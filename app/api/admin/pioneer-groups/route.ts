@@ -12,6 +12,7 @@ export async function GET() {
       success: true,
       data: groups
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('GET /api/admin/pioneer-groups error:', error);
     return NextResponse.json(
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
       data: group,
       message: 'Pioneer group created successfully'
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('POST /api/admin/pioneer-groups error:', error);
     return NextResponse.json(

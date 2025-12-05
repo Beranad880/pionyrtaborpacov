@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
     if (slug) {
       // Get specific article by slug
       const article = await Article.findOne({ slug, status: 'published' })
-        .populate('author', 'name')
         .lean();
 
       if (!article) {
@@ -43,7 +42,6 @@ export async function GET(request: NextRequest) {
     }
 
     const articles = await Article.find(filter)
-      .populate('author', 'name')
       .sort({ publishedAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -81,7 +79,7 @@ export async function POST(request: NextRequest) {
     const { title, slug, content, excerpt, author, category, tags, status } = body;
 
     // Validate required fields
-    if (!title || !slug || !content || !excerpt || !author || !category) {
+    if (!title || !slug || !content || !excerpt || !category) {
       return NextResponse.json(
         { success: false, message: 'Chybí povinná pole' },
         { status: 400 }
@@ -97,13 +95,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create new article
+    // Create new article without author reference for now
     const article = new Article({
       title,
       slug,
       content,
       excerpt,
-      author,
+      author: author || 'Admin',
       category,
       tags: tags || [],
       status: status || 'draft',
@@ -111,9 +109,6 @@ export async function POST(request: NextRequest) {
     });
 
     await article.save();
-
-    // Populate author for response
-    await article.populate('author', 'name');
 
     return NextResponse.json({
       success: true,
