@@ -1,0 +1,559 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import ArticleForm from '@/components/ArticleForm';
+
+interface Article {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  category: 'news' | 'event-report' | 'general' | 'announcement';
+  tags: string[];
+  status: 'draft' | 'published' | 'archived';
+  publishedAt?: string;
+  views: number;
+  likes: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const categories = [
+  { value: 'news', label: 'Novinky', color: 'bg-purple-100 text-purple-800' },
+  { value: 'event-report', label: 'Reportáž', color: 'bg-green-100 text-green-800' },
+  { value: 'general', label: 'Obecné', color: 'bg-gray-100 text-gray-800' },
+  { value: 'announcement', label: 'Oznámení', color: 'bg-blue-100 text-blue-800' }
+];
+
+const statuses = [
+  { value: 'draft', label: 'Koncept', color: 'bg-yellow-100 text-yellow-800' },
+  { value: 'published', label: 'Publikováno', color: 'bg-green-100 text-green-800' },
+  { value: 'archived', label: 'Archivováno', color: 'bg-gray-100 text-gray-800' }
+];
+
+export default function ArticlesAdminPage() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+
+  // Sample articles for demonstration
+  const sampleArticles: Article[] = [
+    {
+      _id: '1',
+      title: 'Přípravy na zimní tábor 2024',
+      slug: 'pripravy-na-zimni-tabor-2024',
+      excerpt: 'Blíží se termín našeho tradičního zimního tábora. Letos se koná od 27. prosince 2024 do 2. ledna 2025 na Hájence Bělá.',
+      content: '<p>Blíží se termín našeho tradičního zimního tábora a přípravy jsou v plném proudu! Letos se zimní tábor koná od <strong>27. prosince 2024 do 2. ledna 2025</strong> na naší oblíbené Hájence Bělá.</p><h2>Program tábora</h2><p>Připravili jsme pro vás bohatý program plný her, sportovních aktivit a táborového dobrodružství...</p>',
+      author: 'Vedení skupiny',
+      category: 'announcement',
+      tags: ['tábor', 'zima', '2024'],
+      status: 'published',
+      publishedAt: '2024-11-15',
+      views: 124,
+      likes: 8,
+      createdAt: '2024-11-15',
+      updatedAt: '2024-11-15'
+    },
+    {
+      _id: '2',
+      title: 'Úspěšný letní tábor 2024',
+      slug: 'uspesny-letni-tabor-2024',
+      excerpt: 'Letní tábor 2024 na Hájence Bělá se vydařil na výbornou. Účastnilo se ho 28 dětí a měli jsme krásné počasí po celou dobu.',
+      content: '<p>Letní tábor 2024 na Hájence Bělá se vydařil na výbornou! Od 15. do 29. července se ho účastnilo <strong>28 dětí</strong> ve věku 7-15 let...</p>',
+      author: 'Vedení skupiny',
+      category: 'event-report',
+      tags: ['tábor', 'léto', '2024', 'reportáž'],
+      status: 'published',
+      publishedAt: '2024-08-15',
+      views: 256,
+      likes: 15,
+      createdAt: '2024-08-15',
+      updatedAt: '2024-08-15'
+    },
+    {
+      _id: '3',
+      title: 'Nový článek (koncept)',
+      slug: 'novy-clanek-koncept',
+      excerpt: 'Toto je koncept nového článku, který ještě není publikován.',
+      content: '<p>Obsah článku v konceptu...</p>',
+      author: 'Jan Novák',
+      category: 'news',
+      tags: ['koncept'],
+      status: 'draft',
+      views: 0,
+      likes: 0,
+      createdAt: '2024-12-05',
+      updatedAt: '2024-12-05'
+    },
+    {
+      _id: '4',
+      title: 'Starý archivovaný článek',
+      slug: 'stary-archivovany-clanek',
+      excerpt: 'Tento článek byl archivován a není již viditelný na webu.',
+      content: '<p>Archivovaný obsah...</p>',
+      author: 'Marie Svobodová',
+      category: 'general',
+      tags: ['archiv'],
+      status: 'archived',
+      publishedAt: '2023-01-01',
+      views: 89,
+      likes: 3,
+      createdAt: '2023-01-01',
+      updatedAt: '2024-01-01'
+    }
+  ];
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  const fetchArticles = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/articles');
+      const result = await response.json();
+
+      if (result.success) {
+        setArticles(result.data.articles);
+      } else {
+        console.error('Failed to fetch articles:', result.message);
+        // Fallback to sample data
+        setArticles(sampleArticles);
+      }
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+      // Fallback to sample data
+      setArticles(sampleArticles);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCategoryInfo = (category: string) => {
+    return categories.find(c => c.value === category) || categories[categories.length - 1];
+  };
+
+  const getStatusInfo = (status: string) => {
+    return statuses.find(s => s.value === status) || statuses[0];
+  };
+
+  const updateArticleStatus = async (id: string, status: Article['status']) => {
+    try {
+      const response = await fetch(`/api/articles/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setArticles(prev =>
+          prev.map(article =>
+            article._id === id ? {
+              ...article,
+              status,
+              publishedAt: status === 'published' && !article.publishedAt ? new Date().toISOString() : article.publishedAt,
+              updatedAt: new Date().toISOString()
+            } : article
+          )
+        );
+      } else {
+        alert(`Chyba: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error updating article:', error);
+      alert('Chyba při aktualizaci článku');
+    }
+  };
+
+  const deleteArticle = async (id: string) => {
+    if (confirm('Opravdu chcete tento článek smazat?')) {
+      try {
+        const response = await fetch(`/api/articles/${id}`, {
+          method: 'DELETE',
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          setArticles(prev => prev.filter(article => article._id !== id));
+          setSelectedArticle(null);
+        } else {
+          alert(`Chyba: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Error deleting article:', error);
+        alert('Chyba při mazání článku');
+      }
+    }
+  };
+
+  const filteredArticles = articles.filter(article => {
+    if (filterStatus !== 'all' && article.status !== filterStatus) return false;
+    if (filterCategory !== 'all' && article.category !== filterCategory) return false;
+    return true;
+  });
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-900">Správa článků</h1>
+        <div className="animate-pulse space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white p-6 rounded-lg shadow-sm border h-32"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const publishedCount = articles.filter(a => a.status === 'published').length;
+  const draftCount = articles.filter(a => a.status === 'draft').length;
+  const totalViews = articles.reduce((sum, a) => sum + a.views, 0);
+  const totalLikes = articles.reduce((sum, a) => sum + a.likes, 0);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Správa článků</h1>
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Nový článek
+        </button>
+      </div>
+
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <span className="text-green-600 font-semibold">📝</span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-500">Publikováno</h3>
+              <p className="text-2xl font-semibold text-gray-900">{publishedCount}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                <span className="text-yellow-600 font-semibold">📄</span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-500">Koncepty</h3>
+              <p className="text-2xl font-semibold text-gray-900">{draftCount}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 font-semibold">👁️</span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-500">Zobrazení</h3>
+              <p className="text-2xl font-semibold text-gray-900">{totalViews}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-red-600 font-semibold">❤️</span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-500">Líbí se</h3>
+              <p className="text-2xl font-semibold text-gray-900">{totalLikes}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <div className="flex flex-wrap gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+            >
+              <option value="all">Všechny</option>
+              {statuses.map(status => (
+                <option key={status.value} value={status.value}>{status.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Kategorie</label>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+            >
+              <option value="all">Všechny</option>
+              {categories.map(category => (
+                <option key={category.value} value={category.value}>{category.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Articles List */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Články ({filteredArticles.length})
+          </h2>
+        </div>
+        <div className="divide-y divide-gray-200">
+          {filteredArticles.map((article) => (
+            <div key={article._id} className="p-6 hover:bg-gray-50 transition-colors">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <h3 className="text-lg font-medium text-gray-900">{article.title}</h3>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryInfo(article.category).color}`}>
+                      {getCategoryInfo(article.category).label}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusInfo(article.status).color}`}>
+                      {getStatusInfo(article.status).label}
+                    </span>
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <span className="font-medium">Autor:</span> {article.author}
+                      </div>
+                      <div>
+                        <span className="font-medium">Vytvořeno:</span> {new Date(article.createdAt).toLocaleDateString('cs-CZ')}
+                      </div>
+                      <div>
+                        <span className="font-medium">Zobrazení:</span> {article.views}
+                      </div>
+                      <div>
+                        <span className="font-medium">Líbí se:</span> {article.likes}
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-gray-600">{article.excerpt}</p>
+
+                  {article.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {article.tags.map((tag, index) => (
+                        <span key={index} className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col space-y-2">
+                  <button
+                    onClick={() => setSelectedArticle(article)}
+                    className="px-3 py-1 text-sm text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
+                  >
+                    Detail
+                  </button>
+                  <button
+                    onClick={() => setSelectedArticle(article)}
+                    className="px-3 py-1 text-sm text-gray-600 border border-gray-600 rounded hover:bg-gray-50 transition-colors"
+                  >
+                    Upravit
+                  </button>
+                  {article.status === 'draft' && (
+                    <button
+                      onClick={() => updateArticleStatus(article._id, 'published')}
+                      className="px-3 py-1 text-sm text-white bg-green-600 rounded hover:bg-green-700 transition-colors"
+                    >
+                      Publikovat
+                    </button>
+                  )}
+                  {article.status === 'published' && (
+                    <button
+                      onClick={() => updateArticleStatus(article._id, 'archived')}
+                      className="px-3 py-1 text-sm text-white bg-gray-600 rounded hover:bg-gray-700 transition-colors"
+                    >
+                      Archivovat
+                    </button>
+                  )}
+                  <button
+                    onClick={() => deleteArticle(article._id)}
+                    className="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700 transition-colors"
+                  >
+                    Smazat
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Article Detail/Edit Modal */}
+      {selectedArticle && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold">
+                {isEditing ? 'Upravit článek' : 'Detail článku'}
+              </h3>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="px-3 py-1 text-sm text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
+                >
+                  {isEditing ? 'Zrušit' : 'Upravit'}
+                </button>
+                <button
+                  onClick={() => setSelectedArticle(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {isEditing ? (
+              <div className="space-y-4">
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Editor článků bude doplněn později.</p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    Zde bude formulář pro editaci nadpisu, obsahu, kategorií, tagů atd.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">{selectedArticle.title}</h4>
+                  <div className="flex space-x-2 mb-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryInfo(selectedArticle.category).color}`}>
+                      {getCategoryInfo(selectedArticle.category).label}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusInfo(selectedArticle.status).color}`}>
+                      {getStatusInfo(selectedArticle.status).label}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Autor:</span> {selectedArticle.author}
+                  </div>
+                  <div>
+                    <span className="font-medium">Slug:</span> {selectedArticle.slug}
+                  </div>
+                  <div>
+                    <span className="font-medium">Vytvořeno:</span> {new Date(selectedArticle.createdAt).toLocaleDateString('cs-CZ')}
+                  </div>
+                  <div>
+                    <span className="font-medium">Upraveno:</span> {new Date(selectedArticle.updatedAt).toLocaleDateString('cs-CZ')}
+                  </div>
+                  {selectedArticle.publishedAt && (
+                    <div>
+                      <span className="font-medium">Publikováno:</span> {new Date(selectedArticle.publishedAt).toLocaleDateString('cs-CZ')}
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium">Zobrazení:</span> {selectedArticle.views} • Líbí se: {selectedArticle.likes}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Výtah</label>
+                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{selectedArticle.excerpt}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Obsah</label>
+                  <div
+                    className="prose max-w-none bg-gray-50 p-4 rounded border max-h-96 overflow-y-auto"
+                    dangerouslySetInnerHTML={{ __html: selectedArticle.content }}
+                  />
+                </div>
+
+                {selectedArticle.tags.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tagy</label>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedArticle.tags.map((tag, index) => (
+                        <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex space-x-3 pt-4 border-t">
+                  {selectedArticle.status === 'draft' && (
+                    <button
+                      onClick={() => {
+                        updateArticleStatus(selectedArticle._id, 'published');
+                        setSelectedArticle(null);
+                      }}
+                      className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700 transition-colors"
+                    >
+                      Publikovat článek
+                    </button>
+                  )}
+                  {selectedArticle.status === 'published' && (
+                    <button
+                      onClick={() => {
+                        updateArticleStatus(selectedArticle._id, 'archived');
+                        setSelectedArticle(null);
+                      }}
+                      className="px-4 py-2 text-white bg-gray-600 rounded hover:bg-gray-700 transition-colors"
+                    >
+                      Archivovat článek
+                    </button>
+                  )}
+                  <button
+                    onClick={() => deleteArticle(selectedArticle._id)}
+                    className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 transition-colors"
+                  >
+                    Smazat článek
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Add Article Form Modal */}
+      {showAddForm && <ArticleForm onClose={() => setShowAddForm(false)} onSubmit={fetchArticles} />}
+    </div>
+  );
+}

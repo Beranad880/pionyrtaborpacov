@@ -11,6 +11,7 @@
     "db:test": "curl http://localhost:3000/api/test/mongodb"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
     "next": "^16.0.7",

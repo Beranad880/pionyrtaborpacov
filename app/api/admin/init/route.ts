@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
         action: 'init'
       });
     }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('POST /api/admin/init error:', error);
     return NextResponse.json(
@@ -70,6 +71,7 @@ export async function GET(request: NextRequest) {
         databaseConnected: true
       }
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('GET /api/admin/init error:', error);
     return NextResponse.json({

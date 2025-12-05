@@ -1,0 +1,149 @@
+import { NextRequest, NextResponse } from 'next/server';
+import connectToMongoose from '@/lib/mongoose';
+import Article from '@/models/Article';
+
+export async function GET(request: NextRequest) {
+  try {
+    await connectToMongoose();
+
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get('slug');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const category = searchParams.get('category');
+
+    if (slug) {
+      // Get specific article by slug
+      const article = await Article.findOne({ slug, status: 'published' })
+        .populate('author', 'name')
+        .lean();
+
+      if (!article) {
+        return NextResponse.json(
+          { success: false, message: 'Article not found' },
+          { status: 404 }
+        );
+      }
+
+      // Increment views
+      await Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } });
+
+      return NextResponse.json({
+        success: true,
+        data: article
+      });
+    }
+
+    // Get articles list
+    const skip = (page - 1) * limit;
+    const filter: any = { status: 'published' };
+
+    if (category) {
+      filter.category = category;
+    }
+
+    const articles = await Article.find(filter)
+      .populate('author', 'name')
+      .sort({ publishedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select('title slug excerpt author category tags publishedAt views likes')
+      .lean();
+
+    const total = await Article.countDocuments(filter);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        articles,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error: any) {
+    console.error('GET /api/articles error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Failed to fetch articles', error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    await connectToMongoose();
+
+    const body = await request.json();
+    const { title, slug, content, excerpt, author, category, tags, status } = body;
+
+    // Validate required fields
+    if (!title || !slug || !content || !excerpt || !author || !category) {
+      return NextResponse.json(
+        { success: false, message: 'Chybí povinná pole' },
+        { status: 400 }
+      );
+    }
+
+    // Check if slug already exists
+    const existingArticle = await Article.findOne({ slug });
+    if (existingArticle) {
+      return NextResponse.json(
+        { success: false, message: 'Článek s tímto slug již existuje' },
+        { status: 409 }
+      );
+    }
+
+    // Create new article
+    const article = new Article({
+      title,
+      slug,
+      content,
+      excerpt,
+      author,
+      category,
+      tags: tags || [],
+      status: status || 'draft',
+      publishedAt: status === 'published' ? new Date() : undefined
+    });
+
+    await article.save();
+
+    // Populate author for response
+    await article.populate('author', 'name');
+
+    return NextResponse.json({
+      success: true,
+      data: article,
+      message: 'Článek byl úspěšně vytvořen'
+    }, { status: 201 });
+
+  } catch (error: any) {
+    console.error('POST /api/articles error:', error);
+
+    // Handle mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err: any) => err.message);
+      return NextResponse.json(
+        { success: false, message: errors.join(', ') },
+        { status: 400 }
+      );
+    }
+
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { success: false, message: 'Článek s tímto slug již existuje' },
+        { status: 409 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, message: 'Chyba při vytváření článku', error: error.message },
+      { status: 500 }
+    );
+  }
+}

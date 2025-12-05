@@ -10,13 +10,10 @@ const adminPages = [
   { name: 'Přehled', href: '/admin', icon: '📊' },
   { name: 'Úvodní stránka', href: '/admin/home', icon: '🏠' },
   { name: 'Pionýrské oddíly', href: '/admin/pioneer-groups', icon: '👥' },
-  { name: 'Hájenka Bělá', href: '/admin/hajenka-bela', icon: '🏕️' },
-  { name: 'Pronájem Hájenky', href: '/admin/rental', icon: '🏗️' },
+  { name: 'Pronájem hájenky', href: '/admin/rental', icon: '🏗️' },
   { name: 'Kalendář akcí', href: '/admin/calendar', icon: '📅' },
   { name: 'Články', href: '/admin/articles', icon: '📝' },
   { name: 'Fotky z akcí', href: '/admin/photos', icon: '📸' },
-  { name: 'Kontakty', href: '/admin/contacts', icon: '📞' },
-  { name: 'Statistiky', href: '/admin/statistics', icon: '📈' },
 ];
 
 export default function AdminLayout({
