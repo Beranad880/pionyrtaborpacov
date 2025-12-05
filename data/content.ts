@@ -1,3 +1,9 @@
+interface MenuItem {
+  title: string;
+  href: string;
+  submenu?: MenuItem[];
+}
+
 export const siteData = {
   title: "Pionýrská skupina Pacov",
   description: "Pionýr je demokratický, dobrovolný, samostatný a nezávislý spolek dětí, mládeže a dospělých. Předmětem hlavní činnosti Pionýra je veřejně prospěšná činnost.",
@@ -50,7 +56,7 @@ export const siteData = {
     { title: "Pronájem Hájenky Bělá", href: "/pages?page=pronajem-hajenky-bela" },
     { title: "Články", href: "/pages?page=clanky" },
     { title: "Fotky z akcí", href: "/pages?page=fotky-z-akci" }
-  ]
+  ] as MenuItem[]
 };
 
 export const pageContent = {
