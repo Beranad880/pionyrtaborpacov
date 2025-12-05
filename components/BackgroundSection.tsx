@@ -8,32 +8,32 @@ export default function BackgroundSection({ children }: BackgroundSectionProps) 
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Články sekce */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-slate-800 mb-8 text-center">
             Články
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Placeholder pro články */}
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-slate-50 rounded-lg p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">
                 Článek 1
               </h3>
-              <p className="text-gray-600">
+              <p className="text-slate-600">
                 Zde bude obsah článku...
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-slate-50 rounded-lg p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">
                 Článek 2
               </h3>
-              <p className="text-gray-600">
+              <p className="text-slate-600">
                 Zde bude obsah článku...
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-slate-50 rounded-lg p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">
                 Článek 3
               </h3>
-              <p className="text-gray-600">
+              <p className="text-slate-600">
                 Zde bude obsah článku...
               </p>
             </div>
@@ -42,30 +42,30 @@ export default function BackgroundSection({ children }: BackgroundSectionProps) 
 
         {/* Akce sekce */}
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-slate-800 mb-8 text-center">
             Akce
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Placeholder pro akce */}
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-slate-50 rounded-lg p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">
                 Nadcházející akce 1
               </h3>
-              <p className="text-gray-600 mb-2">
+              <p className="text-slate-600 mb-2">
                 Datum: 15. prosince 2024
               </p>
-              <p className="text-gray-600">
+              <p className="text-slate-600">
                 Popis akce...
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-slate-50 rounded-lg p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">
                 Nadcházející akce 2
               </h3>
-              <p className="text-gray-600 mb-2">
+              <p className="text-slate-600 mb-2">
                 Datum: 22. prosince 2024
               </p>
-              <p className="text-gray-600">
+              <p className="text-slate-600">
                 Popis akce...
               </p>
             </div>

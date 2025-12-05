@@ -2,15 +2,15 @@ import { pageContent } from '@/data/content';
 
 export default function AboutSection() {
   return (
-    <section id="about-section" className="py-16 bg-white">
+    <section id="about-section" className="py-16 bg-gradient-to-b from-white to-slate-50">
       <div className="container mx-auto px-4">
         {/* About Section */}
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-6">
               {pageContent.about.title}
             </h2>
-            <blockquote className="text-xl md:text-2xl text-gray-600 italic leading-relaxed max-w-4xl mx-auto border-l-4 border-red-600 pl-6 bg-gray-50 p-6 rounded-r-lg">
+            <blockquote className="text-xl md:text-2xl text-slate-600 italic leading-relaxed max-w-4xl mx-auto border-l-4 border-red-600 pl-6 bg-red-50 p-6 rounded-r-lg shadow-sm">
               {pageContent.about.subtitle}
             </blockquote>
           </div>
@@ -18,7 +18,7 @@ export default function AboutSection() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               {pageContent.about.content.map((paragraph, index) => (
-                <p key={index} className="text-gray-700 leading-relaxed text-justify">
+                <p key={index} className="text-slate-700 leading-relaxed text-justify">
                   {paragraph}
                 </p>
               ))}
@@ -50,23 +50,23 @@ export default function AboutSection() {
         <div className="max-w-6xl mx-auto mt-20">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
             <div className="lg:col-span-2">
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+              <h3 className="text-2xl md:text-3xl font-bold text-slate-800 mb-6">
                 Pionýr
               </h3>
-              <p className="text-gray-700 leading-relaxed mb-8">
+              <p className="text-slate-700 leading-relaxed mb-8">
                 {pageContent.pioneer.description}
               </p>
 
-              <h4 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
+              <h4 className="text-xl md:text-2xl font-bold text-slate-800 mb-4">
                 {pageContent.pioneer.ideals.title}
               </h4>
-              <p className="text-gray-700 leading-relaxed mb-6">
+              <p className="text-slate-700 leading-relaxed mb-6">
                 {pageContent.pioneer.ideals.description}
               </p>
 
               <div className="space-y-4">
                 {pageContent.pioneer.ideals.content.map((paragraph, index) => (
-                  <p key={index} className="text-gray-700 leading-relaxed text-justify">
+                  <p key={index} className="text-slate-700 leading-relaxed text-justify">
                     {paragraph}
                   </p>
                 ))}
@@ -95,11 +95,11 @@ export default function AboutSection() {
 
         {/* History Section */}
         <div className="max-w-6xl mx-auto mt-20">
-          <div className="bg-gray-50 rounded-xl p-8">
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+          <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
+            <h3 className="text-2xl md:text-3xl font-bold text-slate-800 mb-6">
               {pageContent.history.title}
             </h3>
-            <p className="text-gray-700 leading-relaxed text-justify">
+            <p className="text-slate-700 leading-relaxed text-justify">
               {pageContent.history.content}
             </p>
 

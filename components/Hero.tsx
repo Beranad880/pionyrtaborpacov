@@ -21,14 +21,15 @@ export default function Hero() {
             backgroundImage: "url('/44780.jpg')"
           }}
         />
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
 
       {/* Hero Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
           {pageContent.hero.title}
         </h1>
-        <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+        <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed drop-shadow-lg font-medium">
           Demokratický, dobrovolný spolek dětí, mládeže a dospělých
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

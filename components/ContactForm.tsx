@@ -60,8 +60,8 @@ export default function ContactForm() {
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Děkujeme!</h3>
-          <p className="text-gray-600">Vaše zpráva byla úspěšně odeslána. Ozveme se vám co nejdříve.</p>
+          <h3 className="text-xl font-semibold text-slate-800 mb-2">Děkujeme!</h3>
+          <p className="text-slate-600">Vaše zpráva byla úspěšně odeslána. Ozveme se vám co nejdříve.</p>
         </div>
       </div>
     );
@@ -69,12 +69,12 @@ export default function ContactForm() {
 
   return (
     <div className="bg-white rounded-xl shadow-md p-8">
-      <h3 className="text-2xl font-bold text-gray-900 mb-6">Kontaktní formulář</h3>
+      <h3 className="text-2xl font-bold text-slate-800 mb-6">Kontaktní formulář</h3>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
               Jméno a příjmení *
             </label>
             <input
@@ -84,13 +84,13 @@ export default function ContactForm() {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
               placeholder="Vaše jméno"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
               E-mail *
             </label>
             <input
@@ -100,7 +100,7 @@ export default function ContactForm() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
               placeholder="vas@email.cz"
             />
           </div>
@@ -108,7 +108,7 @@ export default function ContactForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
               Telefon
             </label>
             <input
@@ -117,13 +117,13 @@ export default function ContactForm() {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
               placeholder="+420 xxx xxx xxx"
             />
           </div>
 
           <div>
-            <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="subject" className="block text-sm font-medium text-slate-700 mb-2">
               Předmět *
             </label>
             <select
@@ -132,7 +132,7 @@ export default function ContactForm() {
               value={formData.subject}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
             >
               <option value="">Vyberte předmět</option>
               <option value="general">Obecný dotaz</option>
@@ -146,7 +146,7 @@ export default function ContactForm() {
         </div>
 
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="message" className="block text-sm font-medium text-slate-700 mb-2">
             Zpráva *
           </label>
           <textarea
@@ -156,13 +156,13 @@ export default function ContactForm() {
             onChange={handleChange}
             required
             rows={6}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-vertical"
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-vertical"
             placeholder="Napište nám svou zprávu..."
           />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-500">
             * Povinná pole. Vaše údaje budou použity pouze pro odpověď na váš dotaz.
           </p>
 
@@ -171,7 +171,7 @@ export default function ContactForm() {
             disabled={isSubmitting}
             className={`px-8 py-3 rounded-lg font-semibold transition-all ${
               isSubmitting
-                ? 'bg-gray-400 cursor-not-allowed'
+                ? 'bg-slate-400 cursor-not-allowed'
                 : 'bg-red-600 hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
             } text-white shadow-md`}
           >
