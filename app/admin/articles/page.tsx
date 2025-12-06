@@ -33,6 +33,217 @@ const statuses = [
   { value: 'archived', label: 'Archivováno', color: 'bg-gray-100 text-gray-800' }
 ];
 
+// Edit Article Form Component
+function EditArticleForm({ article, onSave, onCancel }: {
+  article: Article;
+  onSave: (article: Article) => void;
+  onCancel: () => void;
+}) {
+  const [formData, setFormData] = useState({
+    title: article.title,
+    excerpt: article.excerpt,
+    content: article.content,
+    category: article.category,
+    tags: article.tags.join(', '),
+    status: article.status
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim('-');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const slug = generateSlug(formData.title);
+      const tagsArray = formData.tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+
+      const articleData = {
+        title: formData.title,
+        slug,
+        content: formData.content,
+        excerpt: formData.excerpt,
+        category: formData.category,
+        tags: tagsArray,
+        status: formData.status
+      };
+
+      const response = await fetch(`/api/articles/${article._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(articleData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        onSave({
+          ...article,
+          ...articleData,
+          slug,
+          tags: tagsArray,
+          updatedAt: new Date().toISOString()
+        });
+      } else {
+        setError(result.message || 'Chyba při aktualizaci článku');
+      }
+    } catch (error) {
+      console.error('Error updating article:', error);
+      setError('Chyba při aktualizaci článku');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800 text-sm">{error}</p>
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Nadpis článku *
+        </label>
+        <input
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={handleInputChange}
+          required
+          maxLength={150}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Výtah článku *
+        </label>
+        <textarea
+          name="excerpt"
+          value={formData.excerpt}
+          onChange={handleInputChange}
+          required
+          maxLength={300}
+          rows={3}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Obsah článku *
+        </label>
+        <textarea
+          name="content"
+          value={formData.content}
+          onChange={handleInputChange}
+          required
+          rows={12}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 font-mono text-sm"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Kategorie *
+          </label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            required
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            {categories.map(category => (
+              <option key={category.value} value={category.value}>
+                {category.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Status *
+          </label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleInputChange}
+            required
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            {statuses.map(status => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Tagy
+          </label>
+          <input
+            type="text"
+            name="tags"
+            value={formData.tags}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+            placeholder="tag1, tag2, tag3"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          Zrušit
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400"
+        >
+          {isSubmitting ? 'Ukládání...' : 'Uložit změny'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export default function ArticlesAdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,7 +327,9 @@ export default function ArticlesAdminPage() {
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/articles');
+      const response = await fetch('/api/articles', {
+        credentials: 'include'
+      });
       const result = await response.json();
 
       if (result.success) {
@@ -150,6 +363,7 @@ export default function ArticlesAdminPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ status }),
       });
 
@@ -180,6 +394,7 @@ export default function ArticlesAdminPage() {
       try {
         const response = await fetch(`/api/articles/${id}`, {
           method: 'DELETE',
+          credentials: 'include',
         });
 
         const result = await response.json();
@@ -445,14 +660,14 @@ export default function ArticlesAdminPage() {
             </div>
 
             {isEditing ? (
-              <div className="space-y-4">
-                <div className="text-center py-8">
-                  <p className="text-gray-500">Editor článků bude doplněn později.</p>
-                  <p className="text-sm text-gray-400 mt-2">
-                    Zde bude formulář pro editaci nadpisu, obsahu, kategorií, tagů atd.
-                  </p>
-                </div>
-              </div>
+              <EditArticleForm
+                article={selectedArticle}
+                onSave={(updatedArticle) => {
+                  setArticles(prev => prev.map(a => a._id === updatedArticle._id ? updatedArticle : a));
+                  setIsEditing(false);
+                }}
+                onCancel={() => setIsEditing(false)}
+              />
             ) : (
               <div className="space-y-4">
                 <div>

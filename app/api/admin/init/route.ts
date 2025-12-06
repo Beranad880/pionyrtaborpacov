@@ -45,18 +45,22 @@ export async function GET(request: NextRequest) {
     const Facility = (await import('@/models/Facility')).default;
     const Statistics = (await import('@/models/Statistics')).default;
     const PageContent = (await import('@/models/PageContent')).default;
+    const Article = (await import('@/models/Article')).default;
+    const AdminUser = (await import('@/models/AdminUser')).default;
 
     await connectToMongoose();
 
-    const [pioneerGroups, contacts, facilities, statistics, pageContents] = await Promise.all([
+    const [pioneerGroups, contacts, facilities, statistics, pageContents, articles, adminUsers] = await Promise.all([
       PioneerGroup.countDocuments(),
       Contact.countDocuments(),
       Facility.countDocuments(),
       Statistics.countDocuments(),
       PageContent.countDocuments(),
+      Article.countDocuments(),
+      AdminUser.countDocuments(),
     ]);
 
-    const totalCollections = pioneerGroups + contacts + facilities + statistics + pageContents;
+    const totalCollections = pioneerGroups + contacts + facilities + statistics + pageContents + articles + adminUsers;
 
     return NextResponse.json({
       success: true,
@@ -66,6 +70,8 @@ export async function GET(request: NextRequest) {
         contacts,
         facilities,
         statistics,
+        articles,
+        adminUsers,
         totalCollections,
         isInitialized: totalCollections > 0,
         databaseConnected: true
@@ -82,6 +88,8 @@ export async function GET(request: NextRequest) {
         contacts: 0,
         facilities: 0,
         statistics: 0,
+        articles: 0,
+        adminUsers: 0,
         totalCollections: 0,
         isInitialized: false,
         databaseConnected: false,

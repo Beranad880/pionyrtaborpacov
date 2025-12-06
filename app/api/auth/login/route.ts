@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import AdminUser from '@/models/AdminUser';
+import SimpleAdminUser from '@/models/SimpleAdminUser';
 import { cookies } from 'next/headers';
 import mongoose from 'mongoose';
 
@@ -23,22 +24,27 @@ export async function POST(request: NextRequest) {
     console.log('Connected to database');
     console.log('Current DB name:', mongoose.connection.db?.databaseName);
 
-    // Najít uživatele přímo z DB
-    const db = mongoose.connection.db;
+    // Try to find user in SimpleAdminUser collection first
     console.log('Looking for username:', username);
-    const userDoc = await db.collection('adminusers').findOne({ username });
-    console.log('User found in DB:', userDoc ? 'yes' : 'no');
+    let userDoc = await SimpleAdminUser.findOne({ username, isActive: true }).lean();
+    let userSource = 'SimpleAdminUser';
 
     if (userDoc) {
-      console.log('Found user:', userDoc.username, 'with ID:', userDoc._id);
+      console.log('Found user in SimpleAdminUser:', userDoc.username, 'with ID:', userDoc._id);
+    } else {
+      console.log('User not found in SimpleAdminUser, trying AdminUser...');
+      // Fallback to original AdminUser collection
+      const db = mongoose.connection.db;
+      userDoc = await db.collection('adminusers').findOne({ username });
+      userSource = 'AdminUser';
+
+      if (userDoc) {
+        console.log('Found user in AdminUser:', userDoc.username, 'with ID:', userDoc._id);
+      }
     }
 
-    // Debug: list all users
-    const allUsers = await db.collection('adminusers').find({}).toArray();
-    console.log('All users in DB:', allUsers.map(u => u.username));
-
     if (!userDoc) {
-      console.log('User not found in DB');
+      console.log('User not found in any collection');
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
         { status: 401 }
@@ -61,11 +67,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Aktualizovat lastLogin přímo v DB
-    await db.collection('adminusers').updateOne(
-      { _id: userDoc._id },
-      { $set: { lastLogin: new Date() } }
-    );
+    // Aktualizovat lastLogin podle zdroje uživatele
+    if (userSource === 'SimpleAdminUser') {
+      await SimpleAdminUser.findByIdAndUpdate(userDoc._id, { lastLogin: new Date() });
+    } else {
+      const db = mongoose.connection.db;
+      await db.collection('adminusers').updateOne(
+        { _id: userDoc._id },
+        { $set: { lastLogin: new Date() } }
+      );
+    }
 
     // Vytvořit response
     const response = NextResponse.json({

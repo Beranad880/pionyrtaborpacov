@@ -75,6 +75,7 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(articleData),
       });
 

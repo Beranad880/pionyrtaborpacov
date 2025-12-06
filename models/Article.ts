@@ -36,7 +36,7 @@ const ArticleSchema = new Schema<IArticle>(
       required: [true, 'URL slug je povinný'],
       unique: true,
       lowercase: true,
-      match: [/^[a-z0-9-]+$/, 'Slug může obsahovat pouze malá písmena, čísla a pomlčky'],
+      match: [/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/, 'Slug může obsahovat pouze malá písmena, čísla a pomlčky'],
     },
     content: {
       type: String,

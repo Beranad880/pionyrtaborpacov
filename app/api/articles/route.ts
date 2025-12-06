@@ -41,14 +41,40 @@ export async function GET(request: NextRequest) {
       filter.category = category;
     }
 
-    const articles = await Article.find(filter)
-      .sort({ publishedAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .select('title slug excerpt author category tags publishedAt views likes')
-      .lean();
+    // Pro admin requesty (s auth cookie) vrať všechny články
+    const authCookie = request.cookies.get('admin_auth');
+    let articlesQuery;
 
-    const total = await Article.countDocuments(filter);
+    if (authCookie) {
+      // Admin může vidět všechny články včetně draft a archived
+      const adminFilter: any = {};
+      if (category) adminFilter.category = category;
+
+      const status = new URL(request.url).searchParams.get('status');
+      if (status && status !== 'all') {
+        adminFilter.status = status;
+      }
+
+      articlesQuery = Article.find(adminFilter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean();
+    } else {
+      // Public může vidět jen published články
+      articlesQuery = Article.find(filter)
+        .sort({ publishedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .select('title slug excerpt author category tags publishedAt views likes')
+        .lean();
+    }
+
+    const articles = await articlesQuery;
+
+    const total = authCookie
+      ? await Article.countDocuments(authCookie ? {} : filter)
+      : await Article.countDocuments(filter);
 
     return NextResponse.json({
       success: true,
@@ -73,6 +99,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Kontrola autentifikace pro admin operace
+    const authCookie = request.cookies.get('admin_auth');
+    if (!authCookie) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     await connectToMongoose();
 
     const body = await request.json();

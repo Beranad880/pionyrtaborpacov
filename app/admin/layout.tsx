@@ -30,7 +30,8 @@ export default function AdminLayout({
   // VŽDY volat useEffect bez ohledu na podmínky
   useEffect(() => {
     if (pathname !== '/admin/login' && !isLoading && !isAuthenticated) {
-      router.push('/admin/login');
+      const loginUrl = `/admin/login${pathname !== '/admin' ? `?redirect=${encodeURIComponent(pathname)}` : ''}`;
+      router.push(loginUrl);
     }
   }, [pathname, isLoading, isAuthenticated, router]);
 
@@ -93,7 +94,10 @@ export default function AdminLayout({
               </div>
 
               <button
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  router.push('/admin/login');
+                }}
                 className="text-sm text-slate-600 hover:text-red-600 transition-colors"
                 title="Odhlásit se"
               >

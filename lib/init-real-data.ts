@@ -4,6 +4,8 @@ import Contact from '@/models/Contact';
 import Facility from '@/models/Facility';
 import Statistics from '@/models/Statistics';
 import PageContent from '@/models/PageContent';
+import Article from '@/models/Article';
+import AdminUser from '@/models/AdminUser';
 import { allPagesContent, siteData } from '@/data/content';
 
 let isInitialized = false;
@@ -33,6 +35,12 @@ export async function initializeRealDataCollections() {
 
     // 5. Initialize Page Contents
     await initializePageContents();
+
+    // 6. Initialize Articles
+    await initializeArticles();
+
+    // 7. Initialize Admin Users
+    await initializeAdminUsers();
 
     // Print summary
     await printCollectionSummary();
@@ -302,12 +310,126 @@ async function initializePageContents() {
   }
 }
 
+async function initializeArticles() {
+  const existingArticles = await Article.countDocuments();
+
+  if (existingArticles === 0) {
+    console.log('📝 Creating sample articles...');
+
+    const sampleArticles = [
+      {
+        title: 'Přípravy na zimní tábor 2024',
+        slug: 'pripravy-na-zimni-tabor-2024',
+        excerpt: 'Blíží se termín našeho tradičního zimního tábora. Letos se koná od 27. prosince 2024 do 2. ledna 2025 na Hájence Bělá. Program je plný her, sportovních aktivit a táborového dobrodružství.',
+        content: '<p>Blíží se termín našeho tradičního zimního tábora a přípravy jsou v plném proudu! Letos se zimní tábor koná od <strong>27. prosince 2024 do 2. ledna 2025</strong> na naší oblíbené Hájence Bělá.</p><h2>Program tábora</h2><p>Připravili jsme pro vás bohatý program plný her, sportovních aktivit a táborového dobrodružství. Nebudou chybět ani tradiční táborové ohně, noční hry a mnoho dalších zážitků.</p><h2>Co s sebou</h2><ul><li>Teplé oblečení na zimní podmínky</li><li>Pevnou zimní obuv</li><li>Osobní hygienické potřeby</li><li>Léky (pokud nějaké užíváte)</li></ul><p>Těšíme se na vás!</p>',
+        author: 'Vedení skupiny',
+        category: 'announcement',
+        tags: ['tábor', 'zima', '2024'],
+        status: 'published',
+        publishedAt: new Date('2024-11-15'),
+        views: 124,
+        likes: 8
+      },
+      {
+        title: 'Úspěšný letní tábor 2024',
+        slug: 'uspesny-letni-tabor-2024',
+        excerpt: 'Letní tábor 2024 na Hájence Bělá se vydařil na výbornou. Účastnilo se ho 28 dětí a měli jsme krásné počasí po celou dobu. Děti si užily spoustu her, výletů a táborových aktivit.',
+        content: '<p>Letní tábor 2024 na Hájence Bělá se vydařil na výbornou! Od 15. do 29. července se ho účastnilo <strong>28 dětí</strong> ve věku 7-15 let.</p><h2>Highlights tábora</h2><ul><li>Krásné počasí po celou dobu</li><li>Výlet do ZOO Tábor</li><li>Noční hra v lese</li><li>Sportovní olympiáda</li><li>Táborový ples</li></ul><p>Děkujeme všem vedoucím a rodičům za podporu. Fotky z tábora najdete v naší galerii.</p>',
+        author: 'Vedení skupiny',
+        category: 'event-report',
+        tags: ['tábor', 'léto', '2024', 'reportáž'],
+        status: 'published',
+        publishedAt: new Date('2024-08-15'),
+        views: 256,
+        likes: 15
+      },
+      {
+        title: 'Rekonstrukce hájenky dokončena',
+        slug: 'rekonstrukce-hajenky-dokoncena',
+        excerpt: 'Dokončili jsme rozsáhlou rekonstrukci naší hájenky. Nové sociální zařízení, opravené střechy a celkově modernizované zázemí nám poskytne ještě lepší podmínky pro naše aktivity.',
+        content: '<p>Po několika měsících náročné práce jsme dokončili rozsáhlou rekonstrukci naší táborové základny Hájenka Bělá.</p><h2>Co jsme opravili</h2><ul><li>Kompletně nové sociální zařízení</li><li>Opravu střech a zateplení</li><li>Modernizaci kuchyně</li><li>Nové topení</li><li>Úpravu okolí</li></ul><p>Díky těmto úpravám můžeme nabídnout ještě lepší podmínky pro naše tábory a akce. Hájenka je nyní připravena na další roky využívání.</p>',
+        author: 'Vedení skupiny',
+        category: 'news',
+        tags: ['hájenka', 'rekonstrukce', 'novinky'],
+        status: 'published',
+        publishedAt: new Date('2024-05-01'),
+        views: 189,
+        likes: 12
+      },
+      {
+        title: 'Oslava 10. výročí skupiny',
+        slug: 'oslava-10-vyroci-skupiny',
+        excerpt: 'Letos slavíme 10 let od založení Pionýrské skupiny Pacov. Během této doby jsme uspořádali desítky táborů, výletů a akcí pro stovky dětí z Pacova a okolí. Děkujeme všem vedoucím a rodičům za podporu!',
+        content: '<p>Tento rok je pro naši Pionýrskou skupinu Pacov výjimečný - slavíme <strong>10. výročí</strong> našeho založení!</p><h2>Co jsme za 10 let dokázali</h2><ul><li>Uspořádali jsme 40+ táborů</li><li>Prošlo námi více než 300 dětí</li><li>Zrekonstruovali jsme Hájenku Bělá</li><li>Založili jsme 3 oddíly</li><li>Vychovali jsme desítky mladých vedoucích</li></ul><p>Oslavy výročí proběhnou během celého roku 2024. Děkujeme všem vedoucím, rodičům a dětem, kteří s námi tuto cestu prošli!</p><h2>Pozvánka na oslavu</h2><p>Hlavní oslava se koná <strong>15. června 2024</strong> na Hájence Bělá. Všichni bývalí i současní členové jsou srdečně zváni!</p>',
+        author: 'Vedení skupiny',
+        category: 'announcement',
+        tags: ['výročí', '10 let', 'oslava'],
+        status: 'published',
+        publishedAt: new Date('2024-01-01'),
+        views: 342,
+        likes: 24
+      },
+      {
+        title: 'Nový článek v přípravě',
+        slug: 'novy-clanek-v-priprave',
+        excerpt: 'Toto je ukázkový článek v režimu konceptu. Můžete ho použít pro testování admin rozhraní.',
+        content: '<p>Toto je obsah článku, který je zatím pouze v konceptu. Můžete ho upravit nebo publikovat pomocí admin rozhraní.</p>',
+        author: 'Admin',
+        category: 'general',
+        tags: ['test', 'koncept'],
+        status: 'draft',
+        views: 0,
+        likes: 0
+      }
+    ];
+
+    await Article.insertMany(sampleArticles);
+    console.log(`✅ Created ${sampleArticles.length} sample articles`);
+  } else {
+    console.log(`ℹ️ Found ${existingArticles} existing articles, skipping`);
+  }
+}
+
+async function initializeAdminUsers() {
+  const existingAdminUsers = await AdminUser.countDocuments();
+
+  if (existingAdminUsers === 0) {
+    console.log('📝 Creating default admin user...');
+
+    const bcrypt = require('bcrypt');
+    const saltRounds = 12;
+
+    // Create default admin user
+    const defaultPassword = 'admin123';
+    const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
+
+    const adminUser = {
+      username: 'admin',
+      password: hashedPassword,
+      email: 'admin@pionyr-pacov.cz',
+      role: 'admin',
+      isActive: true,
+      lastLogin: null,
+      createdBy: 'system-init'
+    };
+
+    await AdminUser.create(adminUser);
+    console.log('✅ Created default admin user');
+    console.log('⚠️  Default login: admin / admin123');
+    console.log('⚠️  Please change the password after first login!');
+  } else {
+    console.log(`ℹ️ Found ${existingAdminUsers} existing admin users, skipping`);
+  }
+}
+
 async function printCollectionSummary() {
   const pioneerGroups = await PioneerGroup.countDocuments();
   const contacts = await Contact.countDocuments();
   const facilities = await Facility.countDocuments();
   const statistics = await Statistics.countDocuments();
   const pageContents = await PageContent.countDocuments();
+  const articles = await Article.countDocuments();
+  const adminUsers = await AdminUser.countDocuments();
 
   console.log('📊 Database Collections Summary:');
   console.log(`   Pioneer Groups: ${pioneerGroups}`);
@@ -315,6 +437,8 @@ async function printCollectionSummary() {
   console.log(`   Facilities: ${facilities}`);
   console.log(`   Statistics: ${statistics}`);
   console.log(`   Page Contents: ${pageContents}`);
+  console.log(`   Articles: ${articles}`);
+  console.log(`   Admin Users: ${adminUsers}`);
 }
 
 export async function resetAllCollections() {
@@ -329,6 +453,8 @@ export async function resetAllCollections() {
       Facility.deleteMany({}),
       Statistics.deleteMany({}),
       PageContent.deleteMany({}),
+      Article.deleteMany({}),
+      AdminUser.deleteMany({}),
     ]);
 
     console.log('✅ All collections cleared');

@@ -1,5 +1,4 @@
 import { Schema, model, models } from 'mongoose';
-import bcrypt from 'bcrypt';
 
 export interface IAdminUser {
   _id?: string;
@@ -33,21 +32,9 @@ const adminUserSchema = new Schema<IAdminUser>({
   }
 });
 
-// Hash password před uložením
-adminUserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-
-  try {
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error: any) {
-    next(error);
-  }
-});
-
 // Metoda pro kontrolu hesla
 adminUserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+  const bcrypt = require('bcrypt');
   return bcrypt.compare(candidatePassword, this.password);
 };
 

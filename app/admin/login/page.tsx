@@ -26,15 +26,17 @@ export default function AdminLoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (data.success) {
+        // Krátké zpoždění pro uložení cookies
+        await new Promise(resolve => setTimeout(resolve, 100));
         // Přesměrovat na admin panel nebo na původní stránku
-        router.push(redirectTo);
-        router.refresh();
+        window.location.href = redirectTo;
       } else {
         setError(data.message || 'Neplatné přihlašovací údaje');
       }

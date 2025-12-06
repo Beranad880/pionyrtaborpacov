@@ -204,7 +204,7 @@ export default function AdminDashboard() {
           </div>
 
           {dbStatus.totalCollections > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-3 mb-4">
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
                 <p className="text-xs text-blue-600">Stránky</p>
                 <p className="font-bold text-blue-800">{dbStatus.contentPages || 0}</p>
@@ -224,6 +224,14 @@ export default function AdminDashboard() {
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
                 <p className="text-xs text-yellow-600">Kontakty</p>
                 <p className="font-bold text-yellow-800">{dbStatus.contacts || 0}</p>
+              </div>
+              <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-center">
+                <p className="text-xs text-indigo-600">Články</p>
+                <p className="font-bold text-indigo-800">{dbStatus.articles || 0}</p>
+              </div>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-center">
+                <p className="text-xs text-red-600">Admini</p>
+                <p className="font-bold text-red-800">{dbStatus.adminUsers || 0}</p>
               </div>
             </div>
           )}

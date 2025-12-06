@@ -73,3 +73,59 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// POST - Uložit nebo aktualizovat obsah stránky
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { page, data } = body;
+
+    if (!page || !data) {
+      return NextResponse.json(
+        { success: false, message: 'Page and data are required' },
+        { status: 400 }
+      );
+    }
+
+    await connectToMongoose();
+
+    // Aktualizovat nebo vytvořit obsah
+    const savedContent = await Content.findOneAndUpdate(
+      { page },
+      {
+        page,
+        content: data,
+        modifiedBy: 'admin',
+        lastModified: new Date(),
+        $inc: { version: 1 }
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true
+      }
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: 'Content saved successfully',
+      data: savedContent,
+    });
+  } catch (error: any) {
+    console.error('POST /api/content error:', error);
+
+    // Handle mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err: any) => err.message);
+      return NextResponse.json(
+        { success: false, message: errors.join(', ') },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, message: 'Failed to save content', error: error.message },
+      { status: 500 }
+    );
+  }
+}

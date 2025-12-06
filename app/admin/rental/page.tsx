@@ -37,7 +37,9 @@ export default function RentalsAdminPage() {
   const fetchRentals = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/rental?status=${filter}&page=${currentPage}&limit=10`);
+      const response = await fetch(`/api/admin/rental?status=${filter}&page=${currentPage}&limit=10`, {
+        credentials: 'include'
+      });
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
@@ -63,6 +65,7 @@ export default function RentalsAdminPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
@@ -88,6 +91,7 @@ export default function RentalsAdminPage() {
         try {
           const response = await fetch(`/api/admin/rental/${rentalId}`, {
             method: 'DELETE',
+            credentials: 'include',
           });
     
           if (response.ok) {

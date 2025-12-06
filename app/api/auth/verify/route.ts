@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import AdminUser from '@/models/AdminUser';
+import SimpleAdminUser from '@/models/SimpleAdminUser';
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +38,12 @@ export async function GET(request: NextRequest) {
 
     // Připojení k databázi a ověření existence uživatele
     await connectToMongoose();
-    const user = await AdminUser.findById(userId);
+
+    // Try SimpleAdminUser first, then AdminUser
+    let user = await SimpleAdminUser.findById(userId);
+    if (!user) {
+      user = await AdminUser.findById(userId);
+    }
 
     if (!user || user.username !== username) {
       return NextResponse.json(

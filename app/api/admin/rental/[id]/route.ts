@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
-import Rental from '@/models/Rental';
+import Rental, { IRental } from '@/models/Rental';
 import RentalRequest from '@/models/RentalRequest';
 
 // GET - Načíst konkrétní pronájem
@@ -9,6 +9,15 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Kontrola autentifikace
+    const authCookie = request.cookies.get('admin_auth');
+    if (!authCookie) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     await connectToMongoose();
 
     const rental = await Rental.findById(params.id);
@@ -39,6 +48,15 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Kontrola autentifikace
+    const authCookie = request.cookies.get('admin_auth');
+    if (!authCookie) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     await connectToMongoose();
 
     const body = await request.json();
@@ -127,6 +145,15 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Kontrola autentifikace
+    const authCookie = request.cookies.get('admin_auth');
+    if (!authCookie) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     await connectToMongoose();
 
     const rental = await Rental.findByIdAndDelete(params.id);
