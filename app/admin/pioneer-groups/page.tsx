@@ -36,29 +36,29 @@ export default function PioneerGroupsAdminPage() {
   };
 
   const updateBasicField = (field: string, value: string) => {
-    setContent(prev => ({
+    setContent((prev: typeof allPagesContent.pioneerGroups) => ({
       ...prev,
       [field]: value
     }));
   };
 
   const updateGroup = (index: number, field: string, value: string | string[]) => {
-    setContent(prev => ({
+    setContent((prev: typeof allPagesContent.pioneerGroups) => ({
       ...prev,
-      groups: prev.groups.map((group, i) =>
+      groups: prev.groups.map((group: any, i: number) =>
         i === index ? { ...group, [field]: value } : group
       )
     }));
   };
 
   const updateGroupActivity = (groupIndex: number, activityIndex: number, value: string) => {
-    setContent(prev => ({
+    setContent((prev: typeof allPagesContent.pioneerGroups) => ({
       ...prev,
-      groups: prev.groups.map((group, i) =>
+      groups: prev.groups.map((group: any, i: number) =>
         i === groupIndex
           ? {
               ...group,
-              activities: group.activities.map((activity, j) =>
+              activities: group.activities.map((activity: string, j: number) =>
                 j === activityIndex ? value : activity
               )
             }
@@ -68,9 +68,9 @@ export default function PioneerGroupsAdminPage() {
   };
 
   const addGroupActivity = (groupIndex: number) => {
-    setContent(prev => ({
+    setContent((prev: typeof allPagesContent.pioneerGroups) => ({
       ...prev,
-      groups: prev.groups.map((group, i) =>
+      groups: prev.groups.map((group: any, i: number) =>
         i === groupIndex
           ? { ...group, activities: [...group.activities, 'Nová aktivita'] }
           : group
@@ -79,13 +79,13 @@ export default function PioneerGroupsAdminPage() {
   };
 
   const removeGroupActivity = (groupIndex: number, activityIndex: number) => {
-    setContent(prev => ({
+    setContent((prev: typeof allPagesContent.pioneerGroups) => ({
       ...prev,
-      groups: prev.groups.map((group, i) =>
+      groups: prev.groups.map((group: any, i: number) =>
         i === groupIndex
           ? {
               ...group,
-              activities: group.activities.filter((_, j) => j !== activityIndex)
+              activities: group.activities.filter((_: string, j: number) => j !== activityIndex)
             }
           : group
       )
@@ -93,7 +93,7 @@ export default function PioneerGroupsAdminPage() {
   };
 
   const updateJoinInfo = (field: string, value: string) => {
-    setContent(prev => ({
+    setContent((prev: typeof allPagesContent.pioneerGroups) => ({
       ...prev,
       joinInfo: {
         ...prev.joinInfo,
@@ -159,7 +159,7 @@ export default function PioneerGroupsAdminPage() {
 
       {/* Pioneer Groups */}
       <div className="space-y-6">
-        {content.groups.map((group, groupIndex) => (
+        {content.groups.map((group: any, groupIndex: number) => (
           <div key={groupIndex} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <h3 className="text-lg font-semibold text-slate-800 mb-4">
               Oddíl {groupIndex + 1}: {group.name}
@@ -218,7 +218,7 @@ export default function PioneerGroupsAdminPage() {
                 </div>
 
                 <div className="space-y-2">
-                  {group.activities.map((activity, activityIndex) => (
+                  {group.activities.map((activity: string, activityIndex: number) => (
                     <div key={activityIndex} className="flex items-center space-x-2">
                       <input
                         type="text"

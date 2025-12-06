@@ -68,7 +68,7 @@ export default function HomeAdminPage() {
   };
 
   const updateHeroContent = (field: string, value: string) => {
-    setHomeContent(prev => ({
+    setHomeContent((prev: typeof allPagesContent.home) => ({
       ...prev,
       hero: {
         ...prev.hero,
@@ -78,17 +78,17 @@ export default function HomeAdminPage() {
   };
 
   const updateAboutContent = (index: number, value: string) => {
-    setHomeContent(prev => ({
+    setHomeContent((prev: typeof allPagesContent.home) => ({
       ...prev,
       about: {
         ...prev.about,
-        content: prev.about.content.map((item, i) => i === index ? value : item)
+        content: prev.about.content.map((item: string, i: number) => i === index ? value : item)
       }
     }));
   };
 
   const updateAboutField = (field: string, value: string) => {
-    setHomeContent(prev => ({
+    setHomeContent((prev: typeof allPagesContent.home) => ({
       ...prev,
       about: {
         ...prev.about,
@@ -98,7 +98,7 @@ export default function HomeAdminPage() {
   };
 
   const updatePioneerField = (field: string, value: string) => {
-    setHomeContent(prev => ({
+    setHomeContent((prev: typeof allPagesContent.home) => ({
       ...prev,
       pioneer: {
         ...prev.pioneer,
@@ -108,7 +108,7 @@ export default function HomeAdminPage() {
   };
 
   const updatePioneerIdeals = (field: string, value: any) => {
-    setHomeContent(prev => ({
+    setHomeContent((prev: typeof allPagesContent.home) => ({
       ...prev,
       pioneer: {
         ...prev.pioneer,
@@ -121,20 +121,20 @@ export default function HomeAdminPage() {
   };
 
   const updatePioneerIdealsContent = (index: number, value: string) => {
-    setHomeContent(prev => ({
+    setHomeContent((prev: typeof allPagesContent.home) => ({
       ...prev,
       pioneer: {
         ...prev.pioneer,
         ideals: {
           ...prev.pioneer.ideals,
-          content: prev.pioneer.ideals.content.map((item, i) => i === index ? value : item)
+          content: prev.pioneer.ideals.content.map((item: string, i: number) => i === index ? value : item)
         }
       }
     }));
   };
 
   const updateHistoryContent = (field: string, value: string) => {
-    setHomeContent(prev => ({
+    setHomeContent((prev: typeof allPagesContent.home) => ({
       ...prev,
       history: {
         ...prev.history,
@@ -288,7 +288,7 @@ export default function HomeAdminPage() {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Odstavce textu
             </label>
-            {homeContent.about.content.map((paragraph, index) => (
+            {homeContent.about.content.map((paragraph: string, index: number) => (
               <div key={index} className="mb-3">
                 <label className="block text-xs text-slate-500 mb-1">
                   Odstavec {index + 1}
@@ -349,7 +349,7 @@ export default function HomeAdminPage() {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Obsah sekce
             </label>
-            {homeContent.pioneer.ideals.content.map((paragraph, index) => (
+            {homeContent.pioneer.ideals.content.map((paragraph: string, index: number) => (
               <div key={index} className="mb-3">
                 <label className="block text-xs text-slate-500 mb-1">
                   Odstavec {index + 1}

@@ -4,13 +4,14 @@ import Article from '@/models/Article';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { slug } = await params;
 
     const article = await Article.findOne({
-      slug: params.slug,
+      slug: slug,
       status: 'published'
     })
       .lean();
@@ -40,7 +41,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     // Kontrola autentifikace
@@ -53,12 +54,13 @@ export async function PUT(
     }
 
     await connectToMongoose();
+    const { slug: slugParam } = await params;
 
     const body = await request.json();
     const { title, slug, content, excerpt, category, tags, status } = body;
 
     // Find article by ID (assuming slug param is actually an ID in admin context)
-    const article = await Article.findById(params.slug);
+    const article = await Article.findById(slugParam);
 
     if (!article) {
       return NextResponse.json(
@@ -69,7 +71,7 @@ export async function PUT(
 
     // Check if new slug already exists (if slug is being changed)
     if (slug && slug !== article.slug) {
-      const existingArticle = await Article.findOne({ slug, _id: { $ne: params.slug } });
+      const existingArticle = await Article.findOne({ slug, _id: { $ne: slugParam } });
       if (existingArticle) {
         return NextResponse.json(
           { success: false, message: 'Článek s tímto slug již existuje' },
@@ -97,7 +99,7 @@ export async function PUT(
     }
 
     const updatedArticle = await Article.findByIdAndUpdate(
-      params.slug,
+      slugParam,
       updateData,
       { new: true }
     );
@@ -128,7 +130,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     // Kontrola autentifikace
@@ -141,9 +143,10 @@ export async function DELETE(
     }
 
     await connectToMongoose();
+    const { slug } = await params;
 
     // Find and delete article by ID
-    const article = await Article.findByIdAndDelete(params.slug);
+    const article = await Article.findByIdAndDelete(slug);
 
     if (!article) {
       return NextResponse.json(

@@ -58,7 +58,8 @@ function EditArticleForm({ article, onSave, onCancel }: {
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
-      .trim('-');
+      .trim()
+      .replace(/^-+|-+$/g, '');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

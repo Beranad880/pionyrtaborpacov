@@ -5,12 +5,13 @@ import PhotoGallery from '@/models/PhotoGallery';
 // GET - Načíst konkrétní galerii
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { id } = await params;
 
-    const gallery = await PhotoGallery.findById(params.id);
+    const gallery = await PhotoGallery.findById(id);
 
     if (!gallery) {
       return NextResponse.json(
@@ -35,14 +36,15 @@ export async function GET(
 // PUT - Aktualizovat galerii
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { id } = await params;
 
     const body = await request.json();
 
-    const gallery = await PhotoGallery.findById(params.id);
+    const gallery = await PhotoGallery.findById(id);
 
     if (!gallery) {
       return NextResponse.json(
@@ -93,12 +95,13 @@ export async function PUT(
 // DELETE - Smazat galerii
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { id } = await params;
 
-    const gallery = await PhotoGallery.findByIdAndDelete(params.id);
+    const gallery = await PhotoGallery.findByIdAndDelete(id);
 
     if (!gallery) {
       return NextResponse.json(

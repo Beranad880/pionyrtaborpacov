@@ -70,7 +70,12 @@ export async function POST(request: NextRequest) {
     const startDate = new Date(body.startDate);
     const endDate = new Date(body.endDate);
 
-    if (startDate < new Date()) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const inputStartDate = new Date(startDate);
+    inputStartDate.setHours(0, 0, 0, 0);
+
+    if (inputStartDate < today) {
       return NextResponse.json(
         { success: false, message: 'Datum příjezdu nemůže být v minulosti' },
         { status: 400 }

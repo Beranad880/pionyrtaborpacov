@@ -145,7 +145,7 @@ npm run admin:remove <username>       # Odstranit admin účet
 
 ```bash
 # Přidat nový admin účet
-npm run admin:add administrator silne_heslo123
+npm run admin:add adam heslo123
 
 # Vypsat všechny admin účty
 npm run admin:list

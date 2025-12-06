@@ -10,7 +10,8 @@
       "Bash(curl:*)",
       "Bash(npm run build:*)",
       "Bash(python:*)",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

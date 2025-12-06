@@ -5,12 +5,13 @@ import Event from '@/models/Event';
 // GET - Načíst konkrétní akci
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { id } = await params;
 
-    const event = await Event.findById(params.id);
+    const event = await Event.findById(id);
 
     if (!event) {
       return NextResponse.json(
@@ -35,14 +36,15 @@ export async function GET(
 // PUT - Aktualizovat akci
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { id } = await params;
 
     const body = await request.json();
 
-    const event = await Event.findById(params.id);
+    const event = await Event.findById(id);
 
     if (!event) {
       return NextResponse.json(
@@ -113,12 +115,13 @@ export async function PUT(
 // DELETE - Smazat akci
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { id } = await params;
 
-    const event = await Event.findByIdAndDelete(params.id);
+    const event = await Event.findByIdAndDelete(id);
 
     if (!event) {
       return NextResponse.json(

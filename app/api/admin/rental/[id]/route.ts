@@ -6,7 +6,7 @@ import RentalRequest from '@/models/RentalRequest';
 // GET - Načíst konkrétní pronájem
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Kontrola autentifikace
@@ -19,8 +19,9 @@ export async function GET(
     }
 
     await connectToMongoose();
+    const { id } = await params;
 
-    const rental = await Rental.findById(params.id);
+    const rental = await Rental.findById(id);
 
     if (!rental) {
       return NextResponse.json(
@@ -45,7 +46,7 @@ export async function GET(
 // PUT - Aktualizovat pronájem
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Kontrola autentifikace
@@ -58,9 +59,10 @@ export async function PUT(
     }
 
     await connectToMongoose();
+    const { id } = await params;
 
     const body = await request.json();
-    const rental = await Rental.findById(params.id);
+    const rental = await Rental.findById(id);
 
     if (!rental) {
       return NextResponse.json(
@@ -89,7 +91,7 @@ export async function PUT(
       });
   
       const conflictingRentals = await Rental.find({
-        _id: { $ne: params.id },
+        _id: { $ne: id },
         status: { $in: ['confirmed', 'paid'] },
         $or: [
           { startDate: { $lte: endDate }, endDate: { $gte: startDate } }
@@ -142,7 +144,7 @@ export async function PUT(
 // DELETE - Smazat pronájem
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Kontrola autentifikace
@@ -155,8 +157,9 @@ export async function DELETE(
     }
 
     await connectToMongoose();
+    const { id } = await params;
 
-    const rental = await Rental.findByIdAndDelete(params.id);
+    const rental = await Rental.findByIdAndDelete(id);
 
     if (!rental) {
       return NextResponse.json(

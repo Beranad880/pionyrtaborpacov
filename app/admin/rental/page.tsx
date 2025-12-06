@@ -181,7 +181,7 @@ export default function RentalsAdminPage() {
         ) : (
           <div className="space-y-4">
             {rentals.map((rental) => (
-              <div key={rental._id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+              <div key={rental._id.toString()} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>

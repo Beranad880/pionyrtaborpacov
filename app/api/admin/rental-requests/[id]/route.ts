@@ -5,12 +5,13 @@ import RentalRequest from '@/models/RentalRequest';
 // GET - Načíst konkrétní žádost
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { id } = await params;
 
-    const rentalRequest = await RentalRequest.findById(params.id);
+    const rentalRequest = await RentalRequest.findById(id);
 
     if (!rentalRequest) {
       return NextResponse.json(
@@ -35,14 +36,15 @@ export async function GET(
 // PUT - Aktualizovat žádost (změna statusu, poznámky)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { id } = await params;
 
     const body = await request.json();
 
-    const rentalRequest = await RentalRequest.findById(params.id);
+    const rentalRequest = await RentalRequest.findById(id);
 
     if (!rentalRequest) {
       return NextResponse.json(
@@ -63,7 +65,7 @@ export async function PUT(
       // Check for conflicts when approving
       if (body.status === 'approved') {
         const conflictingRequests = await RentalRequest.find({
-          _id: { $ne: params.id },
+          _id: { $ne: id },
           status: 'approved',
           $or: [
             {
@@ -115,12 +117,13 @@ export async function PUT(
 // DELETE - Smazat žádost
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
+    const { id } = await params;
 
-    const rentalRequest = await RentalRequest.findByIdAndDelete(params.id);
+    const rentalRequest = await RentalRequest.findByIdAndDelete(id);
 
     if (!rentalRequest) {
       return NextResponse.json(

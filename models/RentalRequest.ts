@@ -50,7 +50,11 @@ const RentalRequestSchema = new Schema<IRentalRequest>(
       required: [true, 'Datum příjezdu je povinné'],
       validate: {
         validator: function(value: Date) {
-          return value >= new Date();
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Set to start of day
+          const inputDate = new Date(value);
+          inputDate.setHours(0, 0, 0, 0); // Set to start of day
+          return inputDate >= today;
         },
         message: 'Datum příjezdu nemůže být v minulosti',
       },
