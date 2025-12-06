@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAdminAuth } from '@/lib/auth-admin';
-import AdminLogin from '@/components/AdminLogin';
+import { useRouter } from 'next/navigation';
 
 const adminPages = [
   { name: 'Přehled', href: '/admin', icon: '📊' },
@@ -22,8 +22,21 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { isAuthenticated, isLoading, login, logout } = useAdminAuth();
+  const { isAuthenticated, isLoading, logout } = useAdminAuth();
+
+  // VŽDY volat useEffect bez ohledu na podmínky
+  useEffect(() => {
+    if (pathname !== '/admin/login' && !isLoading && !isAuthenticated) {
+      router.push('/admin/login');
+    }
+  }, [pathname, isLoading, isAuthenticated, router]);
+
+  // Neaplikovat autentifikaci na login stránku
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (
@@ -37,7 +50,7 @@ export default function AdminLayout({
   }
 
   if (!isAuthenticated) {
-    return <AdminLogin onLogin={login} />;
+    return null;
   }
 
   return (

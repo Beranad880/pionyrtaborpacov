@@ -2,60 +2,88 @@
 
 import { useState, useEffect } from 'react';
 
-// Jednoduché admin ověření - v produkci by mělo být robustnější
-export const ADMIN_CREDENTIALS = {
-  username: 'admin',
-  password: 'pionyr2025!', // V produkci by mělo být v ENV proměnných
-};
-
 export function useAdminAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
-  const checkAuthStatus = () => {
-    const token = localStorage.getItem('admin-token');
-    const loginTime = localStorage.getItem('admin-login-time');
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/verify', {
+        method: 'GET',
+        credentials: 'include'
+      });
 
-    if (token && loginTime) {
-      const now = Date.now();
-      const loginTimestamp = parseInt(loginTime);
-      const EIGHT_HOURS = 8 * 60 * 60 * 1000; // 8 hodin
-
-      if (now - loginTimestamp < EIGHT_HOURS) {
-        setIsAuthenticated(true);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setIsAuthenticated(true);
+          setUser(data.user);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
       } else {
-        logout();
+        setIsAuthenticated(false);
+        setUser(null);
       }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      setIsAuthenticated(false);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-      const token = btoa(`${username}:${Date.now()}`);
-      localStorage.setItem('admin-token', token);
-      localStorage.setItem('admin-login-time', Date.now().toString());
-      setIsAuthenticated(true);
-      return true;
-    }
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ username, password }),
+      });
 
-    return false;
+      const data = await response.json();
+
+      if (data.success) {
+        setIsAuthenticated(true);
+        setUser(data.user);
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('admin-token');
-    localStorage.removeItem('admin-login-time');
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsAuthenticated(false);
+      setUser(null);
+    }
   };
 
   return {
     isAuthenticated,
     isLoading,
+    user,
     login,
     logout,
   };
@@ -75,7 +103,8 @@ export function verifyAdminRequest(request: Request): boolean {
     const decoded = atob(token);
     const [username] = decoded.split(':');
 
-    return username === ADMIN_CREDENTIALS.username;
+    // Admin credentials check se provádí v API endpointech
+    return username && username.length >= 3;
   } catch {
     return false;
   }

@@ -8,10 +8,15 @@
     "start": "next start",
     "lint": "eslint",
     "db:init": "tsx scripts/init-db.ts",
-    "db:test": "curl http://localhost:3000/api/test/mongodb"
+    "db:test": "curl http://localhost:3000/api/test/mongodb",
+    "admin:add": "node scripts/manage-admin-users.js add",
+    "admin:remove": "node scripts/manage-admin-users.js remove",
+    "admin:list": "node scripts/manage-admin-users.js list",
+    "admin:manage": "node scripts/manage-admin-users.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
     "next": "^16.0.7",
@@ -21,6 +26,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

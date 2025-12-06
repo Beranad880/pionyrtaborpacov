@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 // Optional MongoDB - don't throw error if missing in development
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/pionyrska-skupina';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/pionyr-pacov';
 
 interface MongooseConnection {
   conn: typeof mongoose | null;

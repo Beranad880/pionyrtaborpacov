@@ -8,6 +8,8 @@ Moderní webové stránky pro Pionýrskou skupinu Pacov vytvořené v Next.js a 
 - **React 19** - Frontend knihovna
 - **TypeScript** - Typová bezpečnost
 - **Tailwind CSS** - Utility-first CSS framework pro rychlé stylování
+- **MongoDB + Mongoose** - Databáze pro správu obsahu a uživatelů
+- **bcrypt** - Bezpečné hashování hesel
 - **Responsive design** - Optimalizováno pro všechna zařízení
 
 ## Funkce
@@ -25,6 +27,8 @@ Moderní webové stránky pro Pionýrskou skupinu Pacov vytvořené v Next.js a 
 - **Blog/Články** - Přehled novinek a aktivit
 - **Kalendář akcí** - Nadcházející a proběhlé události
 - **LDT Bělá** - Informace o letním táboře
+- **Admin systém** - Zabezpečená správa obsahu s autentifikací
+- **MongoDB integrace** - Databáze pro správu uživatelů a obsahu
 - **SEO optimalizace** - Meta tagy, Open Graph
 - **Czech localization** - Český obsah a formátování
 
@@ -32,8 +36,6 @@ Moderní webové stránky pro Pionýrskou skupinu Pacov vytvořené v Next.js a 
 
 - Fotogalerie
 - Online přihlášky
-- Správa obsahu (CMS)
-- Uživatelské účty
 - Newsletter
 - Integrace s kalendářem
 - Platební brána
@@ -43,6 +45,12 @@ Moderní webové stránky pro Pionýrskou skupinu Pacov vytvořené v Next.js a 
 ```
 my-app/
 ├── app/                    # Next.js App Router
+│   ├── admin/             # Admin panel (zabezpečeno)
+│   │   ├── login/         # Přihlášení do admin panelu
+│   │   ├── layout.tsx     # Admin layout
+│   │   └── page.tsx       # Admin dashboard
+│   ├── api/               # API endpointy
+│   │   └── auth/          # Autentifikační API
 │   ├── blog/              # Stránka s články
 │   ├── kalendar-akci/     # Kalendář akcí
 │   ├── kontakt/           # Kontaktní stránka
@@ -57,8 +65,16 @@ my-app/
 │   ├── AboutSection.tsx   # O nás sekce
 │   ├── ContactSection.tsx # Kontaktní sekce
 │   └── ContactForm.tsx    # Kontaktní formulář
+├── lib/                   # Knihovny a utils
+│   ├── auth-admin.ts      # Admin autentifikace
+│   └── mongoose.ts        # MongoDB připojení
+├── models/                # MongoDB modely
+│   └── AdminUser.ts       # Model admin uživatele
+├── scripts/               # Utility skripty
+│   └── manage-admin-users.js # Správa admin účtů
 ├── data/                  # Datové soubory
 │   └── content.ts         # Obsah stránek
+├── middleware.ts          # Next.js middleware pro auth
 └── public/                # Statické soubory
 ```
 
@@ -68,21 +84,37 @@ my-app/
 
 - Node.js 18 nebo novější
 - npm nebo yarn
+- MongoDB (lokální nebo cloud - MongoDB Atlas)
 
 ### Instalace a spuštění
 
-1. **Instalace závislostí**:
+1. **Konfigurace prostředí**:
+   Vytvořte soubor `.env.local` s MongoDB připojením:
+   ```bash
+   MONGODB_URI=mongodb://localhost:27017/pionyr-pacov
+   # Nebo pro MongoDB Atlas:
+   # MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/pionyr-pacov
+   ```
+
+2. **Instalace závislostí**:
    ```bash
    npm install
    ```
 
-2. **Spuštění vývojového serveru**:
+3. **Vytvoření prvního admin uživatele**:
+   ```bash
+   npm run admin:add admin vase_heslo123
+   ```
+
+4. **Spuštění vývojového serveru**:
    ```bash
    npm run dev
    ```
 
-3. **Otevření v prohlížeči**:
-   Přejděte na [http://localhost:3000](http://localhost:3000)
+5. **Otevření v prohlížeči**:
+   - Hlavní stránka: [http://localhost:3000](http://localhost:3000)
+   - Admin panel: [http://localhost:3000/admin](http://localhost:3000/admin)
+   - Admin přihlášení: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
 
 ### Další příkazy
 
@@ -96,9 +128,38 @@ npm start
 # Linting
 npm run lint
 
-# Type checking
-npm run type-check
+# Správa admin uživatelů
+npm run admin:list                    # Vypsat všechny admin účty
+npm run admin:add <username> <password>  # Přidat nový admin účet
+npm run admin:remove <username>       # Odstranit admin účet
 ```
+
+## Admin systém
+
+### Přístup k admin panelu
+
+1. **URL admin panelu**: [http://localhost:3000/admin](http://localhost:3000/admin)
+2. **Přihlášení**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+
+### Správa admin účtů
+
+```bash
+# Přidat nový admin účet
+npm run admin:add administrator silne_heslo123
+
+# Vypsat všechny admin účty
+npm run admin:list
+
+# Odstranit admin účet
+npm run admin:remove stary_admin
+```
+
+### Bezpečnostní funkce
+
+- **Bcrypt hashování** - Hesla jsou bezpečně hashována s bcrypt
+- **Cookie-based auth** - Relace jsou spravovány přes HttpOnly cookies
+- **Middleware ochrana** - Všechny admin stránky jsou automaticky chráněny
+- **Session timeout** - Automatické odhlášení po 7 dnech neaktivity
 
 ## Konfigurace obsahu
 
@@ -137,7 +198,7 @@ Projekt je připraven pro nasazení na:
 ## Budoucí rozšíření
 
 ### Prioritní
-1. **CMS integrace** - Strapi nebo Sanity pro správu obsahu
+1. **Admin správa obsahu** - Rozšíření admin panelu o správu článků, událostí
 2. **Fotogalerie** - Přidání galerií z akcí
 3. **Online přihlášky** - Formuláře pro tábory a akce
 4. **Newsletter** - Mailchimp nebo SendGrid integrace
