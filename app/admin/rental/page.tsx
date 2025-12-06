@@ -1,353 +1,268 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { IRental } from '@/models/Rental';
+import RentalForm from '@/components/RentalForm';
 
-interface RentalRequest {
-  _id: string;
-  name: string;
-  email: string;
-  phone: string;
-  organization?: string;
-  startDate: string;
-  endDate: string;
-  guestCount: number;
-  purpose: string;
-  facilities: string[];
-  message?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  createdAt: string;
-}
+const statusNames: Record<string, string> = {
+    confirmed: 'Potvrzeno',
+    paid: 'Zaplaceno',
+    completed: 'Dokončeno',
+    cancelled: 'Zrušeno'
+};
 
-export default function RentalAdminPage() {
-  const [requests, setRequests] = useState<RentalRequest[]>([]);
+const statusColors: Record<string, string> = {
+    confirmed: 'bg-blue-100 text-blue-800 border-blue-200',
+    paid: 'bg-green-100 text-green-800 border-green-200',
+    completed: 'bg-gray-100 text-gray-800 border-gray-200',
+    cancelled: 'bg-red-100 text-red-800 border-red-200'
+};
+
+export default function RentalsAdminPage() {
+  const [rentals, setRentals] = useState<IRental[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRequest, setSelectedRequest] = useState<RentalRequest | null>(null);
-
-  // Sample data for demonstration
-  const sampleRequests: RentalRequest[] = [
-    {
-      _id: '1',
-      name: 'Jan Novák',
-      email: 'jan.novak@email.cz',
-      phone: '+420 123 456 789',
-      organization: 'Skautský oddíl Tábor',
-      startDate: '2024-07-15',
-      endDate: '2024-07-22',
-      guestCount: 25,
-      purpose: 'Letní tábor pro děti',
-      facilities: ['kitchen', 'wifi', 'fireplace'],
-      message: 'Potřebovali bychom celou hájenku na týden. Máme zkušenosti s provozem táborů.',
-      status: 'pending',
-      createdAt: '2024-12-01'
-    },
-    {
-      _id: '2',
-      name: 'Marie Svobodová',
-      email: 'marie.s@firma.cz',
-      phone: '+420 987 654 321',
-      organization: 'Firma XYZ',
-      startDate: '2024-06-10',
-      endDate: '2024-06-12',
-      guestCount: 15,
-      purpose: 'Firemní teambuilding',
-      facilities: ['kitchen', 'wifi'],
-      message: 'Rádi bychom si pronajali hájenku na víkendový teambuilding.',
-      status: 'approved',
-      createdAt: '2024-11-28'
-    },
-    {
-      _id: '3',
-      name: 'Petr Černý',
-      email: 'petr.cerny@email.cz',
-      phone: '+420 555 666 777',
-      startDate: '2024-08-01',
-      endDate: '2024-08-05',
-      guestCount: 35,
-      purpose: 'Rodinná oslava',
-      facilities: ['kitchen', 'fireplace', 'parking'],
-      message: 'Slavíme 50. narozeniny, chtěli bychom udělat velkou rodinnou akci.',
-      status: 'rejected',
-      createdAt: '2024-11-25'
-    }
-  ];
+  const [filter, setFilter] = useState<'all' | 'confirmed' | 'paid' | 'completed' | 'cancelled'>('all');
+  const [selectedRental, setSelectedRental] = useState<IRental | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const router = useRouter();
 
   useEffect(() => {
-    fetchRequests();
-  }, []);
+    fetchRentals();
+  }, [filter, currentPage]);
 
-  const fetchRequests = async () => {
+  const fetchRentals = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/rental-requests');
-      const result = await response.json();
-
-      if (result.success) {
-        setRequests(result.data.requests);
-      } else {
-        console.error('Failed to fetch requests:', result.message);
-        // Fallback to sample data
-        setRequests(sampleRequests);
+      const response = await fetch(`/api/admin/rental?status=${filter}&page=${currentPage}&limit=10`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setRentals(result.data.rentals || []);
+          setTotalPages(result.data.pagination.pages || 1);
+        }
       }
     } catch (error) {
-      console.error('Error fetching requests:', error);
-      // Fallback to sample data
-      setRequests(sampleRequests);
+      console.error('Failed to fetch rentals:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateRequestStatus = async (id: string, status: 'approved' | 'rejected') => {
+  const handleSaveRental = async (data: Partial<IRental>) => {
+    setIsProcessing(true);
+    const url = data._id ? `/api/admin/rental/${data._id}` : '/api/admin/rental';
+    const method = data._id ? 'PUT' : 'POST';
+
     try {
-      const response = await fetch(`/api/admin/rental-requests/${id}`, {
-        method: 'PUT',
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          status,
-          processedBy: 'admin',
-        }),
+        body: JSON.stringify(data),
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        setRequests(prev =>
-          prev.map(req =>
-            req._id === id ? { ...req, status } : req
-          )
-        );
-        setSelectedRequest(null);
+      if (response.ok) {
+        fetchRentals();
+        setShowForm(false);
+        setSelectedRental(null);
       } else {
-        alert(`Chyba: ${result.message}`);
+        const res = await response.json();
+        alert(res.message || 'Chyba při ukládání pronájmu');
       }
     } catch (error) {
-      console.error('Error updating request:', error);
-      alert('Chyba při aktualizaci žádosti');
+      console.error('Error saving rental:', error);
+      alert('Chyba při ukládání pronájmu');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const handleDeleteRental = async (rentalId: string) => {
+    if (confirm('Opravdu chcete tento pronájem smazat?')) {
+        setIsProcessing(true);
+        try {
+          const response = await fetch(`/api/admin/rental/${rentalId}`, {
+            method: 'DELETE',
+          });
+    
+          if (response.ok) {
+            fetchRentals();
+          } else {
+            alert('Chyba při mazání pronájmu');
+          }
+        } catch (error) {
+          console.error('Error deleting rental:', error);
+          alert('Chyba při mazání pronájmu');
+        } finally {
+          setIsProcessing(false);
+        }
     }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pending': return 'Čeká na vyřízení';
-      case 'approved': return 'Schváleno';
-      case 'rejected': return 'Zamítnuto';
-      default: return status;
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">Pronájem hájenky</h1>
-        <div className="animate-pulse space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white p-6 rounded-lg shadow-sm border h-32"></div>
-          ))}
-        </div>
-      </div>
-    );
   }
 
+  const openForm = (rental: IRental | null) => {
+    setSelectedRental(rental);
+    setShowForm(true);
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('cs-CZ');
+  };
+
+  const calculateDays = (startDate: string, endDate: string) => {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Pronájem hájenky</h1>
-        <div className="flex space-x-2">
-          <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
-            {requests.filter(r => r.status === 'pending').length} čeká
-          </span>
-          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-            {requests.filter(r => r.status === 'approved').length} schváleno
-          </span>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Žádosti o pronájem</h2>
-        </div>
-
-        <div className="divide-y divide-gray-200">
-          {requests.map((request) => (
-            <div key={request._id} className="p-6 hover:bg-gray-50 transition-colors">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <h3 className="text-lg font-medium text-gray-900">{request.name}</h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                      {getStatusText(request.status)}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                    <div>
-                      <span className="font-medium">Termín:</span><br/>
-                      {new Date(request.startDate).toLocaleDateString('cs-CZ')} - {new Date(request.endDate).toLocaleDateString('cs-CZ')}
-                    </div>
-                    <div>
-                      <span className="font-medium">Účastníků:</span><br/>
-                      {request.guestCount} osob
-                    </div>
-                    <div>
-                      <span className="font-medium">Účel:</span><br/>
-                      {request.purpose}
-                    </div>
-                  </div>
-
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Kontakt:</span> {request.email}, {request.phone}
-                    {request.organization && <span> • {request.organization}</span>}
-                  </div>
-                </div>
-
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setSelectedRequest(request)}
-                    className="px-3 py-1 text-sm text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
-                  >
-                    Detail
-                  </button>
-                  {request.status === 'pending' && (
-                    <>
-                      <button
-                        onClick={() => updateRequestStatus(request._id, 'approved')}
-                        className="px-3 py-1 text-sm text-white bg-green-600 rounded hover:bg-green-700 transition-colors"
-                      >
-                        Schválit
-                      </button>
-                      <button
-                        onClick={() => updateRequestStatus(request._id, 'rejected')}
-                        className="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700 transition-colors"
-                      >
-                        Zamítnout
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Detail modal */}
-      {selectedRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold">Detail žádosti</h3>
-              <button
-                onClick={() => setSelectedRequest(null)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Jméno</label>
-                  <p className="text-gray-900">{selectedRequest.name}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedRequest.status)}`}>
-                    {getStatusText(selectedRequest.status)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <p className="text-gray-900">{selectedRequest.email}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Telefon</label>
-                  <p className="text-gray-900">{selectedRequest.phone}</p>
-                </div>
-              </div>
-
-              {selectedRequest.organization && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Organizace</label>
-                  <p className="text-gray-900">{selectedRequest.organization}</p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Datum příjezdu</label>
-                  <p className="text-gray-900">{new Date(selectedRequest.startDate).toLocaleDateString('cs-CZ')}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Datum odjezdu</label>
-                  <p className="text-gray-900">{new Date(selectedRequest.endDate).toLocaleDateString('cs-CZ')}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Počet osob</label>
-                  <p className="text-gray-900">{selectedRequest.guestCount}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Účel pobytu</label>
-                  <p className="text-gray-900">{selectedRequest.purpose}</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Požadované služby</label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {selectedRequest.facilities.map((facility, index) => (
-                    <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                      {facility}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {selectedRequest.message && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Zpráva</label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded">{selectedRequest.message}</p>
-                </div>
-              )}
-
-              {selectedRequest.status === 'pending' && (
-                <div className="flex space-x-3 pt-4 border-t">
-                  <button
-                    onClick={() => updateRequestStatus(selectedRequest._id, 'approved')}
-                    className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700 transition-colors"
-                  >
-                    Schválit žádost
-                  </button>
-                  <button
-                    onClick={() => updateRequestStatus(selectedRequest._id, 'rejected')}
-                    className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 transition-colors"
-                  >
-                    Zamítnout žádost
-                  </button>
-                </div>
-              )}
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900">Správa pronájmů</h1>
+            <div className="flex items-center gap-4">
+                <button
+                onClick={() => openForm(null)}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                >
+                + Nový pronájem
+                </button>
+                <button
+                onClick={() => router.push('/admin')}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                >
+                ← Zpět do adminu
+                </button>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Filters */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          {(['all', 'confirmed', 'paid', 'completed', 'cancelled'] as const).map((status) => (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filter === status
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+              }`}
+            >
+              {status === 'all' ? 'Všechny' : statusNames[status]}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Načítání pronájmů...</p>
+          </div>
+        ) : rentals.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <p className="text-gray-500 text-lg">Žádné pronájmy nebyly nalezeny.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {rentals.map((rental) => (
+              <div key={rental._id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{rental.name}</h3>
+                      <p className="text-gray-600">{rental.email} • {rental.phone}</p>
+                      {rental.organization && (
+                        <p className="text-gray-600">{rental.organization}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${statusColors[rental.status]}`}>
+                            {statusNames[rental.status]}
+                        </span>
+                        <button
+                            onClick={() => openForm(rental)}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                        >
+                            Upravit
+                        </button>
+                         <button
+                            onClick={() => handleDeleteRental(rental._id)}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                        >
+                            Smazat
+                        </button>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-2">Pobyt</h4>
+                      <p className="text-gray-600">
+                        {formatDate(rental.startDate)} - {formatDate(rental.endDate)}
+                        <span className="text-gray-500"> ({calculateDays(rental.startDate, rental.endDate)} dní)</span>
+                      </p>
+                      <p className="text-gray-600">Počet hostů: {rental.guestCount}</p>
+                      <p className="text-gray-600">Cena: {rental.price ? `${rental.price} Kč` : 'Nespecifikováno'}</p>
+                    </div>
+
+                    {rental.adminNotes && (
+                        <div className="mb-4">
+                        <h4 className="font-medium text-gray-900 mb-2">Poznámky administrátora</h4>
+                        <p className="text-gray-600 bg-yellow-50 p-3 rounded-lg border border-yellow-200">{rental.adminNotes}</p>
+                        </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ← Předchozí
+            </button>
+
+            <span className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+              {currentPage} z {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Další →
+            </button>
+          </div>
+        )}
+      </div>
+
+      {showForm && (
+        <RentalForm
+            rental={selectedRental}
+            onClose={() => setShowForm(false)}
+            onSave={handleSaveRental}
+            isProcessing={isProcessing}
+        />
       )}
     </div>
   );
