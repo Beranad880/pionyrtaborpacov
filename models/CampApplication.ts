@@ -51,7 +51,7 @@ const CampApplicationSchema = new Schema<ICampApplication>(
     grade: {
       type: String,
       required: [true, 'Třída je povinná'],
-      enum: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+      enum: ['0', '1', '2', '3', '4', '5', '6', '7', '8'],
     },
     dateOfBirth: {
       type: String,
@@ -91,7 +91,7 @@ const CampApplicationSchema = new Schema<ICampApplication>(
       type: String,
       required: [true, 'Telefonní číslo je povinné'],
       trim: true,
-      match: [/^(\+420)?\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/, 'Telefonní číslo není ve správném formátu'],
+      match: [/^[\+]?[0-9\s\-]{9,15}$/, 'Telefonní číslo není ve správném formátu'],
     },
     guardianEmail: {
       type: String,
@@ -117,7 +117,7 @@ const CampApplicationSchema = new Schema<ICampApplication>(
       type: String,
       required: [true, 'Telefonní číslo druhého kontaktu je povinné'],
       trim: true,
-      match: [/^(\+420)?\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/, 'Telefonní číslo není ve správném formátu'],
+      match: [/^[\+]?[0-9\s\-]{9,15}$/, 'Telefonní číslo není ve správném formátu'],
     },
     secondContactEmail: {
       type: String,

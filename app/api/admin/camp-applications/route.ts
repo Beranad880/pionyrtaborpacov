@@ -94,8 +94,6 @@ export async function POST(request: NextRequest) {
       'grade',
       'dateOfBirth',
       'birthNumber',
-      'street',
-      'city',
       'guardianName',
       'guardianPhone',
       'guardianEmail',
@@ -110,6 +108,14 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+    }
+
+    // Validace adresních údajů
+    if (!body.address || !body.address.street || !body.address.city) {
+      return NextResponse.json(
+        { success: false, message: 'Adresa účastníka je povinná' },
+        { status: 400 }
+      );
     }
 
     // Kontrola duplicit podle rodného čísla nebo emailu
@@ -133,8 +139,8 @@ export async function POST(request: NextRequest) {
       dateOfBirth: body.dateOfBirth,
       birthNumber: body.birthNumber,
       address: {
-        street: body.street,
-        city: body.city
+        street: body.address.street,
+        city: body.address.city
       },
       guardianName: body.guardianName,
       guardianPhone: body.guardianPhone,
@@ -144,6 +150,7 @@ export async function POST(request: NextRequest) {
       secondContactPhone: body.secondContactPhone,
       secondContactEmail: body.secondContactEmail,
       secondContactAddress: body.secondContactAddress,
+      campInfo: body.campInfo,
       status: 'pending'
     });
 
