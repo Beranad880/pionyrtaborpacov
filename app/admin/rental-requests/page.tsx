@@ -60,13 +60,8 @@ export default function RentalRequestsAdmin() {
   const router = useRouter();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('adminAuthenticated');
-    if (!isAuthenticated) {
-      router.push('/admin');
-      return;
-    }
     fetchRequests();
-  }, [filter, currentPage, router]);
+  }, [filter, currentPage]);
 
   const fetchRequests = async () => {
     try {
