@@ -5,7 +5,8 @@
       "Bash(npm install:*)",
       "Bash(tasklist)",
       "Bash(findstr:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

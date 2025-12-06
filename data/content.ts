@@ -77,10 +77,10 @@ export const siteData = {
   menu: [
     { title: "Úvod", href: "/" },
     { title: "Pionýrské oddíly", href: "/pages?page=pionyrske-oddily" },
-    { title: "Hájenka Bělá", href: "/hajenka-bela" },
-    { title: "Kalendář akcí", href: "/calendar" },
+    { title: "Hájenka Bělá", href: "/pages?page=hajenka-bela" },
+    { title: "Kalendář akcí", href: "/pages?page=kalendar-akci" },
     { title: "Pronájem Hájenky Bělá", href: "/pages?page=pronajem-hajenky-bela" },
-    { title: "Články", href: "/articles" },
+    { title: "Články", href: "/pages?page=clanky" },
     { title: "Fotky z akcí", href: "/pages?page=fotky-z-akci" }
   ] as MenuItem[]
 };

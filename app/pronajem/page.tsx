@@ -165,7 +165,7 @@ export default function RentalFormPage() {
                 <Link href="/" className="text-slate-600 hover:text-red-600 transition-colors">
                   Domů
                 </Link>
-                <Link href="/hajenka-bela" className="text-slate-600 hover:text-red-600 transition-colors">
+                <Link href="/pages?page=hajenka-bela" className="text-slate-600 hover:text-red-600 transition-colors">
                   Hájenka Bělá
                 </Link>
                 <Link href="/pronajem" className="text-red-600 font-medium">
@@ -204,7 +204,7 @@ export default function RentalFormPage() {
                 </div>
                 <div className="mt-6 space-x-4">
                   <Link
-                    href="/hajenka-bela"
+                    href="/pages?page=hajenka-bela"
                     className="inline-flex items-center px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
                   >
                     Více o hájence

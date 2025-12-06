@@ -65,17 +65,17 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-lg mb-4 text-slate-800">Rychlé odkazy</h4>
             <div className="space-y-2 text-sm">
-              <Link href="/ldt-bela" className="block text-slate-600 hover:text-red-600 transition-colors">
-                LDT Bělá
+              <Link href="/pages?page=hajenka-bela" className="block text-slate-600 hover:text-red-600 transition-colors">
+                Hájenka Bělá
               </Link>
-              <Link href="/blog" className="block text-slate-600 hover:text-red-600 transition-colors">
+              <Link href="/pages?page=clanky" className="block text-slate-600 hover:text-red-600 transition-colors">
                 Články
               </Link>
-              <Link href="/kalendar-akci" className="block text-slate-600 hover:text-red-600 transition-colors">
+              <Link href="/pages?page=kalendar-akci" className="block text-slate-600 hover:text-red-600 transition-colors">
                 Kalendář akcí
               </Link>
-              <Link href="/kontakt" className="block text-slate-600 hover:text-red-600 transition-colors">
-                Kontakt
+              <Link href="/pages?page=pronajem-hajenky-bela" className="block text-slate-600 hover:text-red-600 transition-colors">
+                Pronájem
               </Link>
             </div>
           </div>

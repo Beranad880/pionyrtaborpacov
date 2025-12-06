@@ -87,6 +87,8 @@ export async function POST(request: NextRequest) {
     // If MongoDB is not available, save to static content file as fallback
     if (error.message?.includes('connect ECONNREFUSED')) {
       try {
+        const body = await request.json();
+        const { page, content } = body;
         await updateContentFile(page, content);
         return NextResponse.json({
           success: true,
