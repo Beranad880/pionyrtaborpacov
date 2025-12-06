@@ -1,0 +1,174 @@
+import { NextRequest, NextResponse } from 'next/server';
+import connectToMongoose from '@/lib/mongoose';
+import CampApplication from '@/models/CampApplication';
+
+// GET - Načíst táborové přihlášky
+export async function GET(request: NextRequest) {
+  try {
+    await connectToMongoose();
+
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
+
+    const skip = (page - 1) * limit;
+    const filter: any = {};
+
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+
+    if (search) {
+      filter.$or = [
+        { participantName: { $regex: search, $options: 'i' } },
+        { guardianName: { $regex: search, $options: 'i' } },
+        { guardianEmail: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const applications = await CampApplication.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const total = await CampApplication.countDocuments(filter);
+
+    // Statistiky podle statusu
+    const statusStats = await CampApplication.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const stats = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      total: total
+    };
+
+    statusStats.forEach(stat => {
+      if (stat._id in stats) {
+        stats[stat._id as keyof typeof stats] = stat.count;
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        applications,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        },
+        stats
+      }
+    });
+  } catch (error: any) {
+    console.error('GET /api/admin/camp-applications error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Nepodařilo se načíst přihlášky', error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Vytvořit novou táborovou přihlášku (veřejné API)
+export async function POST(request: NextRequest) {
+  try {
+    await connectToMongoose();
+
+    const body = await request.json();
+
+    // Validace required fields
+    const requiredFields = [
+      'participantName',
+      'grade',
+      'dateOfBirth',
+      'birthNumber',
+      'street',
+      'city',
+      'guardianName',
+      'guardianPhone',
+      'guardianEmail',
+      'secondContactName',
+      'secondContactPhone'
+    ];
+
+    for (const field of requiredFields) {
+      if (!body[field]) {
+        return NextResponse.json(
+          { success: false, message: `${field} je povinný` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Kontrola duplicit podle rodného čísla nebo emailu
+    const existingApplication = await CampApplication.findOne({
+      $or: [
+        { birthNumber: body.birthNumber },
+        { guardianEmail: body.guardianEmail }
+      ]
+    });
+
+    if (existingApplication) {
+      return NextResponse.json(
+        { success: false, message: 'Přihláška s tímto rodným číslem nebo emailem již existuje' },
+        { status: 409 }
+      );
+    }
+
+    const campApplication = new CampApplication({
+      participantName: body.participantName,
+      grade: body.grade,
+      dateOfBirth: body.dateOfBirth,
+      birthNumber: body.birthNumber,
+      address: {
+        street: body.street,
+        city: body.city
+      },
+      guardianName: body.guardianName,
+      guardianPhone: body.guardianPhone,
+      guardianEmail: body.guardianEmail,
+      guardianAddress: body.guardianAddress,
+      secondContactName: body.secondContactName,
+      secondContactPhone: body.secondContactPhone,
+      secondContactEmail: body.secondContactEmail,
+      secondContactAddress: body.secondContactAddress,
+      status: 'pending'
+    });
+
+    await campApplication.save();
+
+    return NextResponse.json({
+      success: true,
+      message: 'Přihláška byla úspěšně odeslána',
+      data: campApplication
+    }, { status: 201 });
+
+  } catch (error: any) {
+    console.error('POST /api/admin/camp-applications error:', error);
+
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((e: any) => e.message);
+      return NextResponse.json(
+        { success: false, message: 'Validace selhala', errors },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, message: 'Nepodařilo se vytvořit přihlášku', error: error.message },
+      { status: 500 }
+    );
+  }
+}

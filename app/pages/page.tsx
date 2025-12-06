@@ -9,6 +9,7 @@ import PionyrseOddilyPage from './pionyrske-oddily';
 import KalendarAkciPage from './kalendar-akci';
 import HajenkabelaPage from './hajenka-bela';
 import PronajemHajenkybePage from './pronajem-hajenky-bela';
+import TaborovePrihlaskyPage from './taborove-prihlasky';
 import ClankyPage from './clanky';
 import FotkyZAkciPage from './fotky-z-akci';
 
@@ -27,6 +28,8 @@ function PagesContent() {
       return <HajenkabelaPage />;
     case 'pronajem-hajenky-bela':
       return <PronajemHajenkybePage />;
+    case 'taborove-prihlasky':
+      return <TaborovePrihlaskyPage />;
     case 'clanky':
       return <ClankyPage />;
     case 'fotky-z-akci':

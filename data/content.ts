@@ -80,6 +80,7 @@ export const siteData = {
     { title: "Hájenka Bělá", href: "/pages?page=hajenka-bela" },
     { title: "Kalendář akcí", href: "/pages?page=kalendar-akci" },
     { title: "Pronájem Hájenky Bělá", href: "/pages?page=pronajem-hajenky-bela" },
+    { title: "Táborové přihlášky", href: "/pages?page=taborove-prihlasky" },
     { title: "Články", href: "/pages?page=clanky" },
     { title: "Fotky z akcí", href: "/pages?page=fotky-z-akci" }
   ] as MenuItem[]
@@ -323,6 +324,59 @@ export const allPagesContent: PageContent = {
     download: {
       title: "Stažení fotografií",
       description: "Pro stažení fotografií ve vyšším rozlišení nás kontaktujte."
+    }
+  },
+
+  // Táborové přihlášky
+  campApplications: {
+    title: "Táborové přihlášky",
+    description: "Přihlášky na letní dětský tábor v Hájence Bělá. Připojte se k nám na nezapomenutelné prázdninové dobrodružství!",
+    campInfo: {
+      theme: "Dobrodružství v přírodě",
+      dates: "15. - 25. července 2025",
+      price: 8500,
+      location: "Hájenka Bělá",
+      capacity: 30,
+      ageRange: "6-15 let",
+      includes: [
+        "Ubytování v Hájence Bělá",
+        "Plná penze (snídaně, oběd, večeře + svačiny)",
+        "Bohatý program plný her a aktivit",
+        "Výlety do okolí",
+        "Táborové ohně a večerní programy",
+        "Sportovní a rukodělné aktivity",
+        "Profesionální vedení a dozor"
+      ]
+    },
+    requirements: {
+      title: "Požadavky na účastníky",
+      items: [
+        "Věk 6-15 let",
+        "Základní samostatnost",
+        "Zdravotní způsobilost",
+        "Chuť do táborových aktivit"
+      ]
+    },
+    whatToBring: {
+      title: "Co s sebou na tábor",
+      description: "Detailní seznam vybavení zašleme všem přihlášeným účastníkům před začátkem tábora.",
+      basicItems: [
+        "Oblečení na 10 dní (včetně teplého oblečení)",
+        "Pevná obuv na turistiku",
+        "Plavky a ručník na koupání",
+        "Osobní hygienické potřeby",
+        "Léky (pokud nějaké užívá)",
+        "Malý batoh na výlety"
+      ]
+    },
+    payment: {
+      title: "Platební podmínky",
+      description: "Po přijetí přihlášky zašleme pokyny k platbě zálohy a celkové částky.",
+      steps: [
+        "Záloha 2000 Kč při potvrzení přihlášky",
+        "Doplatek 6500 Kč nejpozději do 30. června 2025",
+        "Platba na účet nebo v hotovosti"
+      ]
     }
   }
 };

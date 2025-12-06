@@ -11,6 +11,7 @@ const adminPages = [
   { name: 'Úvodní stránka', href: '/admin/home', icon: '🏠' },
   { name: 'Pionýrské oddíly', href: '/admin/pioneer-groups', icon: '👥' },
   { name: 'Pronájem hájenky', href: '/admin/rental', icon: '🏗️' },
+  { name: 'Táborové přihlášky', href: '/admin/camp-applications', icon: '🏕️' },
   { name: 'Kalendář akcí', href: '/admin/calendar', icon: '📅' },
   { name: 'Články', href: '/admin/articles', icon: '📝' },
   { name: 'Fotky z akcí', href: '/admin/photos', icon: '📸' },
