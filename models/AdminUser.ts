@@ -1,5 +1,4 @@
 import { Schema, model, models } from 'mongoose';
-import bcrypt from 'bcrypt';
 
 export interface IAdminUser {
   _id?: string;
@@ -26,7 +25,8 @@ const adminUserSchema = new Schema<IAdminUser>({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters']
+    minlength: [6, 'Password must be at least 6 characters'],
+    select: false
   },
   email: {
     type: String,
@@ -57,6 +57,7 @@ const adminUserSchema = new Schema<IAdminUser>({
 
 // Metoda pro kontrolu hesla
 adminUserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+  const bcrypt = require('bcrypt');
   return bcrypt.compare(candidatePassword, this.password);
 };
 
@@ -65,6 +66,7 @@ adminUserSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
 
   try {
+    const bcrypt = require('bcrypt');
     this.password = await bcrypt.hash(this.password, 12);
     next();
   } catch (error) {
@@ -79,6 +81,6 @@ adminUserSchema.methods.toJSON = function() {
   return userObject;
 };
 
-const AdminUser = models.AdminUser || model<IAdminUser>('AdminUser', adminUserSchema);
+const AdminUser = models.AdminUser || model<IAdminUser>('AdminUser', adminUserSchema, 'simpleadminusers');
 
 export default AdminUser;
