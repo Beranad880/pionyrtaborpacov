@@ -13,7 +13,8 @@
       "Bash(cmd /c:*)",
       "Bash(npm run dev:*)",
       "WebSearch",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

@@ -139,12 +139,28 @@ npm run admin:add admin mojeheslo123
 ### Alternativní způsob - JSON import
 
 1. **Vytvořte soubor `admin_credentials.json`**:
+
+**Možnost A: Zahashovaná hesla (bezpečnější)**
 ```json
 {
   "admins": [
     {
       "username": "admin",
-      "password": "strongpassword123"
+      "password": "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewGaJgCgP.VuxG3u",
+      "passwordHashed": true
+    }
+  ]
+}
+```
+
+**Možnost B: Čistá hesla (jednodušší, méně bezpečné)**
+```json
+{
+  "admins": [
+    {
+      "username": "admin",
+      "password": "strongpassword123",
+      "passwordHashed": false
     },
     {
       "username": "manager",
@@ -186,6 +202,19 @@ npm run admin:sync
 - Necommittujte `admin_credentials.json` do Gitu
 - Smažte JSON soubor po importu
 - Nepoužívejte slabá hesla
+
+### 🔒 Bcrypt podpora
+
+**Automatické hashování**: Při přidávání uživatele pomocí `npm run admin:add` se hesla automaticky hashují bcryptem jak do MongoDB, tak do `admin_credentials.json`.
+
+**JSON formáty**:
+- `passwordHashed: true` - heslo je už zahashováno bcryptem
+- `passwordHashed: false` nebo chybí - heslo je v čistém textu (zahashuje se při importu)
+
+**Generování bcrypt hash** (pokud chcete vytvořit hash ručně):
+```bash
+node -e "const bcrypt=require('bcrypt'); bcrypt.hash('vaše_heslo', 12).then(h=>console.log(h))"
+```
 
 ### Další příkazy
 
