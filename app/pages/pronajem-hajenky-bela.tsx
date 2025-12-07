@@ -1,31 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
 
 interface RentalFormData {
   name: string;
   email: string;
   phone: string;
-  organization: string;
+  organization?: string;
   startDate: string;
   endDate: string;
   guestCount: number;
   purpose: string;
   facilities: string[];
-  message: string;
+  message?: string;
   agreeTerms: boolean;
 }
 
 const facilityOptions = [
-  { id: 'kitchen', name: 'Plně vybavená kuchyně', price: 0 },
-  { id: 'wifi', name: 'Wi-Fi připojení', price: 50 },
-  { id: 'fireplace', name: 'Krb a společenská místnost', price: 0 },
-  { id: 'parking', name: 'Parkování', price: 0 },
-  { id: 'heating', name: 'Topení', price: 100 },
-  { id: 'electricity', name: 'Elektřina', price: 0 },
-  { id: 'water', name: 'Teplá voda', price: 0 },
-  { id: 'outdoor_grill', name: 'Venkovní gril', price: 50 },
-  { id: 'sports_equipment', name: 'Sportovní vybavení', price: 100 }
+  { id: 'kitchen', label: 'Kuchyně pro vaření', price: 'zdarma' },
+  { id: 'wifi', label: 'Wi-Fi připojení', price: 'zdarma' },
+  { id: 'fireplace', label: 'Ohniště', price: 'zdarma' },
+  { id: 'grill', label: 'Gril', price: '50 Kč/den' },
+  { id: 'projector', label: 'Projektor', price: '100 Kč/den' },
+  { id: 'sound_system', label: 'Ozvučení', price: '150 Kč/den' },
+  { id: 'bedding', label: 'Ložní prádlo', price: '50 Kč/osoba' },
+];
+
+const purposeOptions = [
+  'Letní tábor',
+  'Víkendový pobyt',
+  'Firemní akce',
+  'Školní výlet',
+  'Rodinná oslava',
+  'Sportovní soustředění',
+  'Vzdělávací seminář',
+  'Jiné'
 ];
 
 export default function PronajemHajenkybePage() {
@@ -44,68 +54,80 @@ export default function PronajemHajenkybePage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const calculateDays = () => {
-    if (formData.startDate && formData.endDate) {
-      const start = new Date(formData.startDate);
-      const end = new Date(formData.endDate);
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+    } else if (type === 'number') {
+      setFormData(prev => ({ ...prev, [name]: parseInt(value) || 0 }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
-    return 0;
   };
 
-  const calculatePrice = () => {
-    const days = calculateDays();
-    const basePrice = days > 7 ? 1200 : 1500; // Týdenní vs víkendový tarif
-    const facilitiesPrice = formData.facilities.reduce((total, facilityId) => {
-      const facility = facilityOptions.find(f => f.id === facilityId);
-      return total + (facility ? facility.price : 0);
-    }, 0);
-
-    return (basePrice * days) + facilitiesPrice;
+  const handleFacilityChange = (facilityId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      facilities: prev.facilities.includes(facilityId)
+        ? prev.facilities.filter(id => id !== facilityId)
+        : [...prev.facilities, facilityId]
+    }));
   };
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  const calculateEstimatedPrice = () => {
+    if (!formData.startDate || !formData.endDate) return 0;
 
-    if (!formData.name.trim()) newErrors.name = 'Jméno je povinné';
-    if (!formData.email.trim()) newErrors.email = 'Email je povinný';
-    if (!formData.phone.trim()) newErrors.phone = 'Telefon je povinný';
-    if (!formData.startDate) newErrors.startDate = 'Datum příjezdu je povinné';
-    if (!formData.endDate) newErrors.endDate = 'Datum odjezdu je povinné';
-    if (formData.guestCount < 1) newErrors.guestCount = 'Počet hostů musí být alespoň 1';
-    if (!formData.purpose.trim()) newErrors.purpose = 'Účel pobytu je povinný';
-    if (!formData.agreeTerms) newErrors.agreeTerms = 'Musíte souhlasit s podmínkami';
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
 
-    if (formData.startDate && formData.endDate) {
-      const start = new Date(formData.startDate);
-      const end = new Date(formData.endDate);
-      if (start >= end) {
-        newErrors.endDate = 'Datum odjezdu musí být po datu příjezdu';
-      }
-      if (start < new Date()) {
-        newErrors.startDate = 'Datum příjezdu nemůže být v minulosti';
-      }
+    if (days <= 0) return 0;
+
+    const dailyRate = days >= 7 ? 1200 : 1500; // Weekly vs weekend rate
+    let total = days * dailyRate;
+
+    // Add facility costs
+    if (formData.facilities.includes('grill')) {
+      total += days * 50;
+    }
+    if (formData.facilities.includes('projector')) {
+      total += days * 100;
+    }
+    if (formData.facilities.includes('sound_system')) {
+      total += days * 150;
+    }
+    if (formData.facilities.includes('bedding')) {
+      total += formData.guestCount * 50;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return total;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
-    if (!validateForm()) {
-      setSubmitMessage('Opravte prosím chyby ve formuláři');
+    if (!formData.agreeTerms) {
+      setError('Musíte souhlasit s podmínkami pronájmu');
+      return;
+    }
+
+    if (new Date(formData.startDate) >= new Date(formData.endDate)) {
+      setError('Datum konce musí být po datu začátku');
+      return;
+    }
+
+    if (formData.guestCount > 35) {
+      setError('Kapacita hájenky je maximálně 35 osob');
       return;
     }
 
     setIsSubmitting(true);
-    setSubmitMessage('');
 
     try {
       const response = await fetch('/api/admin/rental-requests', {
@@ -118,386 +140,416 @@ export default function PronajemHajenkybePage() {
 
       const result = await response.json();
 
-      if (result.success) {
-        setSubmitMessage('Žádost byla úspěšně odeslána! Budeme Vás kontaktovat do 48 hodin.');
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          organization: '',
-          startDate: '',
-          endDate: '',
-          guestCount: 1,
-          purpose: '',
-          facilities: [],
-          message: '',
-          agreeTerms: false
-        });
+      if (response.ok && result.success) {
+        setShowSuccess(true);
       } else {
-        setSubmitMessage(result.message || 'Chyba při odesílání žádosti');
+        setError(result.message || 'Chyba při odesílání žádosti');
       }
     } catch (error) {
-      setSubmitMessage('Chyba při odesílání žádosti. Zkuste to prosím znovu.');
+      setError('Chyba při odesílání žádosti. Zkuste to prosím později.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-
-    if (type === 'checkbox') {
-      const checkbox = e.target as HTMLInputElement;
-      setFormData(prev => ({
-        ...prev,
-        [name]: checkbox.checked
-      }));
-    } else if (type === 'number') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: parseInt(value) || 0
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
-
-  const handleFacilityChange = (facilityId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      facilities: checked
-        ? [...prev.facilities, facilityId]
-        : prev.facilities.filter(id => id !== facilityId)
-    }));
-  };
-  return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Pronájem Hájenky Bělá</h1>
-
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Information Section */}
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Kapacita a vybavení</h2>
-            <ul className="space-y-3 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-green-600 mr-2">✓</span>
-                <span><strong>Ubytování:</strong> až 35 osob v pokojích</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-600 mr-2">✓</span>
-                <span><strong>Kuchyně:</strong> plně vybavená pro větší skupiny</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-600 mr-2">✓</span>
-                <span><strong>Jídelna:</strong> prostorná pro celou skupinu</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-600 mr-2">✓</span>
-                <span><strong>Sociální zařízení:</strong> sprchy a toalety</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-600 mr-2">✓</span>
-                <span><strong>Klubovna:</strong> pro společné aktivity</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-600 mr-2">✓</span>
-                <span><strong>Venkovní prostory:</strong> ohniště, sportoviště</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Cenník</h2>
-            <div className="space-y-4">
-              <div className="border-b pb-3">
-                <p className="font-semibold">Víkendový pobyt (2-7 dní)</p>
-                <p className="text-lg text-red-600 font-semibold">1 500 Kč / den</p>
-                <p className="text-sm text-gray-600">za celý objekt</p>
-              </div>
-              <div className="border-b pb-3">
-                <p className="font-semibold">Týdenní pobyt (8+ dní)</p>
-                <p className="text-lg text-red-600 font-semibold">1 200 Kč / den</p>
-                <p className="text-sm text-gray-600">za celý objekt</p>
-              </div>
+  if (showSuccess) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <header className="bg-white shadow-sm border-b border-slate-200">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Link href="/" className="text-2xl font-bold text-red-600">
+                Pionýrská skupina Pacov
+              </Link>
+              <nav className="hidden md:flex space-x-8">
+                <Link href="/" className="text-slate-600 hover:text-red-600 transition-colors">
+                  Domů
+                </Link>
+                <Link href="/pages?page=hajenka-bela" className="text-slate-600 hover:text-red-600 transition-colors">
+                  Hájenka Bělá
+                </Link>
+                <Link href="/pronajem" className="text-red-600 font-medium">
+                  Pronájem
+                </Link>
+              </nav>
             </div>
           </div>
+        </header>
 
-          <div className="bg-blue-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-3">Kontakt</h2>
-            <div className="space-y-2">
-              <p><strong>Mgr. Ladislav Mareš</strong></p>
-              <p><strong>Email:</strong> mareseznam@seznam.cz</p>
-              <p><strong>Telefon:</strong> +420 607 244 526</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Reservation Form */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-6">Rezervační formulář</h2>
-
-          {submitMessage && (
-            <div className={`mb-6 p-4 rounded-lg ${
-              submitMessage.includes('úspěšně')
-                ? 'bg-green-50 border border-green-200 text-green-700'
-                : 'bg-red-50 border border-red-200 text-red-700'
-            }`}>
-              {submitMessage}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Information */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Jméno a příjmení *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.name ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="Vaše jméno"
-                />
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="vas@email.cz"
-                />
-                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Telefon *
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.phone ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="+420 123 456 789"
-                />
-                {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Organizace (nepovinné)
-                </label>
-                <input
-                  type="text"
-                  name="organization"
-                  value={formData.organization}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Název organizace"
-                />
-              </div>
-            </div>
-
-            {/* Stay Information */}
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Datum příjezdu *
-                </label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.startDate ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.startDate && <p className="mt-1 text-sm text-red-600">{errors.startDate}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Datum odjezdu *
-                </label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.endDate ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.endDate && <p className="mt-1 text-sm text-red-600">{errors.endDate}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Počet hostů *
-                </label>
-                <input
-                  type="number"
-                  name="guestCount"
-                  value={formData.guestCount}
-                  onChange={handleInputChange}
-                  min="1"
-                  max="35"
-                  className={`w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.guestCount ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.guestCount && <p className="mt-1 text-sm text-red-600">{errors.guestCount}</p>}
-              </div>
-            </div>
-
-            {/* Purpose */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Účel pobytu *
-              </label>
-              <input
-                type="text"
-                name="purpose"
-                value={formData.purpose}
-                onChange={handleInputChange}
-                className={`w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.purpose ? 'border-red-300' : 'border-gray-300'
-                }`}
-                placeholder="Letní tábor, víkendový pobyt, školení..."
-              />
-              {errors.purpose && <p className="mt-1 text-sm text-red-600">{errors.purpose}</p>}
-            </div>
-
-            {/* Facilities */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Požadované vybavení
-              </label>
-              <div className="grid md:grid-cols-2 gap-3">
-                {facilityOptions.map((facility) => (
-                  <label key={facility.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.facilities.includes(facility.id)}
-                      onChange={(e) => handleFacilityChange(facility.id, e.target.checked)}
-                      className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium text-gray-900">{facility.name}</span>
-                      {facility.price > 0 && (
-                        <span className="text-sm text-gray-600 block">+{facility.price} Kč</span>
-                      )}
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Message */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Zpráva (nepovinné)
-              </label>
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleInputChange}
-                rows={4}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Další informace nebo požadavky..."
-              />
-            </div>
-
-            {/* Price Calculation */}
-            {formData.startDate && formData.endDate && calculateDays() > 0 && (
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h4 className="font-semibold text-gray-900 mb-2">Předběžná kalkulace ceny</h4>
-                <div className="space-y-1 text-sm text-gray-700">
-                  <p>Počet dní: {calculateDays()}</p>
-                  <p>Základní cena: {(calculateDays() > 7 ? 1200 : 1500) * calculateDays()} Kč</p>
-                  {formData.facilities.length > 0 && (
-                    <p>Příplatky za vybavení: {formData.facilities.reduce((total, facilityId) => {
-                      const facility = facilityOptions.find(f => f.id === facilityId);
-                      return total + (facility ? facility.price : 0);
-                    }, 0)} Kč</p>
-                  )}
-                  <p className="font-semibold text-lg text-blue-700">
-                    Celkem: {calculatePrice()} Kč
+        <main className="py-12">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 mb-4">
+                  Žádost byla úspěšně odeslána!
+                </h2>
+                <p className="text-slate-600 mb-6">
+                  Vaše žádost o pronájem Hájenky Bělá byla přijata. Budeme vás kontaktovat do 48 hodin s potvrzením nebo dotazy.
+                </p>
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-500">
+                    <strong>Další kroky:</strong>
                   </p>
-                  <p className="text-xs text-gray-600">
-                    * Orientační cena, finální cena bude upřesněna při potvrzení rezervace
-                  </p>
+                  <ul className="text-sm text-slate-600 space-y-1">
+                    <li>• Prověříme dostupnost termínu</li>
+                    <li>• Kontaktujeme vás s potvrzením</li>
+                    <li>• Pošleme smlouvu a platební údaje</li>
+                    <li>• Po složení zálohy bude rezervace potvrzena</li>
+                  </ul>
+                </div>
+                <div className="mt-6 space-x-4">
+                  <Link
+                    href="/pages?page=hajenka-bela"
+                    className="inline-flex items-center px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                  >
+                    Více o hájence
+                  </Link>
+                  <Link
+                    href="/"
+                    className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Zpět na hlavní stránku
+                  </Link>
                 </div>
               </div>
-            )}
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
-            {/* Terms */}
-            <div className="flex items-start space-x-3">
-              <input
-                type="checkbox"
-                name="agreeTerms"
-                checked={formData.agreeTerms}
-                onChange={handleInputChange}
-                className={`mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 ${
-                  errors.agreeTerms ? 'border-red-300' : ''
-                }`}
-              />
-              <div>
-                <label className="text-sm text-gray-700">
-                  Souhlasím s podmínkami pronájmu a zpracováním osobních údajů *
-                </label>
-                {errors.agreeTerms && <p className="mt-1 text-sm text-red-600">{errors.agreeTerms}</p>}
-              </div>
+  const estimatedPrice = calculateEstimatedPrice();
+  const days = formData.startDate && formData.endDate ?
+    Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-slate-200">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="text-2xl font-bold text-red-600">
+              Pionýrská skupina Pacov
+            </Link>
+            <nav className="hidden md:flex space-x-8">
+              <Link href="/" className="text-slate-600 hover:text-red-600 transition-colors">
+                Domů
+              </Link>
+              <Link href="/hajenka-bela" className="text-slate-600 hover:text-red-600 transition-colors">
+                Hájenka Bělá
+              </Link>
+              <Link href="/pronajem" className="text-red-600 font-medium">
+                Pronájem
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <main className="py-8">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-slate-800 mb-4">
+                Žádost o pronájem Hájenky Bělá
+              </h1>
+              <p className="text-lg text-slate-600">
+                Vyplňte formulář a my se vám ozveme do 48 hodin
+              </p>
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Odesílání...' : 'Odeslat žádost o rezervaci'}
-            </button>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Contact Information */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-bold text-slate-800 mb-4">
+                  Kontaktní údaje
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Jméno a příjmení *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                      placeholder="Jan Novák"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                      placeholder="jan.novak@email.cz"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Telefon *
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                      placeholder="+420 123 456 789"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Organizace / Spolek
+                    </label>
+                    <input
+                      type="text"
+                      name="organization"
+                      value={formData.organization}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                      placeholder="Skautský oddíl, Škola, Firma..."
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <p className="text-sm text-gray-600 text-center">
-              Po odeslání žádosti Vás budeme kontaktovat do 48 hodin s potvrzením rezervace.
-            </p>
-          </form>
+              {/* Event Details */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-bold text-slate-800 mb-4">
+                  Podrobnosti o pobytu
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Datum příjezdu *
+                    </label>
+                    <input
+                      type="date"
+                      name="startDate"
+                      value={formData.startDate}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Datum odjezdu *
+                    </label>
+                    <input
+                      type="date"
+                      name="endDate"
+                      value={formData.endDate}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Počet hostů * (max. 35)
+                    </label>
+                    <input
+                      type="number"
+                      name="guestCount"
+                      value={formData.guestCount}
+                      onChange={handleInputChange}
+                      required
+                      min="1"
+                      max="35"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Účel pobytu *
+                  </label>
+                  <select
+                    name="purpose"
+                    value={formData.purpose}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                  >
+                    <option value="">Vyberte účel pobytu</option>
+                    {purposeOptions.map(purpose => (
+                      <option key={purpose} value={purpose}>{purpose}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {days > 0 && (
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Délka pobytu:</span>
+                        <p>{days} {days === 1 ? 'den' : days < 5 ? 'dny' : 'dní'}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Počet hostů:</span>
+                        <p>{formData.guestCount}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Cena za den:</span>
+                        <p>{days >= 7 ? '1 200' : '1 500'} Kč</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Základní cena:</span>
+                        <p className="font-bold text-blue-600">{estimatedPrice.toLocaleString()} Kč</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Additional Services */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-bold text-slate-800 mb-4">
+                  Doplňkové služby
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {facilityOptions.map(facility => (
+                    <div key={facility.id} className="flex items-start">
+                      <input
+                        type="checkbox"
+                        id={facility.id}
+                        checked={formData.facilities.includes(facility.id)}
+                        onChange={() => handleFacilityChange(facility.id)}
+                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-slate-300 rounded mt-1"
+                      />
+                      <label htmlFor={facility.id} className="ml-3 flex-1">
+                        <span className="text-sm font-medium text-slate-700">
+                          {facility.label}
+                        </span>
+                        <span className="block text-xs text-slate-500">
+                          {facility.price}
+                        </span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Message */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-bold text-slate-800 mb-4">
+                  Dodatečné informace
+                </h2>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                  placeholder="Jakékoliv speciální požadavky, dotazy nebo poznámky k rezervaci..."
+                />
+              </div>
+
+              {/* Price Summary */}
+              {estimatedPrice > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+                  <h2 className="text-xl font-bold text-slate-800 mb-4">
+                    Orientační cena
+                  </h2>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Základní pronájem ({days} {days < 5 ? 'dny' : 'dní'} × {days >= 7 ? '1 200' : '1 500'} Kč)</span>
+                      <span>{(days * (days >= 7 ? 1200 : 1500)).toLocaleString()} Kč</span>
+                    </div>
+                    {formData.facilities.map(facilityId => {
+                      const facility = facilityOptions.find(f => f.id === facilityId);
+                      if (!facility || facility.price === 'zdarma') return null;
+
+                      let cost = 0;
+                      if (facilityId === 'grill') cost = days * 50;
+                      else if (facilityId === 'projector') cost = days * 100;
+                      else if (facilityId === 'sound_system') cost = days * 150;
+                      else if (facilityId === 'bedding') cost = formData.guestCount * 50;
+
+                      return (
+                        <div key={facilityId} className="flex justify-between">
+                          <span>{facility.label}</span>
+                          <span>{cost.toLocaleString()} Kč</span>
+                        </div>
+                      );
+                    })}
+                    <hr className="my-2" />
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Celkem</span>
+                      <span className="text-green-600">{estimatedPrice.toLocaleString()} Kč</span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-2">
+                      * Orientační cena bez energií. Záloha 30% z celkové ceny.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Terms */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <div className="flex items-start">
+                  <input
+                    type="checkbox"
+                    name="agreeTerms"
+                    id="agreeTerms"
+                    checked={formData.agreeTerms}
+                    onChange={handleInputChange}
+                    required
+                    className="h-4 w-4 text-red-600 focus:ring-red-500 border-slate-300 rounded mt-1"
+                  />
+                  <label htmlFor="agreeTerms" className="ml-3 text-sm text-slate-700">
+                    <span className="font-medium">Souhlasím s podmínkami pronájmu</span> *
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Včetně úhrad za energie, úklid a případné škody podle ceníku.
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-800 text-sm">{error}</p>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <div className="text-center">
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !formData.agreeTerms}
+                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Odesílám...' : 'Odeslat žádost'}
+                </button>
+                <p className="text-sm text-slate-500 mt-2">
+                  Ozveme se vám do 48 hodin s potvrzením nebo dotazy.
+                </p>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
