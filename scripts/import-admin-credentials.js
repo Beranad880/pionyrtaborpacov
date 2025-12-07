@@ -62,7 +62,7 @@ adminUserSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const AdminUser = mongoose.model('AdminUser', adminUserSchema);
+const AdminUser = mongoose.model('SimpleAdminUser', adminUserSchema);
 
 // Funkce pro import uživatelů z JSON souboru
 const importAdminCredentials = async (filePath) => {

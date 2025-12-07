@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Try to find user in SimpleAdminUser collection first
     console.log('Looking for username:', username);
-    let userDoc = await SimpleAdminUser.findOne({ username, isActive: true }).lean();
+    let userDoc = await SimpleAdminUser.findOne({ username }).lean();
     let userSource = 'SimpleAdminUser';
 
     if (userDoc) {

@@ -2,13 +2,22 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-require('dotenv').config();
+require('dotenv').config({ path: '.env.local' });
 
 async function createUser() {
   try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/pionyr-pacov';
-    await mongoose.connect(mongoUri);
-    console.log('✅ Připojeno k MongoDB');
+    const mongoUri = process.env.MONGODB_URI;
+    const dbName = process.env.MONGODB_DB || 'test';
+
+    if (!mongoUri) {
+      throw new Error('MONGODB_URI environment variable is not set');
+    }
+
+    console.log('Connecting to:', mongoUri);
+    console.log('Database:', dbName);
+
+    await mongoose.connect(mongoUri, { dbName });
+    console.log('✅ Připojeno k MongoDB:', mongoose.connection.db.databaseName);
 
     // Vytvořit hash ručně
     const password = 'test123';
@@ -17,7 +26,7 @@ async function createUser() {
 
     // Najít collection přímo
     const db = mongoose.connection.db;
-    const collection = db.collection('adminusers');
+    const collection = db.collection('simpleadminusers');
 
     // Smazat existující admin
     await collection.deleteMany({ username: 'admin' });
@@ -26,7 +35,10 @@ async function createUser() {
     const result = await collection.insertOne({
       username: 'admin',
       password: hashedPassword,
+      isActive: true,
+      role: 'admin',
       createdAt: new Date(),
+      updatedAt: new Date(),
       lastLogin: null
     });
 
