@@ -27,21 +27,20 @@ const connectToDatabase = async () => {
   }
 };
 
-// Admin User Schema (stejné jako v modelu)
-const adminUserSchema = new mongoose.Schema({
+// SimpleAdminUser Schema (aby odpovídala modelu používanému v API)
+const simpleAdminUserSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: [true, 'Username is required'],
+    required: true,
     unique: true,
     trim: true,
-    minlength: [3, 'Username must be at least 3 characters'],
-    maxlength: [30, 'Username cannot exceed 30 characters']
+    minlength: 3,
+    maxlength: 30
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters'],
-    select: false
+    required: true,
+    minlength: 6
   },
   email: {
     type: String,
@@ -57,20 +56,17 @@ const adminUserSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  lastLogin: {
-    type: Date
-  },
+  lastLogin: Date,
   createdBy: {
     type: String,
-    default: 'system'
+    default: 'cli-script'
   }
 }, {
   timestamps: true
 });
 
-
 // Hash password před uložením
-adminUserSchema.pre('save', async function() {
+simpleAdminUserSchema.pre('save', async function() {
   if (!this.isModified('password')) return;
 
   const salt = await bcrypt.genSalt(12);
@@ -78,11 +74,11 @@ adminUserSchema.pre('save', async function() {
 });
 
 // Metoda pro kontrolu hesla
-adminUserSchema.methods.comparePassword = async function(candidatePassword) {
+simpleAdminUserSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const AdminUser = mongoose.models.AdminUser || mongoose.model('AdminUser', adminUserSchema);
+const AdminUser = mongoose.model('SimpleAdminUser', simpleAdminUserSchema);
 
 // Funkce pro uložení do admin_credentials.json
 const saveToCredentialsFile = async (username, password) => {
@@ -219,7 +215,8 @@ const addUser = async (username, password) => {
     await saveToCredentialsFile(username, password);
 
     // Automaticky synchronizuj všechny uživatele z admin_credentials.json
-    console.log(`\n🔄 Automatická synchronizace z admin_credentials.json...`);
+    console.log(`
+🔄 Automatická synchronizace z admin_credentials.json...`);
     await syncFromCredentialsQuiet();
 
   } catch (error) {
@@ -295,7 +292,8 @@ const syncFromCredentials = async () => {
     }
 
     console.log(`🔍 Nalezeno ${admins.length} admin uživatelů v JSON souboru`);
-    console.log(`🔄 Synchronizuji do MongoDB...\n`);
+    console.log(`🔄 Synchronizuji do MongoDB...
+`);
 
     let synced = 0;
     let skipped = 0;
@@ -368,14 +366,16 @@ const syncFromCredentials = async () => {
     }
 
     // Shrnutí
-    console.log(`\n📊 Synchronizace dokončena:`);
+    console.log(`
+📊 Synchronizace dokončena:`);
     console.log(`   ✅ Synchronizováno: ${synced}`);
     console.log(`   ⚠️  Přeskočeno: ${skipped}`);
     console.log(`   ❌ Chyby: ${errors}`);
     console.log(`   📝 Celkem zpracováno: ${synced + skipped + errors}`);
 
     if (synced > 0) {
-      console.log(`\n💡 Pro zobrazení všech uživatelů spusťte: npm run admin:list`);
+      console.log(`
+💡 Pro zobrazení všech uživatelů spusťte: npm run admin:list`);
     }
 
   } catch (error) {
@@ -489,7 +489,9 @@ const listUsers = async () => {
       return;
     }
 
-    console.log(`\n📋 Seznam admin uživatelů (${users.length}):\n`);
+    console.log(`
+📋 Seznam admin uživatelů (${users.length}):
+`);
     console.log('┌─────────────────────────┬─────────────────────┬─────────────────────┐');
     console.log('│ Username                │ Vytvořen            │ Poslední přihlášení │');
     console.log('├─────────────────────────┼─────────────────────┼─────────────────────┤');
@@ -516,7 +518,8 @@ const listUsers = async () => {
       console.log(`│ ${username} │ ${created} │ ${lastLogin} │`);
     });
 
-    console.log('└─────────────────────────┴─────────────────────┴─────────────────────┘\n');
+    console.log('└─────────────────────────┴─────────────────────┴─────────────────────┘
+');
 
   } catch (error) {
     console.error('❌ Chyba při výpisu uživatelů:', error.message);

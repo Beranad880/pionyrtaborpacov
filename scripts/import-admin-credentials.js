@@ -31,43 +31,23 @@ const connectToDatabase = async () => {
 const adminUserSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: [true, 'Username is required'],
+    required: true,
     unique: true,
     trim: true,
-    minlength: [3, 'Username must be at least 3 characters'],
-    maxlength: [30, 'Username cannot exceed 30 characters']
+    minlength: 3,
+    maxlength: 30
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters'],
-    select: false
+    required: true,
+    minlength: 6
   },
-  email: {
-    type: String,
-    trim: true,
-    lowercase: true
+  createdAt: {
+    type: Date,
+    default: Date.now
   },
-  role: {
-    type: String,
-    enum: ['admin', 'moderator'],
-    default: 'admin'
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  lastLogin: {
-    type: Date
-  },
-  createdBy: {
-    type: String,
-    default: 'system'
-  }
-}, {
-  timestamps: true
+  lastLogin: Date
 });
-
 
 // Hash password před uložením
 adminUserSchema.pre('save', async function() {
@@ -82,7 +62,7 @@ adminUserSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const AdminUser = mongoose.models.AdminUser || mongoose.model('AdminUser', adminUserSchema);
+const AdminUser = mongoose.model('SimpleAdminUser', adminUserSchema);
 
 // Funkce pro import uživatelů z JSON souboru
 const importAdminCredentials = async (filePath) => {
@@ -121,7 +101,7 @@ const importAdminCredentials = async (filePath) => {
     } else {
       console.error('❌ Neplatný formát JSON souboru. Očekávané formáty:');
       console.log('   1. [{"username": "admin1", "password": "heslo1"}, ...]');
-      console.log('   2. {"admins": [{"username": "admin1", "password": "heslo1"}, ...]}');
+      console.log('   2. {"admins": [{"username": "admin1", "password": "heslo1"}, ...]});
       console.log('   3. {"username": "admin", "password": "heslo"}');
       return;
     }
