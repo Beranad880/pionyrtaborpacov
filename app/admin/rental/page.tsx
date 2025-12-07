@@ -202,7 +202,7 @@ export default function RentalsAdminPage() {
                             Upravit
                         </button>
                          <button
-                            onClick={() => handleDeleteRental(rental._id)}
+                            onClick={() => handleDeleteRental(rental._id.toString())}
                             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                         >
                             Smazat
@@ -214,8 +214,8 @@ export default function RentalsAdminPage() {
                     <div>
                       <h4 className="font-medium text-gray-900 mb-2">Pobyt</h4>
                       <p className="text-gray-600">
-                        {formatDate(rental.startDate)} - {formatDate(rental.endDate)}
-                        <span className="text-gray-500"> ({calculateDays(rental.startDate, rental.endDate)} dní)</span>
+                        {formatDate(rental.startDate.toString())} - {formatDate(rental.endDate.toString())}
+                        <span className="text-gray-500"> ({calculateDays(rental.startDate.toString(), rental.endDate.toString())} dní)</span>
                       </p>
                       <p className="text-gray-600">Počet hostů: {rental.guestCount}</p>
                       <p className="text-gray-600">Cena: {rental.price ? `${rental.price} Kč` : 'Nespecifikováno'}</p>

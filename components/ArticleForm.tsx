@@ -44,7 +44,7 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
-      .trim('-');
+      .replace(/^-+|-+$/g, '');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

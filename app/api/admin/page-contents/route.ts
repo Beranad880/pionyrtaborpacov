@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const pageId = searchParams.get('pageId');
 
-    let query = { isActive: true };
+    let query: any = { isActive: true };
     if (pageId) {
       query = { ...query, pageId };
     }

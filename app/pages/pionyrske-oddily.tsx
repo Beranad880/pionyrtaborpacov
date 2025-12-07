@@ -36,7 +36,7 @@ export default function PionyrseOddilyPage() {
         </p>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {content.groups?.map((group, index) => (
+          {content.groups?.map((group: any, index: number) => (
             <div key={index} className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-3">{group.name}</h2>
               <p className="text-gray-600 mb-2"><strong>Věk:</strong> {group.ageRange}</p>
@@ -47,7 +47,7 @@ export default function PionyrseOddilyPage() {
                 <div>
                   <h3 className="font-semibold mb-2">Aktivity:</h3>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    {group.activities.map((activity, actIndex) => (
+                    {group.activities.map((activity: string, actIndex: number) => (
                       <li key={actIndex}>• {activity}</li>
                     ))}
                   </ul>

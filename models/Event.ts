@@ -71,7 +71,7 @@ const EventSchema = new Schema<IEvent>(
       type: Date,
       required: [true, 'Datum konce je povinné'],
       validate: {
-        validator: function(this: IEvent, value: Date) {
+        validator: function(this: any, value: Date) {
           return value >= this.startDate;
         },
         message: 'Datum konce musí být stejné nebo po datu začátku',

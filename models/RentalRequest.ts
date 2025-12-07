@@ -63,7 +63,7 @@ const RentalRequestSchema = new Schema<IRentalRequest>(
       type: Date,
       required: [true, 'Datum odjezdu je povinné'],
       validate: {
-        validator: function(value: Date) {
+        validator: function(this: any, value: Date) {
           return value > this.startDate;
         },
         message: 'Datum odjezdu musí být po datu příjezdu',

@@ -55,7 +55,7 @@ export default function Hero() {
             {heroData.title}
           </h1>
           <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed drop-shadow-lg font-medium">
-            {heroData.subtitle || 'Demokratický, dobrovolný spolek dětí, mládeže a dospělých'}
+            {(heroData as any).subtitle || 'Demokratický, dobrovolný spolek dětí, mládeže a dospělých'}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button

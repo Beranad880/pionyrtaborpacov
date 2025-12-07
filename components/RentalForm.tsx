@@ -22,7 +22,7 @@ const facilityOptions = [
     { id: 'sports_equipment', label: 'Sportovní vybavení' }
 ];
 
-const getInitialData = (rental?: IRental | null): Partial<IRental> => {
+const getInitialData = (rental?: IRental | null): any => {
     if (rental) {
         return {
             ...rental,
@@ -130,11 +130,11 @@ export default function RentalForm({ rental, onClose, onSave, isProcessing }: Re
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Datum příjezdu</label>
-                                <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
+                                <input type="date" name="startDate" value={formData.startDate as unknown as string} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Datum odjezdu</label>
-                                <input type="date" name="endDate" value={formData.endDate} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
+                                <input type="date" name="endDate" value={formData.endDate as unknown as string} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">

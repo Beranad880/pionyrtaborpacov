@@ -104,7 +104,7 @@ export function verifyAdminRequest(request: Request): boolean {
     const [username] = decoded.split(':');
 
     // Admin credentials check se provádí v API endpointech
-    return username && username.length >= 3;
+    return !!(username && username.length >= 3);
   } catch {
     return false;
   }

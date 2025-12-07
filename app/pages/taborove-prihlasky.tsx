@@ -75,7 +75,7 @@ export default function CampApplications() {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof CampApplicationForm],
+          ...(prev[parent as keyof CampApplicationForm] as any),
           [child]: value
         }
       }));
@@ -97,7 +97,7 @@ export default function CampApplications() {
     for (const field of requiredFields) {
       if (field.includes('.')) {
         const [parent, child] = field.split('.');
-        if (!formData[parent as keyof CampApplicationForm][child]) {
+        if (!(formData[parent as keyof CampApplicationForm] as any)?.[child]) {
           return false;
         }
       } else {

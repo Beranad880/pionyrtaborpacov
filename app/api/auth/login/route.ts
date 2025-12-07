@@ -35,7 +35,9 @@ export async function POST(request: NextRequest) {
       console.log('User not found in SimpleAdminUser, trying AdminUser...');
       // Fallback to original AdminUser collection
       const db = mongoose.connection.db;
-      userDoc = await db.collection('adminusers').findOne({ username });
+      if (db) {
+        userDoc = await db.collection('adminusers').findOne({ username });
+      }
       userSource = 'AdminUser';
 
       if (userDoc) {
@@ -72,10 +74,12 @@ export async function POST(request: NextRequest) {
       await SimpleAdminUser.findByIdAndUpdate(userDoc._id, { lastLogin: new Date() });
     } else {
       const db = mongoose.connection.db;
-      await db.collection('adminusers').updateOne(
-        { _id: userDoc._id },
-        { $set: { lastLogin: new Date() } }
-      );
+      if (db) {
+        await db.collection('adminusers').updateOne(
+          { _id: userDoc._id },
+          { $set: { lastLogin: new Date() } }
+        );
+      }
     }
 
     // Vytvořit response
