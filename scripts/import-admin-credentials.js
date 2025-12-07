@@ -31,23 +31,43 @@ const connectToDatabase = async () => {
 const adminUserSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true,
+    required: [true, 'Username is required'],
     unique: true,
     trim: true,
-    minlength: 3,
-    maxlength: 30
+    minlength: [3, 'Username must be at least 3 characters'],
+    maxlength: [30, 'Username cannot exceed 30 characters']
   },
   password: {
     type: String,
-    required: true,
-    minlength: 6
+    required: [true, 'Password is required'],
+    minlength: [6, 'Password must be at least 6 characters'],
+    select: false
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  email: {
+    type: String,
+    trim: true,
+    lowercase: true
   },
-  lastLogin: Date
+  role: {
+    type: String,
+    enum: ['admin', 'moderator'],
+    default: 'admin'
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  lastLogin: {
+    type: Date
+  },
+  createdBy: {
+    type: String,
+    default: 'system'
+  }
+}, {
+  timestamps: true
 });
+
 
 // Hash password před uložením
 adminUserSchema.pre('save', async function() {
@@ -62,7 +82,7 @@ adminUserSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const AdminUser = mongoose.model('SimpleAdminUser', adminUserSchema);
+const AdminUser = mongoose.models.AdminUser || mongoose.model('AdminUser', adminUserSchema);
 
 // Funkce pro import uživatelů z JSON souboru
 const importAdminCredentials = async (filePath) => {

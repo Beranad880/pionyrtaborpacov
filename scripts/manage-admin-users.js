@@ -27,20 +27,21 @@ const connectToDatabase = async () => {
   }
 };
 
-// SimpleAdminUser Schema (aby odpovídala modelu používanému v API)
-const simpleAdminUserSchema = new mongoose.Schema({
+// Admin User Schema (stejné jako v modelu)
+const adminUserSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true,
+    required: [true, 'Username is required'],
     unique: true,
     trim: true,
-    minlength: 3,
-    maxlength: 30
+    minlength: [3, 'Username must be at least 3 characters'],
+    maxlength: [30, 'Username cannot exceed 30 characters']
   },
   password: {
     type: String,
-    required: true,
-    minlength: 6
+    required: [true, 'Password is required'],
+    minlength: [6, 'Password must be at least 6 characters'],
+    select: false
   },
   email: {
     type: String,
@@ -56,17 +57,20 @@ const simpleAdminUserSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  lastLogin: Date,
+  lastLogin: {
+    type: Date
+  },
   createdBy: {
     type: String,
-    default: 'cli-script'
+    default: 'system'
   }
 }, {
   timestamps: true
 });
 
+
 // Hash password před uložením
-simpleAdminUserSchema.pre('save', async function() {
+adminUserSchema.pre('save', async function() {
   if (!this.isModified('password')) return;
 
   const salt = await bcrypt.genSalt(12);
@@ -74,11 +78,11 @@ simpleAdminUserSchema.pre('save', async function() {
 });
 
 // Metoda pro kontrolu hesla
-simpleAdminUserSchema.methods.comparePassword = async function(candidatePassword) {
+adminUserSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const AdminUser = mongoose.model('SimpleAdminUser', simpleAdminUserSchema);
+const AdminUser = mongoose.models.AdminUser || mongoose.model('AdminUser', adminUserSchema);
 
 // Funkce pro uložení do admin_credentials.json
 const saveToCredentialsFile = async (username, password) => {
