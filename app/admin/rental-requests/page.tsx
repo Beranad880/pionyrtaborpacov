@@ -66,13 +66,20 @@ export default function RentalRequestsAdmin() {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/rental-requests?status=${filter}&page=${currentPage}&limit=10`);
+      const response = await fetch(`/api/admin/rental-requests?status=${filter}&page=${currentPage}&limit=10`, {
+        credentials: 'include'
+      });
       if (response.ok) {
         const result = await response.json();
+        console.log('Rental requests response:', result);
         if (result.success) {
           setRequests(result.data.requests || []);
           setTotalPages(result.data.pagination.pages || 1);
         }
+      } else {
+        console.error('Failed to fetch rental requests:', response.status, response.statusText);
+        const errorResult = await response.json().catch(() => ({}));
+        console.error('Error details:', errorResult);
       }
     } catch (error) {
       console.error('Failed to fetch rental requests:', error);

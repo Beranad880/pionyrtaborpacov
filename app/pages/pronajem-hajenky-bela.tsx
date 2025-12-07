@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 
 interface RentalFormData {
   name: string;
@@ -21,10 +20,12 @@ const facilityOptions = [
   { id: 'kitchen', label: 'Kuchyně pro vaření', price: 'zdarma' },
   { id: 'wifi', label: 'Wi-Fi připojení', price: 'zdarma' },
   { id: 'fireplace', label: 'Ohniště', price: 'zdarma' },
-  { id: 'grill', label: 'Gril', price: '50 Kč/den' },
-  { id: 'projector', label: 'Projektor', price: '100 Kč/den' },
-  { id: 'sound_system', label: 'Ozvučení', price: '150 Kč/den' },
-  { id: 'bedding', label: 'Ložní prádlo', price: '50 Kč/osoba' },
+  { id: 'parking', label: 'Parkování', price: 'zdarma' },
+  { id: 'heating', label: 'Topení', price: '100 Kč/den' },
+  { id: 'electricity', label: 'Elektřina', price: 'zdarma' },
+  { id: 'water', label: 'Teplá voda', price: 'zdarma' },
+  { id: 'outdoor_grill', label: 'Venkovní gril', price: '50 Kč/den' },
+  { id: 'sports_equipment', label: 'Sportovní vybavení', price: '100 Kč/den' },
 ];
 
 const purposeOptions = [
@@ -92,17 +93,14 @@ export default function PronajemHajenkybePage() {
     let total = days * dailyRate;
 
     // Add facility costs
-    if (formData.facilities.includes('grill')) {
-      total += days * 50;
-    }
-    if (formData.facilities.includes('projector')) {
+    if (formData.facilities.includes('heating')) {
       total += days * 100;
     }
-    if (formData.facilities.includes('sound_system')) {
-      total += days * 150;
+    if (formData.facilities.includes('outdoor_grill')) {
+      total += days * 50;
     }
-    if (formData.facilities.includes('bedding')) {
-      total += formData.guestCount * 50;
+    if (formData.facilities.includes('sports_equipment')) {
+      total += days * 100;
     }
 
     return total;
@@ -155,27 +153,6 @@ export default function PronajemHajenkybePage() {
   if (showSuccess) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <header className="bg-white shadow-sm border-b border-slate-200">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <Link href="/" className="text-2xl font-bold text-red-600">
-                Pionýrská skupina Pacov
-              </Link>
-              <nav className="hidden md:flex space-x-8">
-                <Link href="/" className="text-slate-600 hover:text-red-600 transition-colors">
-                  Domů
-                </Link>
-                <Link href="/pages?page=hajenka-bela" className="text-slate-600 hover:text-red-600 transition-colors">
-                  Hájenka Bělá
-                </Link>
-                <Link href="/pronajem" className="text-red-600 font-medium">
-                  Pronájem
-                </Link>
-              </nav>
-            </div>
-          </div>
-        </header>
-
         <main className="py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center">
@@ -203,18 +180,18 @@ export default function PronajemHajenkybePage() {
                   </ul>
                 </div>
                 <div className="mt-6 space-x-4">
-                  <Link
+                  <a
                     href="/pages?page=hajenka-bela"
                     className="inline-flex items-center px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
                   >
                     Více o hájence
-                  </Link>
-                  <Link
+                  </a>
+                  <a
                     href="/"
                     className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     Zpět na hlavní stránku
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
@@ -230,28 +207,6 @@ export default function PronajemHajenkybePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-red-600">
-              Pionýrská skupina Pacov
-            </Link>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-slate-600 hover:text-red-600 transition-colors">
-                Domů
-              </Link>
-              <Link href="/hajenka-bela" className="text-slate-600 hover:text-red-600 transition-colors">
-                Hájenka Bělá
-              </Link>
-              <Link href="/pronajem" className="text-red-600 font-medium">
-                Pronájem
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
       <main className="py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -480,10 +435,9 @@ export default function PronajemHajenkybePage() {
                       if (!facility || facility.price === 'zdarma') return null;
 
                       let cost = 0;
-                      if (facilityId === 'grill') cost = days * 50;
-                      else if (facilityId === 'projector') cost = days * 100;
-                      else if (facilityId === 'sound_system') cost = days * 150;
-                      else if (facilityId === 'bedding') cost = formData.guestCount * 50;
+                      if (facilityId === 'heating') cost = days * 100;
+                      else if (facilityId === 'outdoor_grill') cost = days * 50;
+                      else if (facilityId === 'sports_equipment') cost = days * 100;
 
                       return (
                         <div key={facilityId} className="flex justify-between">

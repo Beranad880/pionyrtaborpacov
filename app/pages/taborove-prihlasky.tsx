@@ -348,9 +348,13 @@ export default function CampApplications() {
                         name="birthNumber"
                         value={formData.birthNumber}
                         onChange={handleInputChange}
+                        placeholder="YYMMDD/XXXX (např. 101215/1234)"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                         required
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Formát: RRMMDD/XXXX (rok, měsíc, den narození + 4 číslice)
+                      </p>
                     </div>
 
                     <div>
