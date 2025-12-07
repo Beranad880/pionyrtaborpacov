@@ -14,7 +14,9 @@
       "Bash(npm run dev:*)",
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "WebFetch(domain:vercel.com)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
