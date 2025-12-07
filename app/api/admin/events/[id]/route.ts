@@ -5,11 +5,11 @@ import Event from '@/models/Event';
 // GET - Načíst konkrétní akci
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
-    const { id } = await context.params;
+    const { id } = await params;
 
     const event = await Event.findById(id);
 
@@ -36,11 +36,11 @@ export async function GET(
 // PUT - Aktualizovat akci
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
-    const { id } = await context.params;
+    const { id } = await params;
 
     const body = await request.json();
 
@@ -115,11 +115,11 @@ export async function PUT(
 // DELETE - Smazat akci
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToMongoose();
-    const { id } = await context.params;
+    const { id } = await params;
 
     const event = await Event.findByIdAndDelete(id);
 
