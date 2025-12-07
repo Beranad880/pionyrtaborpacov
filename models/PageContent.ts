@@ -91,7 +91,7 @@ const PageContentSchema = new Schema<IPageContent>(
 );
 
 // Index for better query performance
-PageContentSchema.index({ pageId: 1 });
+// PageContentSchema.index({ pageId: 1 }); // Already unique: true
 PageContentSchema.index({ isActive: 1 });
 PageContentSchema.index({ 'sections.order': 1 });
 

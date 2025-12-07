@@ -110,7 +110,7 @@ const PhotoGallerySchema = new Schema<IPhotoGallery>(
 );
 
 // Indexes for better query performance
-PhotoGallerySchema.index({ slug: 1 });
+// PhotoGallerySchema.index({ slug: 1 }); // Already unique: true
 PhotoGallerySchema.index({ isPublic: 1 });
 PhotoGallerySchema.index({ date: -1 });
 PhotoGallerySchema.index({ event: 1 });

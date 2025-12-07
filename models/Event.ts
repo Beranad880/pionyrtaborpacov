@@ -198,7 +198,7 @@ const EventSchema = new Schema<IEvent>(
 );
 
 // Indexes for better query performance
-EventSchema.index({ slug: 1 });
+// EventSchema.index({ slug: 1 }); // Already unique: true
 EventSchema.index({ type: 1 });
 EventSchema.index({ status: 1 });
 EventSchema.index({ startDate: 1 });

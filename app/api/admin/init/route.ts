@@ -41,37 +41,37 @@ export async function GET(request: NextRequest) {
   try {
     const connectToMongoose = (await import('@/lib/mongoose')).default;
     const PioneerGroup = (await import('@/models/PioneerGroup')).default;
-    const Contact = (await import('@/models/Contact')).default;
     const Facility = (await import('@/models/Facility')).default;
-    const Statistics = (await import('@/models/Statistics')).default;
     const PageContent = (await import('@/models/PageContent')).default;
     const Article = (await import('@/models/Article')).default;
     const AdminUser = (await import('@/models/AdminUser')).default;
+    const CampApplication = (await import('@/models/CampApplication')).default;
+    const RentalRequest = (await import('@/models/RentalRequest')).default;
 
     await connectToMongoose();
 
-    const [pioneerGroups, contacts, facilities, statistics, pageContents, articles, adminUsers] = await Promise.all([
+    const [pioneerGroups, facilities, pageContents, articles, adminUsers, campApplications, rentalRequests] = await Promise.all([
       PioneerGroup.countDocuments(),
-      Contact.countDocuments(),
       Facility.countDocuments(),
-      Statistics.countDocuments(),
       PageContent.countDocuments(),
       Article.countDocuments(),
       AdminUser.countDocuments(),
+      CampApplication.countDocuments(),
+      RentalRequest.countDocuments(),
     ]);
 
-    const totalCollections = pioneerGroups + contacts + facilities + statistics + pageContents + articles + adminUsers;
+    const totalCollections = pioneerGroups + facilities + pageContents + articles + adminUsers + campApplications + rentalRequests;
 
     return NextResponse.json({
       success: true,
       data: {
         contentPages: pageContents,
         pioneerGroups,
-        contacts,
         facilities,
-        statistics,
         articles,
         adminUsers,
+        campApplications,
+        rentalRequests,
         totalCollections,
         isInitialized: totalCollections > 0,
         databaseConnected: true

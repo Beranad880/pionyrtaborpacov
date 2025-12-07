@@ -1,11 +1,11 @@
 import connectToMongoose from './mongoose';
 import PioneerGroup from '@/models/PioneerGroup';
-import Contact from '@/models/Contact';
 import Facility from '@/models/Facility';
-import Statistics from '@/models/Statistics';
 import PageContent from '@/models/PageContent';
 import Article from '@/models/Article';
 import AdminUser from '@/models/AdminUser';
+import CampApplication from '@/models/CampApplication';
+import RentalRequest from '@/models/RentalRequest';
 import { allPagesContent, siteData } from '@/data/content';
 import fs from 'fs';
 import path from 'path';
@@ -26,22 +26,16 @@ export async function initializeRealDataCollections() {
     // 1. Initialize Pioneer Groups
     await initializePioneerGroups();
 
-    // 2. Initialize Contact Information
-    await initializeContact();
-
-    // 3. Initialize Facilities (Hájenka Bělá)
+    // 2. Initialize Facilities (Hájenka Bělá)
     await initializeFacilities();
 
-    // 4. Initialize Statistics
-    await initializeStatistics();
-
-    // 5. Initialize Page Contents
+    // 3. Initialize Page Contents
     await initializePageContents();
 
-    // 6. Initialize Articles
+    // 4. Initialize Articles
     await initializeArticles();
 
-    // 7. Initialize Admin Users
+    // 5. Initialize Admin Users
     await initializeAdminUsers();
 
     // Print summary
@@ -78,40 +72,6 @@ async function initializePioneerGroups() {
   }
 }
 
-async function initializeContact() {
-  const existingContact = await Contact.countDocuments({ isActive: true });
-
-  if (existingContact === 0) {
-    console.log('📝 Creating contact information...');
-
-    const contact = {
-      organizationName: siteData.title,
-      description: siteData.description,
-      email: siteData.contact.email,
-      phone: siteData.contact.phone,
-      address: siteData.contact.address,
-      bankAccount: siteData.contact.bankAccount,
-      ico: siteData.contact.ico,
-      dic: siteData.contact.dic,
-      socialMedia: {
-        facebook: siteData.social.facebook,
-        instagram: siteData.social.instagram,
-      },
-      leadership: {
-        leader: siteData.leadership.leader,
-        treasurer: siteData.leadership.treasurer,
-        auditor: siteData.leadership.auditor,
-        delegates: siteData.leadership.delegates,
-      },
-      isActive: true,
-    };
-
-    await Contact.create(contact);
-    console.log('✅ Created contact information');
-  } else {
-    console.log('ℹ️ Contact information already exists, skipping');
-  }
-}
 
 async function initializeFacilities() {
   const existingFacilities = await Facility.countDocuments();
@@ -157,43 +117,6 @@ async function initializeFacilities() {
   }
 }
 
-async function initializeStatistics() {
-  const currentYear = new Date().getFullYear();
-  const existingStats = await Statistics.findOne({ year: currentYear });
-
-  if (!existingStats) {
-    console.log(`📝 Creating statistics for year ${currentYear}...`);
-
-    const stats = {
-      year: currentYear,
-      ageGroups: siteData.statistics.ageGroups,
-      totalMembers: siteData.statistics.total,
-      councilMembers: siteData.statistics.councilMembers,
-      leadershipMembers: siteData.statistics.leadershipMembers,
-      krpDelegates: siteData.statistics.krpDelegates,
-      foundedGroups: siteData.statistics.foundedGroups,
-      activeGroups: 3,
-      events: {
-        meetings: 48, // Weekly meetings
-        camps: 4,
-        trips: 12,
-        workshops: 6,
-      },
-      financial: {
-        budget: 250000,
-        expenses: 180000,
-        income: 220000,
-      },
-      notes: `Statistiky pro rok ${currentYear} - automaticky vygenerováno`,
-      isActive: true,
-    };
-
-    await Statistics.create(stats);
-    console.log(`✅ Created statistics for year ${currentYear}`);
-  } else {
-    console.log(`ℹ️ Statistics for year ${currentYear} already exist, skipping`);
-  }
-}
 
 async function initializePageContents() {
   const existingPages = await PageContent.countDocuments();
@@ -431,7 +354,8 @@ async function initializeAdminUsers() {
               const user = new AdminUser({
                 username: adminInfo.username,
                 password: adminInfo.password,
-                createdAt: new Date()
+                role: 'admin',
+                isActive: true
               });
               await user.save();
 
@@ -459,7 +383,8 @@ async function initializeAdminUsers() {
     const user = new AdminUser({
       username: 'admin',
       password: 'admin123',
-      createdAt: new Date()
+      role: 'admin',
+      isActive: true
     });
     await user.save();
 
@@ -474,21 +399,21 @@ async function initializeAdminUsers() {
 
 async function printCollectionSummary() {
   const pioneerGroups = await PioneerGroup.countDocuments();
-  const contacts = await Contact.countDocuments();
   const facilities = await Facility.countDocuments();
-  const statistics = await Statistics.countDocuments();
   const pageContents = await PageContent.countDocuments();
   const articles = await Article.countDocuments();
   const adminUsers = await AdminUser.countDocuments();
+  const campApplications = await CampApplication.countDocuments();
+  const rentalRequests = await RentalRequest.countDocuments();
 
   console.log('📊 Database Collections Summary:');
   console.log(`   Pioneer Groups: ${pioneerGroups}`);
-  console.log(`   Contacts: ${contacts}`);
   console.log(`   Facilities: ${facilities}`);
-  console.log(`   Statistics: ${statistics}`);
   console.log(`   Page Contents: ${pageContents}`);
   console.log(`   Articles: ${articles}`);
   console.log(`   Admin Users: ${adminUsers}`);
+  console.log(`   Camp Applications: ${campApplications}`);
+  console.log(`   Rental Requests: ${rentalRequests}`);
 }
 
 export async function resetAllCollections() {
@@ -499,12 +424,12 @@ export async function resetAllCollections() {
 
     await Promise.all([
       PioneerGroup.deleteMany({}),
-      Contact.deleteMany({}),
       Facility.deleteMany({}),
-      Statistics.deleteMany({}),
       PageContent.deleteMany({}),
       Article.deleteMany({}),
       AdminUser.deleteMany({}),
+      CampApplication.deleteMany({}),
+      RentalRequest.deleteMany({}),
     ]);
 
     console.log('✅ All collections cleared');

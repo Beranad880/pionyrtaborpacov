@@ -101,7 +101,7 @@ const ArticleSchema = new Schema<IArticle>(
 );
 
 // Indexes for better query performance
-ArticleSchema.index({ slug: 1 });
+// ArticleSchema.index({ slug: 1 }); // Already unique: true
 ArticleSchema.index({ category: 1 });
 ArticleSchema.index({ status: 1 });
 ArticleSchema.index({ publishedAt: -1 });

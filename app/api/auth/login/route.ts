@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import AdminUser from '@/models/AdminUser';
-import SimpleAdminUser from '@/models/SimpleAdminUser';
 import { cookies } from 'next/headers';
 import mongoose from 'mongoose';
 
@@ -24,41 +23,22 @@ export async function POST(request: NextRequest) {
     console.log('Connected to database');
     console.log('Current DB name:', mongoose.connection.db?.databaseName);
 
-    // Try to find user in SimpleAdminUser collection first
+    // Find user in AdminUser collection
     console.log('Looking for username:', username);
-    let userDoc = await SimpleAdminUser.findOne({ username }).lean();
-    let userSource = 'SimpleAdminUser';
-
-    if (userDoc) {
-      console.log('Found user in SimpleAdminUser:', userDoc.username, 'with ID:', userDoc._id);
-    } else {
-      console.log('User not found in SimpleAdminUser, trying AdminUser...');
-      // Fallback to original AdminUser collection
-      const db = mongoose.connection.db;
-      if (db) {
-        userDoc = await db.collection('adminusers').findOne({ username });
-      }
-      userSource = 'AdminUser';
-
-      if (userDoc) {
-        console.log('Found user in AdminUser:', userDoc.username, 'with ID:', userDoc._id);
-      }
-    }
+    const userDoc = await AdminUser.findOne({ username, isActive: true }).select('+password');
 
     if (!userDoc) {
-      console.log('User not found in any collection');
+      console.log('User not found or inactive');
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    console.log('User password hash length:', userDoc.password?.length);
+    console.log('Found user:', userDoc.username, 'with ID:', userDoc._id);
 
-    // Kontrola hesla přímo s bcrypt
-    console.log('Comparing password with bcrypt...');
-    const bcrypt = require('bcrypt');
-    const isPasswordValid = await bcrypt.compare(password, userDoc.password);
+    // Compare password using model method
+    const isPasswordValid = await userDoc.comparePassword(password);
     console.log('Password valid:', isPasswordValid);
 
     if (!isPasswordValid) {
@@ -69,18 +49,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Aktualizovat lastLogin podle zdroje uživatele
-    if (userSource === 'SimpleAdminUser') {
-      await SimpleAdminUser.findByIdAndUpdate(userDoc._id, { lastLogin: new Date() });
-    } else {
-      const db = mongoose.connection.db;
-      if (db) {
-        await db.collection('adminusers').updateOne(
-          { _id: userDoc._id },
-          { $set: { lastLogin: new Date() } }
-        );
-      }
-    }
+    // Update lastLogin
+    await AdminUser.findByIdAndUpdate(userDoc._id, { lastLogin: new Date() });
 
     // Vytvořit response
     const response = NextResponse.json({

@@ -63,7 +63,7 @@ const CampApplicationSchema = new Schema<ICampApplication>(
       type: String,
       required: [true, 'Rodné číslo je povinné'],
       trim: true,
-      match: [/^\d{9,10}$/, 'Rodné číslo musí obsahovat 9-10 číslic'],
+      match: [/^\d{6}\/?\d{4}$/, 'Rodné číslo musí být ve formátu RRMMDD/XXXX nebo RRMMDDXXXX'],
     },
     address: {
       street: {

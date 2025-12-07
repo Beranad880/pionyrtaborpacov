@@ -4,8 +4,13 @@ export interface IAdminUser {
   _id?: string;
   username: string;
   password: string;
-  createdAt: Date;
+  email?: string;
+  role: string;
+  isActive: boolean;
   lastLogin?: Date;
+  createdBy?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const adminUserSchema = new Schema<IAdminUser>({
@@ -23,20 +28,51 @@ const adminUserSchema = new Schema<IAdminUser>({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  email: {
+    type: String,
+    trim: true,
+    lowercase: true
+  },
+  role: {
+    type: String,
+    enum: ['admin', 'moderator'],
+    default: 'admin'
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   },
   lastLogin: {
     type: Date
+  },
+  createdBy: {
+    type: String,
+    default: 'system'
   }
+}, {
+  timestamps: true
 });
+
+// Index for better performance (username already has unique: true)
 
 // Metoda pro kontrolu hesla
 adminUserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   const bcrypt = require('bcrypt');
   return bcrypt.compare(candidatePassword, this.password);
 };
+
+// Hash password before saving
+adminUserSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+
+  try {
+    const bcrypt = require('bcrypt');
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
 
 // Prevent password from being returned in queries by default
 adminUserSchema.methods.toJSON = function() {

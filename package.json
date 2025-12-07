@@ -14,7 +14,8 @@
     "admin:list": "node scripts/manage-admin-users.js list",
     "admin:sync": "node scripts/manage-admin-users.js sync",
     "admin:manage": "node scripts/manage-admin-users.js",
-    "admin:import": "node scripts/import-admin-credentials.js"
+    "admin:import": "node scripts/import-admin-credentials.js",
+    "db:cleanup": "node scripts/cleanup-database.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
