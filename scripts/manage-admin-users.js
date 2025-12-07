@@ -11,6 +11,8 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 // MongoDB connection
@@ -62,6 +64,89 @@ adminUserSchema.methods.comparePassword = async function(candidatePassword) {
 
 const AdminUser = mongoose.model('AdminUser', adminUserSchema);
 
+// Funkce pro uložení do admin_credentials.json
+const saveToCredentialsFile = async (username, password) => {
+  try {
+    const credentialsPath = path.join(process.cwd(), 'admin_credentials.json');
+    let credentialsData = { admins: [] };
+
+    // Načti existující soubor, pokud existuje
+    if (fs.existsSync(credentialsPath)) {
+      try {
+        const existingContent = fs.readFileSync(credentialsPath, 'utf8');
+        credentialsData = JSON.parse(existingContent);
+
+        // Zajisti, že struktura je správná
+        if (!credentialsData.admins || !Array.isArray(credentialsData.admins)) {
+          credentialsData = { admins: [] };
+        }
+      } catch (parseError) {
+        console.log('⚠️  Existující admin_credentials.json má neplatný formát, vytvářím nový');
+        credentialsData = { admins: [] };
+      }
+    }
+
+    // Kontrola, zda uživatel už není v JSON souboru
+    const existingInJson = credentialsData.admins.find(admin => admin.username === username);
+    if (existingInJson) {
+      console.log(`📝 Uživatel '${username}' už existuje v admin_credentials.json - aktualizuji heslo`);
+      existingInJson.password = password;
+    } else {
+      // Přidej nového uživatele
+      credentialsData.admins.push({ username, password });
+    }
+
+    // Ulož zpět do souboru
+    fs.writeFileSync(credentialsPath, JSON.stringify(credentialsData, null, 2), 'utf8');
+    console.log(`💾 Přihlašovací údaje uloženy do admin_credentials.json`);
+
+  } catch (error) {
+    console.error('❌ Chyba při ukládání do admin_credentials.json:', error.message);
+  }
+};
+
+// Funkce pro odstranění z admin_credentials.json
+const removeFromCredentialsFile = async (username) => {
+  try {
+    const credentialsPath = path.join(process.cwd(), 'admin_credentials.json');
+
+    if (!fs.existsSync(credentialsPath)) {
+      console.log('📝 Soubor admin_credentials.json neexistuje');
+      return;
+    }
+
+    const existingContent = fs.readFileSync(credentialsPath, 'utf8');
+    let credentialsData;
+
+    try {
+      credentialsData = JSON.parse(existingContent);
+    } catch (parseError) {
+      console.log('⚠️  admin_credentials.json má neplatný formát');
+      return;
+    }
+
+    // Zajisti, že struktura je správná
+    if (!credentialsData.admins || !Array.isArray(credentialsData.admins)) {
+      console.log('⚠️  admin_credentials.json nemá správnou strukturu');
+      return;
+    }
+
+    // Najdi a odstraň uživatele
+    const initialLength = credentialsData.admins.length;
+    credentialsData.admins = credentialsData.admins.filter(admin => admin.username !== username);
+
+    if (credentialsData.admins.length < initialLength) {
+      fs.writeFileSync(credentialsPath, JSON.stringify(credentialsData, null, 2), 'utf8');
+      console.log(`💾 Uživatel '${username}' odstraněn z admin_credentials.json`);
+    } else {
+      console.log(`📝 Uživatel '${username}' nebyl nalezen v admin_credentials.json`);
+    }
+
+  } catch (error) {
+    console.error('❌ Chyba při odstraňování z admin_credentials.json:', error.message);
+  }
+};
+
 // Funkce pro přidání uživatele
 const addUser = async (username, password) => {
   try {
@@ -92,8 +177,15 @@ const addUser = async (username, password) => {
     const user = new AdminUser({ username, password });
     await user.save();
 
-    console.log(`✅ Uživatel '${username}' byl úspěšně vytvořen`);
+    console.log(`✅ Uživatel '${username}' byl úspěšně vytvořen v MongoDB`);
     console.log(`📅 Datum vytvoření: ${user.createdAt.toLocaleString('cs-CZ')}`);
+
+    // Ulož také do admin_credentials.json
+    await saveToCredentialsFile(username, password);
+
+    // Automaticky synchronizuj všechny uživatele z admin_credentials.json
+    console.log(`\n🔄 Automatická synchronizace z admin_credentials.json...`);
+    await syncFromCredentialsQuiet();
 
   } catch (error) {
     console.error('❌ Chyba při vytváření uživatele:', error.message);
@@ -111,14 +203,206 @@ const removeUser = async (username) => {
     const deletedUser = await AdminUser.findOneAndDelete({ username });
 
     if (!deletedUser) {
-      console.error(`❌ Uživatel '${username}' nebyl nalezen`);
+      console.error(`❌ Uživatel '${username}' nebyl nalezen v MongoDB`);
       return;
     }
 
-    console.log(`✅ Uživatel '${username}' byl úspěšně odstraněn`);
+    console.log(`✅ Uživatel '${username}' byl úspěšně odstraněn z MongoDB`);
+
+    // Odstraň také z admin_credentials.json
+    await removeFromCredentialsFile(username);
 
   } catch (error) {
     console.error('❌ Chyba při odstraňování uživatele:', error.message);
+  }
+};
+
+// Funkce pro synchronizaci z admin_credentials.json do MongoDB
+const syncFromCredentials = async () => {
+  try {
+    const credentialsPath = path.join(process.cwd(), 'admin_credentials.json');
+
+    if (!fs.existsSync(credentialsPath)) {
+      console.error('❌ Soubor admin_credentials.json neexistuje');
+      console.log('💡 Vytvořte soubor pomocí: npm run admin:add <username> <password>');
+      return;
+    }
+
+    console.log(`📂 Načítám admin_credentials.json...`);
+
+    const fileContent = fs.readFileSync(credentialsPath, 'utf8');
+    let adminData;
+
+    try {
+      adminData = JSON.parse(fileContent);
+    } catch (parseError) {
+      console.error(`❌ Chyba při parsování JSON souboru: ${parseError.message}`);
+      return;
+    }
+
+    // Podpora různých formátů JSON
+    let admins = [];
+
+    if (Array.isArray(adminData)) {
+      admins = adminData;
+    } else if (adminData.admins && Array.isArray(adminData.admins)) {
+      admins = adminData.admins;
+    } else if (adminData.username && adminData.password) {
+      admins = [adminData];
+    } else {
+      console.error('❌ Neplatný formát JSON souboru');
+      return;
+    }
+
+    if (admins.length === 0) {
+      console.log('⚠️  Žádní admin uživatelé k synchronizaci');
+      return;
+    }
+
+    console.log(`🔍 Nalezeno ${admins.length} admin uživatelů v JSON souboru`);
+    console.log(`🔄 Synchronizuji do MongoDB...\n`);
+
+    let synced = 0;
+    let skipped = 0;
+    let errors = 0;
+
+    for (const adminInfo of admins) {
+      try {
+        // Validace struktury
+        if (!adminInfo.username || !adminInfo.password) {
+          console.error(`⚠️  Přeskakuji uživatele: chybí username nebo password`);
+          skipped++;
+          continue;
+        }
+
+        // Validace délky
+        if (adminInfo.username.length < 3) {
+          console.error(`⚠️  Přeskakuji '${adminInfo.username}': username musí mít alespoň 3 znaky`);
+          skipped++;
+          continue;
+        }
+
+        if (adminInfo.password.length < 6) {
+          console.error(`⚠️  Přeskakuji '${adminInfo.username}': password musí mít alespoň 6 znaků`);
+          skipped++;
+          continue;
+        }
+
+        // Kontrola existence v MongoDB
+        const existingUser = await AdminUser.findOne({ username: adminInfo.username });
+        if (existingUser) {
+          console.log(`⚠️  Uživatel '${adminInfo.username}' už existuje v MongoDB - přeskakuji`);
+          skipped++;
+          continue;
+        }
+
+        // Vytvoření uživatele v MongoDB
+        const user = new AdminUser({
+          username: adminInfo.username,
+          password: adminInfo.password
+        });
+        await user.save();
+
+        console.log(`✅ Uživatel '${adminInfo.username}' synchronizován do MongoDB`);
+        synced++;
+
+      } catch (error) {
+        console.error(`❌ Chyba při synchronizaci uživatele '${adminInfo.username}': ${error.message}`);
+        errors++;
+      }
+    }
+
+    // Shrnutí
+    console.log(`\n📊 Synchronizace dokončena:`);
+    console.log(`   ✅ Synchronizováno: ${synced}`);
+    console.log(`   ⚠️  Přeskočeno: ${skipped}`);
+    console.log(`   ❌ Chyby: ${errors}`);
+    console.log(`   📝 Celkem zpracováno: ${synced + skipped + errors}`);
+
+    if (synced > 0) {
+      console.log(`\n💡 Pro zobrazení všech uživatelů spusťte: npm run admin:list`);
+    }
+
+  } catch (error) {
+    console.error('❌ Neočekávaná chyba při synchronizaci:', error.message);
+  }
+};
+
+// Funkce pro tichou synchronizaci z admin_credentials.json (pro auto-sync)
+const syncFromCredentialsQuiet = async () => {
+  try {
+    const credentialsPath = path.join(process.cwd(), 'admin_credentials.json');
+
+    if (!fs.existsSync(credentialsPath)) {
+      console.log(`📝 Soubor admin_credentials.json zatím neexistuje`);
+      return;
+    }
+
+    const fileContent = fs.readFileSync(credentialsPath, 'utf8');
+    let adminData;
+
+    try {
+      adminData = JSON.parse(fileContent);
+    } catch (parseError) {
+      console.log('⚠️  admin_credentials.json má neplatný formát - přeskakuji auto-sync');
+      return;
+    }
+
+    // Podpora různých formátů JSON
+    let admins = [];
+    if (Array.isArray(adminData)) {
+      admins = adminData;
+    } else if (adminData.admins && Array.isArray(adminData.admins)) {
+      admins = adminData.admins;
+    } else if (adminData.username && adminData.password) {
+      admins = [adminData];
+    }
+
+    if (admins.length === 0) {
+      return;
+    }
+
+    let synced = 0;
+    let skipped = 0;
+
+    for (const adminInfo of admins) {
+      try {
+        // Základní validace
+        if (!adminInfo.username || !adminInfo.password) continue;
+        if (adminInfo.username.length < 3 || adminInfo.password.length < 6) continue;
+
+        // Kontrola existence v MongoDB
+        const existingUser = await AdminUser.findOne({ username: adminInfo.username });
+        if (existingUser) {
+          skipped++;
+          continue;
+        }
+
+        // Vytvoření uživatele v MongoDB
+        const user = new AdminUser({
+          username: adminInfo.username,
+          password: adminInfo.password
+        });
+        await user.save();
+
+        console.log(`   ✅ Synchronizován '${adminInfo.username}'`);
+        synced++;
+
+      } catch (error) {
+        // Tichá chyba - nepíšeme ji
+        continue;
+      }
+    }
+
+    if (synced > 0) {
+      console.log(`🔄 Auto-sync dokončen: ${synced} nových, ${skipped} existujících`);
+    } else if (skipped > 0) {
+      console.log(`📝 Auto-sync: všichni uživatelé (${skipped}) už existují`);
+    }
+
+  } catch (error) {
+    // Tichá chyba - jen základní info
+    console.log('⚠️  Auto-sync selhal - pokračuji bez něj');
   }
 };
 
@@ -176,14 +460,20 @@ const main = async () => {
 🔧 Admin User Management CLI
 
 Použití:
-  node scripts/manage-admin-users.js add <username> <password>     - Přidat nového uživatele
-  node scripts/manage-admin-users.js remove <username>            - Odstranit uživatele
-  node scripts/manage-admin-users.js list                         - Vypsat všechny uživatele
+  node scripts/manage-admin-users.js add <username> <password>     - Přidat uživatele do MongoDB + admin_credentials.json
+  node scripts/manage-admin-users.js remove <username>            - Odstranit z MongoDB + admin_credentials.json
+  node scripts/manage-admin-users.js list                         - Vypsat všechny uživatele z MongoDB
+  node scripts/manage-admin-users.js sync                         - Synchronizovat admin_credentials.json → MongoDB
 
 Příklady:
   node scripts/manage-admin-users.js add admin secretpassword123
   node scripts/manage-admin-users.js remove olduser
   node scripts/manage-admin-users.js list
+  node scripts/manage-admin-users.js sync
+
+📝 Poznámka:
+  • add/remove pracují současně s MongoDB i s admin_credentials.json
+  • sync načítá admin_credentials.json a ukládá nové uživatele do MongoDB
     `);
     process.exit(1);
   }
@@ -207,9 +497,13 @@ Příklady:
       await listUsers();
       break;
 
+    case 'sync':
+      await syncFromCredentials();
+      break;
+
     default:
       console.error(`❌ Neznámý příkaz: ${command}`);
-      console.log('Dostupné příkazy: add, remove, list');
+      console.log('Dostupné příkazy: add, remove, list, sync');
       process.exit(1);
   }
 
@@ -225,4 +519,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { addUser, removeUser, listUsers };
+module.exports = { addUser, removeUser, listUsers, syncFromCredentials };

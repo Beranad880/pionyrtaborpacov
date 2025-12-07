@@ -7,6 +7,8 @@ import PageContent from '@/models/PageContent';
 import Article from '@/models/Article';
 import AdminUser from '@/models/AdminUser';
 import { allPagesContent, siteData } from '@/data/content';
+import fs from 'fs';
+import path from 'path';
 
 let isInitialized = false;
 
@@ -394,29 +396,77 @@ async function initializeAdminUsers() {
   const existingAdminUsers = await AdminUser.countDocuments();
 
   if (existingAdminUsers === 0) {
+    console.log('📝 Initializing admin users...');
+
+    // First try to load from admin_credentials.json
+    const credentialsPath = path.join(process.cwd(), 'admin_credentials.json');
+    let adminsFromJson: Array<{username: string, password: string}> = [];
+
+    if (fs.existsSync(credentialsPath)) {
+      try {
+        console.log('📂 Found admin_credentials.json, loading admin users...');
+        const fileContent = fs.readFileSync(credentialsPath, 'utf8');
+        const adminData = JSON.parse(fileContent);
+
+        // Support different JSON formats
+        if (Array.isArray(adminData)) {
+          adminsFromJson = adminData;
+        } else if (adminData.admins && Array.isArray(adminData.admins)) {
+          adminsFromJson = adminData.admins;
+        } else if (adminData.username && adminData.password) {
+          adminsFromJson = [adminData];
+        }
+
+        if (adminsFromJson.length > 0) {
+          console.log(`🔍 Found ${adminsFromJson.length} admin users in JSON file`);
+
+          let created = 0;
+          for (const adminInfo of adminsFromJson) {
+            try {
+              // Validation
+              if (!adminInfo.username || !adminInfo.password) continue;
+              if (adminInfo.username.length < 3 || adminInfo.password.length < 6) continue;
+
+              // Create admin user using the AdminUser model (with automatic hashing)
+              const user = new AdminUser({
+                username: adminInfo.username,
+                password: adminInfo.password,
+                createdAt: new Date()
+              });
+              await user.save();
+
+              console.log(`   ✅ Created admin user: ${adminInfo.username}`);
+              created++;
+
+            } catch (error: any) {
+              console.log(`   ⚠️ Failed to create ${adminInfo.username}: ${error.message}`);
+            }
+          }
+
+          if (created > 0) {
+            console.log(`✅ Created ${created} admin users from admin_credentials.json`);
+            return;
+          }
+        }
+      } catch (error) {
+        console.log('⚠️ Failed to parse admin_credentials.json, falling back to default admin');
+      }
+    }
+
+    // Fallback: create default admin user if no JSON file or no valid users
     console.log('📝 Creating default admin user...');
 
-    const bcrypt = require('bcrypt');
-    const saltRounds = 12;
-
-    // Create default admin user
-    const defaultPassword = 'admin123';
-    const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
-
-    const adminUser = {
+    const user = new AdminUser({
       username: 'admin',
-      password: hashedPassword,
-      email: 'admin@pionyr-pacov.cz',
-      role: 'admin',
-      isActive: true,
-      lastLogin: null,
-      createdBy: 'system-init'
-    };
+      password: 'admin123',
+      createdAt: new Date()
+    });
+    await user.save();
 
-    await AdminUser.create(adminUser);
     console.log('✅ Created default admin user');
     console.log('⚠️  Default login: admin / admin123');
     console.log('⚠️  Please change the password after first login!');
+
   } else {
     console.log(`ℹ️ Found ${existingAdminUsers} existing admin users, skipping`);
   }

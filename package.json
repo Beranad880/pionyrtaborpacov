@@ -12,7 +12,9 @@
     "admin:add": "node scripts/manage-admin-users.js add",
     "admin:remove": "node scripts/manage-admin-users.js remove",
     "admin:list": "node scripts/manage-admin-users.js list",
-    "admin:manage": "node scripts/manage-admin-users.js"
+    "admin:sync": "node scripts/manage-admin-users.js sync",
+    "admin:manage": "node scripts/manage-admin-users.js",
+    "admin:import": "node scripts/import-admin-credentials.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
