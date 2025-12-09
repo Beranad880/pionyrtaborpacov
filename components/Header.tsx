@@ -1,11 +1,43 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { siteData } from '@/data/content';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const cookie = document.cookie.split(';').find(c => c.trim().startsWith('admin_auth='));
+      setIsAdminLoggedIn(!!cookie);
+    };
+    checkAuth();
+
+    // Listen for changes in localStorage or other events if needed
+    window.addEventListener('storage', checkAuth);
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsAdminLoggedIn(false);
+      router.push('/');
+      // Full page reload to ensure all state is cleared
+      window.location.href = '/';
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -62,7 +94,7 @@ export default function Header() {
             </Link>
 
             {/* Desktop Menu */}
-            <div className="hidden lg:flex space-x-8">
+            <div className="hidden lg:flex items-center space-x-8">
               {siteData.menu.map((item, index) => (
                 <div key={index} className="relative group">
                   <Link
@@ -87,6 +119,19 @@ export default function Header() {
                   )}
                 </div>
               ))}
+              {isAdminLoggedIn && (
+                <>
+                  <Link href="/admin" className="text-slate-700 hover:text-red-600 transition-colors py-2 font-medium">
+                    Admin Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="text-slate-700 hover:text-red-600 transition-colors py-2 font-medium"
+                  >
+                    Odhlásit se
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -130,6 +175,26 @@ export default function Header() {
                   )}
                 </div>
               ))}
+              {isAdminLoggedIn && (
+                <div className="border-t mt-4 pt-4">
+                  <Link
+                    href="/admin"
+                    className="block py-2 text-slate-700 hover:text-red-600 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left py-2 text-slate-700 hover:text-red-600 transition-colors"
+                  >
+                    Odhlásit se
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
