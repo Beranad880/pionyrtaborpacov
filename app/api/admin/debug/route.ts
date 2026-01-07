@@ -3,7 +3,6 @@ import connectToMongoose from '@/lib/mongoose';
 import Article from '@/models/Article';
 import Content from '@/models/Content';
 import AdminUser from '@/models/AdminUser';
-import SimpleAdminUser from '@/models/SimpleAdminUser';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,8 +21,6 @@ export async function POST(request: NextRequest) {
         return await testContentCreate();
       case 'test-admin-user-create':
         return await testAdminUserCreate();
-      case 'test-simple-admin-user-create':
-        return await testSimpleAdminUserCreate();
       case 'create-default-admin':
         return await createDefaultAdmin();
       case 'check-collections':
@@ -155,49 +152,11 @@ async function testAdminUserCreate() {
   }
 }
 
-async function testSimpleAdminUserCreate() {
-  try {
-    const bcrypt = require('bcrypt');
-    const hashedPassword = await bcrypt.hash('test123', 12);
-
-    const testUser = {
-      username: 'test-simple-' + Date.now(),
-      password: hashedPassword,
-      email: 'test@example.com',
-      role: 'admin',
-      isActive: true,
-      createdBy: 'debug-test'
-    };
-
-    console.log('Creating simple admin user:', { username: testUser.username });
-
-    const user = new SimpleAdminUser(testUser);
-    await user.validate();
-    console.log('✅ SimpleAdminUser validation passed');
-
-    const savedUser = await user.save();
-    console.log('✅ SimpleAdminUser saved successfully:', savedUser._id);
-
-    return NextResponse.json({
-      success: true,
-      message: 'SimpleAdminUser created successfully',
-      data: { _id: savedUser._id, username: savedUser.username, createdAt: savedUser.createdAt }
-    });
-  } catch (error: any) {
-    console.error('❌ SimpleAdminUser creation failed:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'SimpleAdminUser creation failed',
-      error: error.message,
-      details: error.errors ? Object.keys(error.errors) : null
-    }, { status: 500 });
-  }
-}
 
 async function createDefaultAdmin() {
   try {
     // Check if admin already exists
-    const existingAdmin = await SimpleAdminUser.findOne({ username: 'admin' });
+    const existingAdmin = await AdminUser.findOne({ username: 'admin' });
     if (existingAdmin) {
       return NextResponse.json({
         success: false,
@@ -211,16 +170,12 @@ async function createDefaultAdmin() {
 
     const adminUser = {
       username: 'admin',
-      password: hashedPassword,
-      email: 'admin@pionyr-pacov.cz',
-      role: 'admin',
-      isActive: true,
-      createdBy: 'system-init'
+      password: hashedPassword
     };
 
     console.log('Creating default admin user...');
 
-    const user = new SimpleAdminUser(adminUser);
+    const user = new AdminUser(adminUser);
     const savedUser = await user.save();
 
     console.log('✅ Default admin user created:', savedUser._id);
@@ -250,15 +205,13 @@ async function checkCollections() {
     const articleCount = await Article.countDocuments();
     const contentCount = await Content.countDocuments();
     const adminUserCount = await AdminUser.countDocuments();
-    const simpleAdminUserCount = await SimpleAdminUser.countDocuments();
 
-    console.log('Collection counts:', { articleCount, contentCount, adminUserCount, simpleAdminUserCount });
+    console.log('Collection counts:', { articleCount, contentCount, adminUserCount });
 
     // Get sample documents
     const sampleArticle = await Article.findOne().lean();
     const sampleContent = await Content.findOne().lean();
     const sampleAdminUser = await AdminUser.findOne().lean();
-    const sampleSimpleAdminUser = await SimpleAdminUser.findOne().lean();
 
     return NextResponse.json({
       success: true,
@@ -267,14 +220,12 @@ async function checkCollections() {
         counts: {
           articles: articleCount,
           content: contentCount,
-          adminUsers: adminUserCount,
-          simpleAdminUsers: simpleAdminUserCount
+          adminUsers: adminUserCount
         },
         samples: {
           article: sampleArticle ? { _id: sampleArticle._id, title: sampleArticle.title } : null,
           content: sampleContent ? { _id: sampleContent._id, page: sampleContent.page } : null,
-          adminUser: sampleAdminUser ? { _id: sampleAdminUser._id, username: sampleAdminUser.username } : null,
-          simpleAdminUser: sampleSimpleAdminUser ? { _id: sampleSimpleAdminUser._id, username: sampleSimpleAdminUser.username } : null
+          adminUser: sampleAdminUser ? { _id: sampleAdminUser._id, username: sampleAdminUser.username } : null
         }
       }
     });
@@ -290,8 +241,8 @@ async function checkCollections() {
 
 async function checkAdmin() {
   try {
-    // Check if admin exists in SimpleAdminUser
-    const adminUser = await SimpleAdminUser.findOne({ username: 'admin' }).lean();
+    // Check if admin exists in AdminUser
+    const adminUser = await AdminUser.findOne({ username: 'admin' }).lean();
 
     if (adminUser) {
       return NextResponse.json({
@@ -300,8 +251,6 @@ async function checkAdmin() {
         data: {
           _id: adminUser._id,
           username: adminUser.username,
-          email: adminUser.email,
-          isActive: adminUser.isActive,
           createdAt: adminUser.createdAt,
           hasPassword: !!adminUser.password
         }
@@ -331,13 +280,13 @@ async function testLogin() {
     console.log('Testing login for:', username);
 
     // Find user
-    const userDoc = await SimpleAdminUser.findOne({ username, isActive: true }).lean();
+    const userDoc = await AdminUser.findOne({ username }).lean();
 
     if (!userDoc) {
       return NextResponse.json({
         success: false,
         message: 'User not found',
-        debug: { username, searched: 'SimpleAdminUser' }
+        debug: { username, searched: 'AdminUser' }
       });
     }
 
