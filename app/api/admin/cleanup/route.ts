@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Get document counts for collections to remove
-    const collectionCounts = {};
+    const collectionCounts: { [key: string]: number } = {};
     for (const name of analysis.toRemove) {
       try {
         const count = await db.collection(name).countDocuments();
