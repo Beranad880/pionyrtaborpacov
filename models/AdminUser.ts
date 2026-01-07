@@ -63,14 +63,13 @@ adminUserSchema.methods.comparePassword = async function(candidatePassword: stri
 
 // Hash password before saving
 adminUserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password')) return;
 
   try {
     const bcrypt = require('bcrypt');
     this.password = await bcrypt.hash(this.password, 12);
-    next();
   } catch (error) {
-    next(error as Error);
+    throw error;
   }
 });
 

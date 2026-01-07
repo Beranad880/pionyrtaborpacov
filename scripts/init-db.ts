@@ -1,5 +1,5 @@
 import connectToMongoose from '../lib/mongoose';
-import User from '../models/User';
+import AdminUser from '../models/AdminUser';
 import Event from '../models/Event';
 import Article from '../models/Article';
 
@@ -10,15 +10,16 @@ async function initializeDatabase() {
     console.log('✅ Connected to MongoDB');
 
     // Create initial admin user
-    const adminUser = await User.findOne({ email: 'admin@pionyr-pacov.cz' });
+    const adminUser = await AdminUser.findOne({ email: 'admin@pionyr-pacov.cz' });
 
     if (!adminUser) {
-      const newAdmin = new User({
-        name: 'Admin Pionýrské skupiny',
+      const newAdmin = new AdminUser({
+        username: 'admin',
+        password: 'admin123',
         email: 'admin@pionyr-pacov.cz',
         role: 'admin',
-        membershipStatus: 'active',
-        joinDate: new Date(),
+        isActive: true,
+        createdBy: 'system',
       });
 
       await newAdmin.save();
@@ -31,7 +32,7 @@ async function initializeDatabase() {
     const eventCount = await Event.countDocuments();
 
     if (eventCount === 0) {
-      const admin = await User.findOne({ email: 'admin@pionyr-pacov.cz' });
+      const admin = await AdminUser.findOne({ email: 'admin@pionyr-pacov.cz' });
 
       const sampleEvents = [
         {
@@ -70,7 +71,7 @@ async function initializeDatabase() {
     const articleCount = await Article.countDocuments();
 
     if (articleCount === 0) {
-      const admin = await User.findOne({ email: 'admin@pionyr-pacov.cz' });
+      const admin = await AdminUser.findOne({ email: 'admin@pionyr-pacov.cz' });
 
       const sampleArticles = [
         {
@@ -104,7 +105,7 @@ async function initializeDatabase() {
     console.log('🎉 Database initialization completed successfully!');
 
     // Display summary
-    const userCount = await User.countDocuments();
+    const userCount = await AdminUser.countDocuments();
     const eventCount2 = await Event.countDocuments();
     const articleCount2 = await Article.countDocuments();
 
