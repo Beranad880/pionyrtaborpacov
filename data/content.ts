@@ -80,7 +80,7 @@ export const siteData = {
     { title: "Hájenka Bělá", href: "/pages?page=hajenka-bela" },
     { title: "Kalendář akcí", href: "/pages?page=kalendar-akci" },
     { title: "Pronájem Hájenky Bělá", href: "/pages?page=pronajem-hajenky-bela" },
-    { title: "Táborové přihlášky", href: "/pages?page=taborove-prihlasky" },
+   // { title: "Táborové přihlášky", href: "/pages?page=taborove-prihlasky" },
     { title: "Články", href: "/pages?page=clanky" },
     { title: "Fotky z akcí", href: "/pages?page=fotky-z-akci" }
   ] as MenuItem[]
