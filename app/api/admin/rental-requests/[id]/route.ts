@@ -33,8 +33,8 @@ export async function GET(
   }
 }
 
-// PUT - Aktualizovat žádost (změna statusu, poznámky)
-export async function PUT(
+// PUT/PATCH - Aktualizovat žádost (změna statusu, poznámky)
+async function updateRentalRequest(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -113,6 +113,9 @@ export async function PUT(
     );
   }
 }
+
+export const PUT = updateRentalRequest;
+export const PATCH = updateRentalRequest;
 
 // DELETE - Smazat žádost
 export async function DELETE(

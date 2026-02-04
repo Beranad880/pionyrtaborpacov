@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import RentalCalendar from '@/components/RentalCalendar';
 
 interface RentalFormData {
   name: string;
@@ -219,6 +220,9 @@ export default function PronajemHajenkybePage() {
                 Vyplňte formulář a my se vám ozveme do 48 hodin
               </p>
             </div>
+
+            {/* Availability Calendar */}
+            <RentalCalendar className="mb-8" />
 
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Contact Information */}
