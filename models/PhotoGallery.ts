@@ -33,7 +33,6 @@ const PhotoSchema = new Schema<IPhoto>({
   url: {
     type: String,
     required: [true, 'URL fotky je povinná'],
-    match: [/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i, 'Neplatná URL fotky'],
   },
   caption: {
     type: String,
@@ -91,7 +90,6 @@ const PhotoGallerySchema = new Schema<IPhotoGallery>(
     photos: [PhotoSchema],
     coverPhoto: {
       type: String,
-      match: [/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i, 'Neplatná URL náhledu'],
     },
     isPublic: {
       type: Boolean,
