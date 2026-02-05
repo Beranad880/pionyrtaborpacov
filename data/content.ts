@@ -78,13 +78,11 @@ export const siteData = {
     { title: "Úvod", href: "/" },
     { title: "Pionýrské oddíly", href: "/pages?page=pionyrske-oddily" },
     { title: "Hájenka Bělá", href: "/pages?page=hajenka-bela" },
-    { title: "Pronájem Hájenky Bělá", href: "/pages?page=pronajem-hajenky-bela" },
     { title: "Kalendář akcí", href: "/pages?page=kalendar-akci" },
     { title: "Články", href: "/pages?page=clanky" },
     { title: "Fotky z akcí", href: "/pages?page=fotky-z-akci" },
     { title: "Město Pacov", href: "/pages?page=mestopacov" },
     { title: "Přihlášky na tábor", href: "https://www.ldtbela.cz/" },
-
   ] as MenuItem[]
 };
 
