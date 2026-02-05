@@ -4,6 +4,8 @@ import "./globals.css";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import DatabaseInitializer from '@/components/DatabaseInitializer';
+import { Analytics } from "@vercel/analytics/next"
+
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
