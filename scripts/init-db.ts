@@ -29,6 +29,9 @@ async function initializeDatabase() {
     console.log('✅ Připojeno k MongoDB\n');
 
     const db = mongoose.connection.db;
+    if (!db) {
+      throw new Error('Nepodařilo se připojit k databázi');
+    }
     const usersCollection = db.collection('simpleadminusers');
 
     // Kontrola existujících uživatelů

@@ -2,19 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Rental from '@/models/Rental';
 import RentalRequest from '@/models/RentalRequest';
+import { requireAuth } from '@/lib/auth-middleware';
 
 // GET - Načíst pronájmy
 export async function GET(request: NextRequest) {
-  try {
-    // Kontrola autentifikace
-    const authCookie = request.cookies.get('admin_auth');
-    if (!authCookie) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const authError = requireAuth(request);
+  if (authError) return authError;
 
+  try {
     await connectToMongoose();
 
     const { searchParams } = new URL(request.url);
@@ -60,16 +55,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Vytvořit nový pronájem
 export async function POST(request: NextRequest) {
-  try {
-    // Kontrola autentifikace
-    const authCookie = request.cookies.get('admin_auth');
-    if (!authCookie) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const authError = requireAuth(request);
+  if (authError) return authError;
 
+  try {
     await connectToMongoose();
 
     const body = await request.json();

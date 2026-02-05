@@ -3,9 +3,13 @@ import connectToMongoose from '@/lib/mongoose';
 import Content from '@/models/Content';
 import fs from 'fs/promises';
 import path from 'path';
+import { requireAuth } from '@/lib/auth-middleware';
 
 // GET - Načíst obsah stránky
 export async function GET(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     const { searchParams } = new URL(request.url);
     const page = searchParams.get('page');
@@ -43,6 +47,9 @@ export async function GET(request: NextRequest) {
 
 // POST - Uložit nebo aktualizovat obsah stránky
 export async function POST(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const { page, content } = body;
@@ -130,6 +137,9 @@ async function updateContentFile(page: string, content: any) {
 
 // GET ALL - Načíst všechen obsah
 export async function PUT(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
 
@@ -150,6 +160,9 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Smazat obsah stránky
 export async function DELETE(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     const { searchParams } = new URL(request.url);
     const page = searchParams.get('page');

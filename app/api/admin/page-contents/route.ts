@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import PageContent from '@/models/PageContent';
+import { requireAuth } from '@/lib/auth-middleware';
 
 // GET - Získat obsah stránek
 export async function GET(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const { searchParams } = new URL(request.url);
@@ -35,6 +39,9 @@ export async function GET(request: NextRequest) {
 
 // POST - Vytvořit nový obsah stránky
 export async function POST(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const body = await request.json();
@@ -75,6 +82,9 @@ export async function POST(request: NextRequest) {
 
 // PUT - Aktualizovat obsah stránky
 export async function PUT(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const body = await request.json();
@@ -133,6 +143,9 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Smazat obsah stránky (soft delete)
 export async function DELETE(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const { searchParams } = new URL(request.url);

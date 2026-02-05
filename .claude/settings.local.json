@@ -21,7 +21,8 @@
       "Bash(npm run admin:list:*)",
       "Bash(dir:*)",
       "WebFetch(domain:www.mestopacov.cz)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Facility from '@/models/Facility';
+import { requireAuth } from '@/lib/auth-middleware';
 
 // GET - Získat všechna zařízení
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const facilities = await Facility.find({ isActive: true }).sort({ createdAt: -1 });
@@ -27,6 +31,9 @@ export async function GET() {
 
 // POST - Vytvořit nové zařízení
 export async function POST(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const body = await request.json();
@@ -54,6 +61,9 @@ export async function POST(request: NextRequest) {
 
 // PUT - Aktualizovat zařízení
 export async function PUT(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const body = await request.json();
@@ -105,6 +115,9 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Smazat zařízení (soft delete)
 export async function DELETE(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const { searchParams } = new URL(request.url);

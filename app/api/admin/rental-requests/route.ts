@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import RentalRequest from '@/models/RentalRequest';
+import { requireAuth } from '@/lib/auth-middleware';
 
-// GET - Načíst žádosti o pronájem
+// GET - Načíst žádosti o pronájem (pouze pro adminy)
 export async function GET(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
 

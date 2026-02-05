@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import CampApplication from '@/models/CampApplication';
+import { requireAuth } from '@/lib/auth-middleware';
 
-// GET - Načíst táborové přihlášky
+// GET - Načíst táborové přihlášky (pouze pro adminy)
 export async function GET(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
 

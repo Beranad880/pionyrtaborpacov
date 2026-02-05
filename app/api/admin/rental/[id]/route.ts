@@ -2,22 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Rental, { IRental } from '@/models/Rental';
 import RentalRequest from '@/models/RentalRequest';
+import { requireAuth } from '@/lib/auth-middleware';
 
 // GET - Načíst konkrétní pronájem
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    // Kontrola autentifikace
-    const authCookie = request.cookies.get('admin_auth');
-    if (!authCookie) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const authError = requireAuth(request);
+  if (authError) return authError;
 
+  try {
     await connectToMongoose();
     const { id } = await params;
 
@@ -48,16 +43,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    // Kontrola autentifikace
-    const authCookie = request.cookies.get('admin_auth');
-    if (!authCookie) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const authError = requireAuth(request);
+  if (authError) return authError;
 
+  try {
     await connectToMongoose();
     const { id } = await params;
 
@@ -146,16 +135,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    // Kontrola autentifikace
-    const authCookie = request.cookies.get('admin_auth');
-    if (!authCookie) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const authError = requireAuth(request);
+  if (authError) return authError;
 
+  try {
     await connectToMongoose();
     const { id } = await params;
 

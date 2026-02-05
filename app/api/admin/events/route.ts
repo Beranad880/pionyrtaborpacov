@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Event from '@/models/Event';
+import { requireAuth } from '@/lib/auth-middleware';
 
 // GET - Načíst akce
 export async function GET(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
 
@@ -60,6 +64,9 @@ export async function GET(request: NextRequest) {
 
 // POST - Vytvořit novou akci
 export async function POST(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
 

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import PioneerGroup from '@/models/PioneerGroup';
+import { requireAuth } from '@/lib/auth-middleware';
 
 // GET - Získat všechny pionýrské oddíly
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const groups = await PioneerGroup.find({ isActive: true }).sort({ createdAt: -1 });
@@ -28,6 +32,9 @@ export async function GET() {
 
 // POST - Vytvořit nový pionýrský oddíl
 export async function POST(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const body = await request.json();
@@ -56,6 +63,9 @@ export async function POST(request: NextRequest) {
 
 // PUT - Aktualizovat pionýrský oddíl
 export async function PUT(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const body = await request.json();
@@ -107,6 +117,9 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Smazat pionýrský oddíl (soft delete)
 export async function DELETE(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
     const { searchParams } = new URL(request.url);

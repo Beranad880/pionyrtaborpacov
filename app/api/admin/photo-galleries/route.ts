@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import PhotoGallery from '@/models/PhotoGallery';
+import { requireAuth } from '@/lib/auth-middleware';
 
 // GET - Načíst fotogalerie
 export async function GET(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
 
@@ -52,6 +56,9 @@ export async function GET(request: NextRequest) {
 
 // POST - Vytvořit novou galerii
 export async function POST(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
 

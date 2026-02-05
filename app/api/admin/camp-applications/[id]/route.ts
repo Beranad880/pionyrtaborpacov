@@ -1,55 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import CampApplication from '@/models/CampApplication';
-import AdminUser from '@/models/AdminUser';
-
-// Utility function pro ověření autentifikace
-async function verifyAuthentication(request: NextRequest) {
-  const authCookie = request.cookies.get('admin_auth');
-
-  if (!authCookie) {
-    return null;
-  }
-
-  try {
-    // Dekódovat auth token
-    const decoded = Buffer.from(authCookie.value, 'base64').toString('utf-8');
-    const [userId, username, timestamp] = decoded.split(':');
-
-    if (!userId || !username || !timestamp) {
-      return null;
-    }
-
-    // Kontrola platnosti (7 dní)
-    const tokenAge = Date.now() - parseInt(timestamp);
-    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 dní v milisekundách
-
-    if (tokenAge > maxAge) {
-      return null;
-    }
-
-    // Ověření existence uživatele
-    const user = await AdminUser.findById(userId);
-
-    if (!user || user.username !== username) {
-      return null;
-    }
-
-    return {
-      id: user._id,
-      username: user.username,
-      email: username // Použijeme username jako email pro kompatibilitu
-    };
-  } catch (error) {
-    return null;
-  }
-}
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 
 // GET - Načíst jednu přihlášku
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
 
@@ -81,18 +42,13 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
 
-    // Ověření autentifikace
-    const user = await verifyAuthentication(request);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: 'Neautorizovaný přístup' },
-        { status: 401 }
-      );
-    }
-
+    const user = getUserFromToken(request);
     const body = await request.json();
     const { status, adminNotes } = body;
 
@@ -116,7 +72,7 @@ export async function PUT(
     // Aktualizace přihlášky
     application.status = status;
     application.adminNotes = adminNotes;
-    application.processedBy = user.username;
+    application.processedBy = user?.username || 'admin';
 
     if (status !== 'pending') {
       application.processedAt = new Date();
@@ -143,17 +99,11 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     await connectToMongoose();
-
-    // Ověření autentifikace
-    const user = await verifyAuthentication(request);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: 'Neautorizovaný přístup' },
-        { status: 401 }
-      );
-    }
 
     const { id } = await params;
     const application = await CampApplication.findByIdAndDelete(id);
