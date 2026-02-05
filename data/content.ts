@@ -27,7 +27,7 @@ interface Activity {
 }
 
 interface PageContent {
-  [key: string]: any;https://pionyrpacov.cz/
+  [key: string]: any;
 }
 
 export const siteData = {
