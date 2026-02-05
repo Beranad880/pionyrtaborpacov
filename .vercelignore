@@ -1,0 +1,8 @@
+# Ignore scripts folder - local dev tools only
+scripts/
+
+# Ignore admin credentials
+admin_credentials.json
+
+# Ignore debug API route
+app/api/admin/debug/
