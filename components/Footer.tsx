@@ -24,13 +24,13 @@ export default function Footer() {
             <div className="space-y-2 text-sm text-slate-600">
               <p>
                 <span className="font-medium">Email:</span>{' '}
-                <a href={`mailto:${siteData.contact.email}`} className="hover:text-red-600 transition-colors">
+                <a href={`mailto:${siteData.contact.email}`} className="hover:text-[#0070af] transition-colors">
                   {siteData.contact.email}
                 </a>
               </p>
               <p>
                 <span className="font-medium">Telefon:</span>{' '}
-                <a href={`tel:${siteData.contact.phone}`} className="hover:text-red-600 transition-colors">
+                <a href={`tel:${siteData.contact.phone}`} className="hover:text-[#0070af] transition-colors">
                   {siteData.contact.phone}
                 </a>
               </p>
@@ -65,23 +65,42 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-lg mb-4 text-slate-800">Rychlé odkazy</h4>
             <div className="space-y-2 text-sm">
-              <Link href="/pages?page=hajenka-bela" className="block text-slate-600 hover:text-red-600 transition-colors">
+              <Link href="/pages?page=hajenka-bela" className="block text-slate-600 hover:text-[#0070af] transition-colors">
                 Hájenka Bělá
               </Link>
-              <Link href="/pages?page=clanky" className="block text-slate-600 hover:text-red-600 transition-colors">
+              <Link href="/pages?page=clanky" className="block text-slate-600 hover:text-[#0070af] transition-colors">
                 Články
               </Link>
-              <Link href="/pages?page=kalendar-akci" className="block text-slate-600 hover:text-red-600 transition-colors">
+              <Link href="/pages?page=kalendar-akci" className="block text-slate-600 hover:text-[#0070af] transition-colors">
                 Kalendář akcí
               </Link>
-              <Link href="/pages?page=pronajem-hajenky-bela" className="block text-slate-600 hover:text-red-600 transition-colors">
+              <Link href="/pages?page=pronajem-hajenky-bela" className="block text-slate-600 hover:text-[#0070af] transition-colors">
                 Pronájem
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-300 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-500">
+        {/* Supported by */}
+        <div className="border-t border-slate-300 mt-8 pt-6">
+          <div className="flex flex-col items-center justify-center mb-6">
+            <p className="text-sm text-slate-500 mb-3">Podpořil</p>
+            <a
+              href="https://www.kr-vysocina.cz/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:opacity-80 transition-opacity"
+            >
+              <img
+                src="/logovysocina.jpg"
+                alt="Kraj Vysočina"
+                className="h-16 w-auto"
+              />
+            </a>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-300 pt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-500">
           <div className="mb-2 sm:mb-0">
             <p>&copy; 2025 {siteData.title}. Všechna práva vyhrazena.</p>
           </div>

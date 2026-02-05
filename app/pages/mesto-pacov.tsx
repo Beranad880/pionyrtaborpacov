@@ -63,11 +63,11 @@ export default function MestoPacovPage() {
   return (
     <main className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-16">
+      <section className="bg-gradient-to-r from-[#0070af] to-[#005a8c] text-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Město Pacov</h1>
-            <p className="text-xl text-emerald-100">
+            <p className="text-xl text-blue-100">
               Malebné město v srdci Českomoravské vrchoviny s bohatou historií
             </p>
           </div>
@@ -123,12 +123,12 @@ export default function MestoPacovPage() {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg hover:bg-emerald-50 hover:text-emerald-600 transition-colors group"
+                    className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg hover:bg-[#0070af]/10 hover:text-[#0070af] transition-colors group"
                   >
-                    <span className="text-slate-600 group-hover:text-emerald-600 transition-colors">
+                    <span className="text-slate-600 group-hover:text-[#0070af] transition-colors">
                       {link.icon}
                     </span>
-                    <span className="font-medium text-slate-700 group-hover:text-emerald-600 transition-colors">
+                    <span className="font-medium text-slate-700 group-hover:text-[#0070af] transition-colors">
                       {link.name}
                     </span>
                   </a>

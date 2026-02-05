@@ -58,7 +58,7 @@ export default function Hero() {
           </p>
           <button
             onClick={scrollToAbout}
-            className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
+            className="bg-[#0070af] hover:bg-[#005a8c] text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
           >
             O nás
           </button>

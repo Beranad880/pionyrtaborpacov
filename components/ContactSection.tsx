@@ -53,7 +53,7 @@ export default function ContactSection() {
             <div className="space-y-6">
               {/* Address */}
               <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[#0070af] rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
@@ -66,7 +66,7 @@ export default function ContactSection() {
 
               {/* Bank Account */}
               <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[#0070af] rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
                     <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd"/>
@@ -80,7 +80,7 @@ export default function ContactSection() {
 
               {/* Company Info */}
               <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[#0070af] rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd"/>
                   </svg>
@@ -134,15 +134,15 @@ export default function ContactSection() {
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
                 {data.statistics.ageGroups.map((group, index) => (
-                  <div key={index} className="text-center p-4 bg-red-50 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600 mb-1">{group.count}</div>
+                  <div key={index} className="text-center p-4 bg-[#0070af]/10 rounded-lg">
+                    <div className="text-2xl font-bold text-[#0070af] mb-1">{group.count}</div>
                     <div className="text-xs text-slate-600">{group.range}</div>
                   </div>
                 ))}
               </div>
 
               <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-red-600 rounded-full">
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-[#0070af] rounded-full">
                   <span className="text-3xl font-bold text-white">{data.statistics.total}</span>
                 </div>
                 <p className="text-lg font-semibold text-slate-800 mt-2">Celkem členů</p>

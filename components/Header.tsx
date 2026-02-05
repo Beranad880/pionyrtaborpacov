@@ -67,10 +67,10 @@ export default function Header() {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-4 mt-2 sm:mt-0">
-            <a href={`mailto:${siteData.contact.email}`} className="text-slate-600 hover:text-red-600 transition-colors">
+            <a href={`mailto:${siteData.contact.email}`} className="text-slate-600 hover:text-[#0070af] transition-colors">
               {siteData.contact.email}
             </a>
-            <a href={`tel:${siteData.contact.phone}`} className="text-slate-600 hover:text-red-600 transition-colors">
+            <a href={`tel:${siteData.contact.phone}`} className="text-slate-600 hover:text-[#0070af] transition-colors">
               {siteData.contact.phone}
             </a>
           </div>
@@ -99,7 +99,7 @@ export default function Header() {
                 <div key={index} className="relative group">
                   <Link
                     href={item.href}
-                    className="text-slate-700 hover:text-red-600 transition-colors py-2 font-medium"
+                    className="text-slate-700 hover:text-[#0070af] transition-colors py-2 font-medium"
                   >
                     {item.title}
                   </Link>
@@ -110,7 +110,7 @@ export default function Header() {
                         <Link
                           key={subindex}
                           href={subitem.href}
-                          className="block px-4 py-2 text-slate-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                          className="block px-4 py-2 text-slate-700 hover:bg-[#0070af]/10 hover:text-[#0070af] transition-colors"
                         >
                           {subitem.title}
                         </Link>
@@ -121,12 +121,12 @@ export default function Header() {
               ))}
               {isAdminLoggedIn && (
                 <>
-                  <Link href="/admin" className="text-slate-700 hover:text-red-600 transition-colors py-2 font-medium">
+                  <Link href="/admin" className="text-slate-700 hover:text-[#0070af] transition-colors py-2 font-medium">
                     Admin Dashboard
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="text-slate-700 hover:text-red-600 transition-colors py-2 font-medium"
+                    className="text-slate-700 hover:text-[#0070af] transition-colors py-2 font-medium"
                   >
                     Odhlásit se
                   </button>
@@ -154,7 +154,7 @@ export default function Header() {
                 <div key={index} className="mb-2">
                   <Link
                     href={item.href}
-                    className="block py-2 text-slate-700 hover:text-red-600 transition-colors"
+                    className="block py-2 text-slate-700 hover:text-[#0070af] transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.title}
@@ -165,7 +165,7 @@ export default function Header() {
                         <Link
                           key={subindex}
                           href={subitem.href}
-                          className="block py-1 text-slate-600 hover:text-red-600 transition-colors"
+                          className="block py-1 text-slate-600 hover:text-[#0070af] transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           {subitem.title}
@@ -179,7 +179,7 @@ export default function Header() {
                 <div className="border-t mt-4 pt-4">
                   <Link
                     href="/admin"
-                    className="block py-2 text-slate-700 hover:text-red-600 transition-colors"
+                    className="block py-2 text-slate-700 hover:text-[#0070af] transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Admin Dashboard
@@ -189,7 +189,7 @@ export default function Header() {
                       handleLogout();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="block w-full text-left py-2 text-slate-700 hover:text-red-600 transition-colors"
+                    className="block w-full text-left py-2 text-slate-700 hover:text-[#0070af] transition-colors"
                   >
                     Odhlásit se
                   </button>

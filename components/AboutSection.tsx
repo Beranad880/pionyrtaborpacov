@@ -35,7 +35,7 @@ export default function AboutSection() {
             <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-6">
               {content.about?.title || pageContent.about.title}
             </h2>
-            <blockquote className="text-xl md:text-2xl text-slate-600 italic leading-relaxed max-w-4xl mx-auto border-l-4 border-red-600 pl-6 bg-red-50 p-6 rounded-r-lg shadow-sm">
+            <blockquote className="text-xl md:text-2xl text-slate-600 italic leading-relaxed max-w-4xl mx-auto border-l-4 border-[#0070af] pl-6 bg-[#0070af]/10 p-6 rounded-r-lg shadow-sm">
               {content.about?.subtitle || pageContent.about.subtitle}
             </blockquote>
           </div>
@@ -57,10 +57,10 @@ export default function AboutSection() {
                     backgroundImage: "url('https://images.unsplash.com/photo-1529390079861-591de354faf5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')"
                   }}
                 />
-                <div className="absolute inset-0 bg-red-600 bg-opacity-80 flex items-center justify-center">
+                <div className="absolute inset-0 bg-[#0070af] bg-opacity-80 flex items-center justify-center">
                   <div className="text-white text-center">
                     <div className="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-red-600 text-2xl font-bold">P</span>
+                      <span className="text-[#0070af] text-2xl font-bold">P</span>
                     </div>
                     <div className="font-bold text-xl">Pionýr</div>
                     <div className="text-sm opacity-90">od roku 1990</div>
@@ -82,14 +82,14 @@ export default function AboutSection() {
                 {content.pioneer?.description || pageContent.pioneer.description}
               </p>
 
-              <div className="mb-8 p-4 bg-red-50 rounded-lg border border-red-100">
+              <div className="mb-8 p-4 bg-[#0070af]/10 rounded-lg border border-[#0070af]/20">
                 <p className="text-slate-700">
                   Jsme součástí{' '}
                   <a
                     href="https://vysocina.pionyr.cz/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-red-600 font-semibold hover:text-red-700 hover:underline transition-colors"
+                    className="text-[#0070af] font-semibold hover:text-[#005a8c] hover:underline transition-colors"
                   >
                     Krajské organizace Pionýra Vysočina (KOP Vysočina)
                   </a>
@@ -114,14 +114,14 @@ export default function AboutSection() {
 
             <div className="flex justify-center lg:justify-end">
               <div className="w-64 h-64 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 rounded-lg transform rotate-6 opacity-20"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#0070af] to-[#005a8c] rounded-lg transform rotate-6 opacity-20"></div>
                 <div
                   className="absolute inset-0 rounded-lg bg-cover bg-center"
                   style={{
                     backgroundImage: "url('https://images.unsplash.com/photo-1544027993-37dbfe43562a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')"
                   }}
                 />
-                <div className="absolute inset-0 bg-red-600 bg-opacity-85 rounded-lg flex items-center justify-center text-white">
+                <div className="absolute inset-0 bg-[#0070af] bg-opacity-85 rounded-lg flex items-center justify-center text-white">
                   <div className="text-center">
                     <div className="text-4xl font-bold mb-2">600+</div>
                     <div className="text-sm">míst po celé republice</div>
@@ -144,15 +144,15 @@ export default function AboutSection() {
 
             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                <div className="text-2xl font-bold text-red-600 mb-2">2014</div>
+                <div className="text-2xl font-bold text-[#0070af] mb-2">2014</div>
                 <div className="text-sm text-gray-600">Oficiální vznik skupiny</div>
               </div>
               <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                <div className="text-2xl font-bold text-red-600 mb-2">1990</div>
+                <div className="text-2xl font-bold text-[#0070af] mb-2">1990</div>
                 <div className="text-sm text-gray-600">Obnovená činnost</div>
               </div>
               <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                <div className="text-2xl font-bold text-red-600 mb-2">1961</div>
+                <div className="text-2xl font-bold text-[#0070af] mb-2">1961</div>
                 <div className="text-sm text-gray-600">Původní založení</div>
               </div>
             </div>
