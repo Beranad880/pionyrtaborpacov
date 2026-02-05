@@ -17,18 +17,6 @@ interface RentalFormData {
   agreeTerms: boolean;
 }
 
-const facilityOptions = [
-  { id: 'kitchen', label: 'Kuchyně pro vaření', price: 'zdarma' },
-  { id: 'wifi', label: 'Wi-Fi připojení', price: 'zdarma' },
-  { id: 'fireplace', label: 'Ohniště', price: 'zdarma' },
-  { id: 'parking', label: 'Parkování', price: 'zdarma' },
-  { id: 'heating', label: 'Topení', price: '100 Kč/den' },
-  { id: 'electricity', label: 'Elektřina', price: 'zdarma' },
-  { id: 'water', label: 'Teplá voda', price: 'zdarma' },
-  { id: 'outdoor_grill', label: 'Venkovní gril', price: '50 Kč/den' },
-  { id: 'sports_equipment', label: 'Sportovní vybavení', price: '100 Kč/den' },
-];
-
 const purposeOptions = [
   'Letní tábor',
   'Víkendový pobyt',
@@ -72,15 +60,6 @@ export default function PronajemHajenkybePage() {
     }
   };
 
-  const handleFacilityChange = (facilityId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      facilities: prev.facilities.includes(facilityId)
-        ? prev.facilities.filter(id => id !== facilityId)
-        : [...prev.facilities, facilityId]
-    }));
-  };
-
   const calculateEstimatedPrice = () => {
     if (!formData.startDate || !formData.endDate) return 0;
 
@@ -91,18 +70,7 @@ export default function PronajemHajenkybePage() {
     if (days <= 0) return 0;
 
     const dailyRate = days >= 7 ? 1200 : 1500; // Weekly vs weekend rate
-    let total = days * dailyRate;
-
-    // Add facility costs
-    if (formData.facilities.includes('heating')) {
-      total += days * 100;
-    }
-    if (formData.facilities.includes('outdoor_grill')) {
-      total += days * 50;
-    }
-    if (formData.facilities.includes('sports_equipment')) {
-      total += days * 100;
-    }
+    const total = days * dailyRate;
 
     return total;
   };
@@ -167,7 +135,7 @@ export default function PronajemHajenkybePage() {
                   Žádost byla úspěšně odeslána!
                 </h2>
                 <p className="text-slate-600 mb-6">
-                  Vaše žádost o pronájem Hájenky Bělá byla přijata. Budeme vás kontaktovat do 48 hodin s potvrzením nebo dotazy.
+                  Vaše žádost o pronájem Hájenky Bělá byla přijata. Budeme vás brzy kontaktovat.
                 </p>
                 <div className="space-y-3">
                   <p className="text-sm text-slate-500">
@@ -217,7 +185,7 @@ export default function PronajemHajenkybePage() {
                 Žádost o pronájem Hájenky Bělá
               </h1>
               <p className="text-lg text-slate-600">
-                Vyplňte formulář a my se vám ozveme do 48 hodin
+                Vyplňte formulář pro rezervaci
               </p>
             </div>
 
@@ -380,34 +348,6 @@ export default function PronajemHajenkybePage() {
                 )}
               </div>
 
-              {/* Additional Services */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h2 className="text-xl font-bold text-slate-800 mb-4">
-                  Doplňkové služby
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {facilityOptions.map(facility => (
-                    <div key={facility.id} className="flex items-start">
-                      <input
-                        type="checkbox"
-                        id={facility.id}
-                        checked={formData.facilities.includes(facility.id)}
-                        onChange={() => handleFacilityChange(facility.id)}
-                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-slate-300 rounded mt-1"
-                      />
-                      <label htmlFor={facility.id} className="ml-3 flex-1">
-                        <span className="text-sm font-medium text-slate-700">
-                          {facility.label}
-                        </span>
-                        <span className="block text-xs text-slate-500">
-                          {facility.price}
-                        </span>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Message */}
               <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                 <h2 className="text-xl font-bold text-slate-800 mb-4">
@@ -434,22 +374,6 @@ export default function PronajemHajenkybePage() {
                       <span>Základní pronájem ({days} {days < 5 ? 'dny' : 'dní'} × {days >= 7 ? '1 200' : '1 500'} Kč)</span>
                       <span>{(days * (days >= 7 ? 1200 : 1500)).toLocaleString()} Kč</span>
                     </div>
-                    {formData.facilities.map(facilityId => {
-                      const facility = facilityOptions.find(f => f.id === facilityId);
-                      if (!facility || facility.price === 'zdarma') return null;
-
-                      let cost = 0;
-                      if (facilityId === 'heating') cost = days * 100;
-                      else if (facilityId === 'outdoor_grill') cost = days * 50;
-                      else if (facilityId === 'sports_equipment') cost = days * 100;
-
-                      return (
-                        <div key={facilityId} className="flex justify-between">
-                          <span>{facility.label}</span>
-                          <span>{cost.toLocaleString()} Kč</span>
-                        </div>
-                      );
-                    })}
                     <hr className="my-2" />
                     <div className="flex justify-between font-bold text-lg">
                       <span>Celkem</span>
@@ -500,9 +424,6 @@ export default function PronajemHajenkybePage() {
                 >
                   {isSubmitting ? 'Odesílám...' : 'Odeslat žádost'}
                 </button>
-                <p className="text-sm text-slate-500 mt-2">
-                  Ozveme se vám do 48 hodin s potvrzením nebo dotazy.
-                </p>
               </div>
             </form>
           </div>
