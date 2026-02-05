@@ -3,6 +3,7 @@ import AboutSection from '@/components/AboutSection';
 import CampRegistrationBanner from '@/components/CampRegistrationBanner';
 import EvidencniListy from '@/components/EvidencniListy';
 import ContactSection from '@/components/ContactSection';
+import { Analytics } from '@vercel/analytics/next';
 
 export default function HomePage() {
   return (
@@ -18,6 +19,7 @@ export default function HomePage() {
       <AboutSection />
       <EvidencniListy />
       <ContactSection />
+      <Analytics/>
     </main>
   );
 }
