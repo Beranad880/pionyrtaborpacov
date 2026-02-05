@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { pageContent } from '@/data/content';
 
@@ -57,20 +56,12 @@ export default function Hero() {
           <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed drop-shadow-lg font-medium">
             {(heroData as any).subtitle || 'Demokratický, dobrovolný spolek dětí, mládeže a dospělých'}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={scrollToAbout}
             className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
           >
             O nás
           </button>
-          <Link
-            href="/kontakt"
-            className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-3 rounded-lg font-semibold transition-all shadow-lg text-center"
-          >
-            Napište nám
-          </Link>
-          </div>
         </div>
       </div>
 

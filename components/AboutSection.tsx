@@ -78,9 +78,23 @@ export default function AboutSection() {
               <h3 className="text-2xl md:text-3xl font-bold text-slate-800 mb-6">
                 Pionýr
               </h3>
-              <p className="text-slate-700 leading-relaxed mb-8">
+              <p className="text-slate-700 leading-relaxed mb-6">
                 {content.pioneer?.description || pageContent.pioneer.description}
               </p>
+
+              <div className="mb-8 p-4 bg-red-50 rounded-lg border border-red-100">
+                <p className="text-slate-700">
+                  Jsme součástí{' '}
+                  <a
+                    href="https://vysocina.pionyr.cz/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-red-600 font-semibold hover:text-red-700 hover:underline transition-colors"
+                  >
+                    Krajské organizace Pionýra Vysočina (KOP Vysočina)
+                  </a>
+                </p>
+              </div>
 
               <h4 className="text-xl md:text-2xl font-bold text-slate-800 mb-4">
                 {content.pioneer?.ideals?.title || pageContent.pioneer.ideals.title}

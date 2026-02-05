@@ -16,7 +16,11 @@
       "WebFetch(domain:github.com)",
       "Bash(node:*)",
       "WebFetch(domain:vercel.com)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm run admin:add:*)",
+      "Bash(npm run admin:list:*)",
+      "Bash(dir:*)",
+      "WebFetch(domain:www.mestopacov.cz)"
     ],
     "deny": [],
     "ask": []

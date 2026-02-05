@@ -13,7 +13,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: '.env.local' });
 
 // MongoDB connection
 const connectToDatabase = async () => {
@@ -518,8 +518,7 @@ const listUsers = async () => {
       console.log(`│ ${username} │ ${created} │ ${lastLogin} │`);
     });
 
-    console.log('└─────────────────────────┴─────────────────────┴─────────────────────┘
-');
+    console.log('└─────────────────────────┴─────────────────────┴─────────────────────┘');
 
   } catch (error) {
     console.error('❌ Chyba při výpisu uživatelů:', error.message);

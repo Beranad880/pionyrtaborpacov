@@ -12,6 +12,7 @@ import PronajemHajenkybePage from './pronajem-hajenky-bela';
 import TaborovePrihlaskyPage from './taborove-prihlasky';
 import ClankyPage from './clanky';
 import FotkyZAkciPage from './fotky-z-akci';
+import MestoPacovPage from './mesto-pacov';
 
 function PagesContent() {
   const searchParams = useSearchParams();
@@ -34,6 +35,8 @@ function PagesContent() {
       return <ClankyPage />;
     case 'fotky-z-akci':
       return <FotkyZAkciPage />;
+    case 'mestopacov':
+      return <MestoPacovPage />;
     default:
       return <UvodPage />;
   }
