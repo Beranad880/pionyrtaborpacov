@@ -22,7 +22,8 @@
       "Bash(dir:*)",
       "WebFetch(domain:www.mestopacov.cz)",
       "Bash(find:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []

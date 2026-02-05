@@ -27,7 +27,7 @@ interface Activity {
 }
 
 interface PageContent {
-  [key: string]: any;
+  [key: string]: any;https://pionyrpacov.cz/
 }
 
 export const siteData = {
@@ -88,7 +88,7 @@ export const siteData = {
 
 export const pageContent = {
   hero: {
-    title: "Adam Pokorný",
+    title: "Pionýrská skupina Pacov",
     backgroundImage: "/images/hero-bg.jpg"
   },
 
