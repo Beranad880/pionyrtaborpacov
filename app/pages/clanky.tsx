@@ -39,73 +39,17 @@ export default function ClankyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Static fallback articles
-  const fallbackArticles: Article[] = [
-    {
-      _id: '1',
-      title: 'Přípravy na zimní tábor 2024',
-      slug: 'pripravy-na-zimni-tabor-2024',
-      excerpt: 'Blíží se termín našeho tradičního zimního tábora. Letos se koná od 27. prosince 2024 do 2. ledna 2025 na Hájence Bělá. Program je plný her, sportovních aktivit a táborového dobrodružství.',
-      author: { name: 'Vedení skupiny' },
-      category: 'announcement',
-      tags: ['tábor', 'zima', '2024'],
-      publishedAt: '2024-11-15',
-      views: 124,
-      likes: 8
-    },
-    {
-      _id: '2',
-      title: 'Úspěšný letní tábor 2024',
-      slug: 'uspesny-letni-tabor-2024',
-      excerpt: 'Letní tábor 2024 na Hájence Bělá se vydařil na výbornou. Účastnilo se ho 28 dětí a měli jsme krásné počasí po celou dobu. Děti si užily spoustu her, výletů a táborových aktivit.',
-      author: { name: 'Vedení skupiny' },
-      category: 'event-report',
-      tags: ['tábor', 'léto', '2024', 'reportáž'],
-      publishedAt: '2024-08-15',
-      views: 256,
-      likes: 15
-    },
-    {
-      _id: '3',
-      title: 'Rekonstrukce hájenky dokončena',
-      slug: 'rekonstrukce-hajenky-dokoncena',
-      excerpt: 'Dokončili jsme rozsáhlou rekonstrukci naší hájenky. Nové sociální zařízení, opravené střechy a celkově modernizované zázemí nám poskytne ještě lepší podmínky pro naše aktivity.',
-      author: { name: 'Vedení skupiny' },
-      category: 'news',
-      tags: ['hájenka', 'rekonstrukce', 'novinky'],
-      publishedAt: '2024-05-01',
-      views: 189,
-      likes: 12
-    },
-    {
-      _id: '4',
-      title: 'Oslava 10. výročí skupiny',
-      slug: 'oslava-10-vyroci-skupiny',
-      excerpt: 'Letos slavíme 10 let od založení Pionýrské skupiny Pacov. Během této doby jsme uspořádali desítky táborů, výletů a akcí pro stovky dětí z Pacova a okolí. Děkujeme všem vedoucím a rodičům za podporu!',
-      author: { name: 'Vedení skupiny' },
-      category: 'announcement',
-      tags: ['výročí', '10 let', 'oslava'],
-      publishedAt: '2024-01-01',
-      views: 342,
-      likes: 24
-    }
-  ];
-
   useEffect(() => {
     const fetchArticles = async () => {
       try {
         const response = await fetch('/api/articles');
         const result = await response.json();
 
-        if (result.success && result.data.articles.length > 0) {
+        if (result.success && result.data.articles) {
           setArticles(result.data.articles);
-        } else {
-          // Use fallback articles if no articles in database
-          setArticles(fallbackArticles);
         }
       } catch (err) {
-        console.log('Using fallback articles due to API error');
-        setArticles(fallbackArticles);
+        console.log('Error fetching articles:', err);
       } finally {
         setLoading(false);
       }
@@ -148,63 +92,69 @@ export default function ClankyPage() {
           Zde najdete nejnovější články, reportáže a novinky z činnosti naší pionýrské skupiny.
         </p>
 
-        <div className="space-y-8">
-          {articles.map((article) => {
-            const categoryInfo = categoryLabels[article.category] || {
-              label: article.category,
-              color: 'bg-gray-100 text-gray-800'
-            };
+        {articles.length === 0 ? (
+          <div className="bg-gray-50 p-8 rounded-lg text-center">
+            <p className="text-gray-600">Zatím zde nejsou žádné články.</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {articles.map((article) => {
+              const categoryInfo = categoryLabels[article.category] || {
+                label: article.category,
+                color: 'bg-gray-100 text-gray-800'
+              };
 
-            return (
-              <article key={article._id} className="bg-white border rounded-lg shadow-sm overflow-hidden">
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                        {article.title}
-                      </h2>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>
-                          Publikováno {new Date(article.publishedAt).toLocaleDateString('cs-CZ', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </span>
-                        {article.author && <span>• {article.author.name}</span>}
-                        <span>• {article.views} zobrazení</span>
+              return (
+                <article key={article._id} className="bg-white border rounded-lg shadow-sm overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                          {article.title}
+                        </h2>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span>
+                            Publikováno {new Date(article.publishedAt).toLocaleDateString('cs-CZ', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </span>
+                          {article.author && <span>• {article.author.name}</span>}
+                          <span>• {article.views} zobrazení</span>
+                        </div>
                       </div>
+                      <span className={`px-3 py-1 rounded-full text-sm ${categoryInfo.color} flex-shrink-0 ml-4`}>
+                        {categoryInfo.label}
+                      </span>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm ${categoryInfo.color} flex-shrink-0 ml-4`}>
-                      {categoryInfo.label}
-                    </span>
+                    <p className="text-gray-700 mb-4">
+                      {article.excerpt}
+                    </p>
+                    {article.tags && article.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {article.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <Link
+                      href={`/pages/clanky/${article.slug}`}
+                      className="text-red-600 hover:text-red-800 font-medium transition-colors"
+                    >
+                      Číst více →
+                    </Link>
                   </div>
-                  <p className="text-gray-700 mb-4">
-                    {article.excerpt}
-                  </p>
-                  {article.tags && article.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {article.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <Link
-                    href={`/pages/clanky/${article.slug}`}
-                    className="text-red-600 hover:text-red-800 font-medium transition-colors"
-                  >
-                    Číst více →
-                  </Link>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
 
         <div className="mt-8 bg-gray-50 p-6 rounded-lg">
           <h2 className="text-xl font-semibold mb-3">Chcete být informováni?</h2>
