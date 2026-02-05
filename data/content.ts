@@ -31,7 +31,7 @@ interface PageContent {
 }
 
 export const siteData = {
-  title: "Adam Pokorný - Pionýrská skupina Pacov",
+  title: "Pionýrská skupina Pacov",
   description: "Pionýr je demokratický, dobrovolný, samostatný a nezávislý spolek dětí, mládeže a dospělých. Předmětem hlavní činnosti Pionýra je veřejně prospěšná činnost.",
 
   contact: {
@@ -88,7 +88,7 @@ export const siteData = {
 
 export const pageContent = {
   hero: {
-    title: "Pionýrská skupina Pacov",
+    title: "Adam Pokorný",
     backgroundImage: "/images/hero-bg.jpg"
   },
 
