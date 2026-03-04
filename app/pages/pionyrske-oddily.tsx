@@ -32,7 +32,7 @@ export default function PionyrseOddilyPage() {
         <div className="h-9 bg-slate-200 rounded w-64 mb-6"></div>
         <div className="h-5 bg-slate-200 rounded w-full mb-2"></div>
         <div className="h-5 bg-slate-200 rounded w-4/5 mb-6"></div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-6">
           {[1, 2, 3].map(i => (
             <div key={i} className="bg-slate-100 p-6 rounded-lg h-48"></div>
           ))}
@@ -50,7 +50,7 @@ export default function PionyrseOddilyPage() {
           {content.description}
         </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-6">
           {content.groups?.map((group: any, index: number) => (
             <div key={index} className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-3">{group.name}</h2>
