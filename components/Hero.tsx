@@ -1,30 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { pageContent } from '@/data/content';
 
 export default function Hero() {
-  const [heroData, setHeroData] = useState<typeof pageContent.hero | null>(null);
-
-  useEffect(() => {
-    const fetchHeroData = async () => {
-      try {
-        const response = await fetch('/api/content?page=home');
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data.hero) {
-            setHeroData(result.data.hero);
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('Failed to fetch hero data, using static content');
-      }
-      setHeroData(pageContent.hero);
-    };
-
-    fetchHeroData();
-  }, []);
+  const heroData = pageContent.hero;
 
   const scrollToAbout = () => {
     const aboutSection = document.getElementById('about-section');
@@ -32,25 +11,6 @@ export default function Hero() {
       aboutSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  if (!heroData) {
-    return (
-      <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="w-full h-full bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/44780.jpg')" }} />
-          <div className="absolute inset-0 bg-black/30"></div>
-        </div>
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <div className="bg-black/60 backdrop-blur-sm rounded-2xl px-8 py-12 mx-4 animate-pulse">
-            <div className="h-14 bg-white/20 rounded-lg mb-6 max-w-lg mx-auto"></div>
-            <div className="h-7 bg-white/20 rounded-lg mb-4 max-w-md mx-auto"></div>
-            <div className="h-7 bg-white/20 rounded-lg mb-8 max-w-xs mx-auto"></div>
-            <div className="h-11 bg-white/20 rounded-lg w-28 mx-auto"></div>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center overflow-hidden">
