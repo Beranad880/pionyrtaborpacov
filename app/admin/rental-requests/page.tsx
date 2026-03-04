@@ -1,7 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type JSX } from 'react';
 import { useRouter } from 'next/navigation';
+
+const DAYS_CS = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
+const MONTHS_CS = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+
+interface BlockedPeriod {
+  _id: string;
+  startDate: string;
+  endDate: string;
+  label: string;
+}
 
 interface RentalRequest {
   _id: string;
@@ -58,6 +68,125 @@ export default function RentalRequestsAdmin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
+
+  // Kalendář blokovaných termínů
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [blockedPeriods, setBlockedPeriods] = useState<BlockedPeriod[]>([]);
+  const [approvedPeriods, setApprovedPeriods] = useState<{startDate: string; endDate: string}[]>([]);
+  const [selectStart, setSelectStart] = useState<string | null>(null);
+  const [selectEnd, setSelectEnd] = useState<string | null>(null);
+  const [blockLabel, setBlockLabel] = useState('');
+  const [isSavingBlock, setIsSavingBlock] = useState(false);
+
+  useEffect(() => { fetchBlockedPeriods(); }, []);
+
+  const fetchBlockedPeriods = async () => {
+    try {
+      const res = await fetch('/api/admin/blocked-periods', { credentials: 'include' });
+      const result = await res.json();
+      if (result.success) setBlockedPeriods(result.data);
+    } catch {}
+    try {
+      const res = await fetch('/api/admin/rental-requests?status=approved&limit=100', { credentials: 'include' });
+      const result = await res.json();
+      if (result.success) setApprovedPeriods(result.data.requests || []);
+    } catch {}
+  };
+
+  const dateStr = (d: Date) => d.toISOString().split('T')[0];
+
+  const isBlocked = (d: Date) => {
+    const s = dateStr(d);
+    return blockedPeriods.some(p => s >= p.startDate.split('T')[0] && s <= p.endDate.split('T')[0]);
+  };
+
+  const isApproved = (d: Date) => {
+    const s = dateStr(d);
+    return approvedPeriods.some((p: any) => s >= p.startDate.split('T')[0] && s <= p.endDate.split('T')[0]);
+  };
+
+  const isInSelection = (d: Date) => {
+    if (!selectStart) return false;
+    const s = dateStr(d);
+    const end = selectEnd || selectStart;
+    const [a, b] = selectStart <= end ? [selectStart, end] : [end, selectStart];
+    return s >= a && s <= b;
+  };
+
+  const handleDayClick = (d: Date) => {
+    const s = dateStr(d);
+    if (!selectStart || (selectStart && selectEnd)) {
+      setSelectStart(s);
+      setSelectEnd(null);
+    } else {
+      if (s < selectStart) { setSelectEnd(selectStart); setSelectStart(s); }
+      else setSelectEnd(s);
+    }
+  };
+
+  const saveBlockedPeriod = async () => {
+    if (!selectStart || !selectEnd || !blockLabel.trim()) return;
+    setIsSavingBlock(true);
+    try {
+      const res = await fetch('/api/admin/blocked-periods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ startDate: selectStart, endDate: selectEnd, label: blockLabel.trim() }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        setBlockedPeriods(prev => [...prev, result.data]);
+        setSelectStart(null); setSelectEnd(null); setBlockLabel('');
+      }
+    } finally {
+      setIsSavingBlock(false);
+    }
+  };
+
+  const deleteBlockedPeriod = async (id: string) => {
+    await fetch('/api/admin/blocked-periods', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ id }),
+    });
+    setBlockedPeriods(prev => prev.filter(p => p._id !== id));
+  };
+
+  const renderAdminCalendar = () => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = (() => { const d = new Date(year, month, 1).getDay(); return d === 0 ? 6 : d - 1; })();
+    const cells: JSX.Element[] = [];
+
+    for (let i = 0; i < firstDay; i++) cells.push(<div key={`e${i}`} />);
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const s = dateStr(date);
+      const blocked = isBlocked(date);
+      const approved = isApproved(date);
+      const inSel = isInSelection(date);
+      const isStart = s === selectStart;
+      const isEnd = s === selectEnd;
+
+      let cls = 'h-9 flex items-center justify-center rounded-lg text-sm cursor-pointer transition-colors select-none ';
+      if (blocked) cls += 'bg-orange-400 text-white font-medium';
+      else if (approved) cls += 'bg-red-500 text-white font-medium';
+      else if (isStart || isEnd) cls += 'bg-blue-600 text-white font-bold';
+      else if (inSel) cls += 'bg-blue-200 text-blue-900';
+      else cls += 'hover:bg-slate-100 text-slate-700';
+
+      cells.push(
+        <div key={day} className={cls} onClick={() => handleDayClick(date)} title={s}>
+          {day}
+        </div>
+      );
+    }
+    return cells;
+  };
 
   useEffect(() => {
     fetchRequests();
@@ -158,6 +287,104 @@ export default function RentalRequestsAdmin() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+
+        {/* Kalendář blokovaných termínů */}
+        <div className="bg-white rounded-xl shadow mb-8 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Správa termínů hájenky</h2>
+
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Kalendář */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <button onClick={() => setCalendarDate(d => { const n = new Date(d); n.setMonth(d.getMonth() - 1); return n; })} className="p-2 hover:bg-slate-100 rounded-lg">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <span className="font-semibold text-slate-700">{MONTHS_CS[calendarDate.getMonth()]} {calendarDate.getFullYear()}</span>
+                <button onClick={() => setCalendarDate(d => { const n = new Date(d); n.setMonth(d.getMonth() + 1); return n; })} className="p-2 hover:bg-slate-100 rounded-lg">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 mb-1">
+                {DAYS_CS.map(d => <div key={d} className="h-8 flex items-center justify-center text-xs font-medium text-slate-500">{d}</div>)}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {renderAdminCalendar()}
+              </div>
+
+              <div className="mt-4 pt-4 border-t flex flex-wrap gap-3 text-sm">
+                <div className="flex items-center gap-1"><div className="w-4 h-4 bg-red-500 rounded"></div><span>Schválená žádost</span></div>
+                <div className="flex items-center gap-1"><div className="w-4 h-4 bg-orange-400 rounded"></div><span>Admin blokace</span></div>
+                <div className="flex items-center gap-1"><div className="w-4 h-4 bg-blue-200 rounded"></div><span>Výběr</span></div>
+              </div>
+            </div>
+
+            {/* Formulář + seznam blokací */}
+            <div className="space-y-6">
+              <div className="bg-slate-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-3">Zablokovat termín</h3>
+                <p className="text-sm text-gray-500 mb-3">Kliknutím vyberte začátek a konec termínu v kalendáři.</p>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Od</label>
+                    <div className="px-3 py-2 bg-white border rounded-lg text-sm text-gray-700">{selectStart || '—'}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Do</label>
+                    <div className="px-3 py-2 bg-white border rounded-lg text-sm text-gray-700">{selectEnd || '—'}</div>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Popis (např. Tábor Pionýr, Oprava...)"
+                  value={blockLabel}
+                  onChange={e => setBlockLabel(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveBlockedPeriod}
+                    disabled={!selectStart || !selectEnd || !blockLabel.trim() || isSavingBlock}
+                    className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    {isSavingBlock ? 'Ukládám...' : 'Zablokovat'}
+                  </button>
+                  <button
+                    onClick={() => { setSelectStart(null); setSelectEnd(null); setBlockLabel(''); }}
+                    className="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm transition-colors"
+                  >
+                    Zrušit
+                  </button>
+                </div>
+              </div>
+
+              {/* Seznam blokací */}
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-3">Aktivní blokace</h3>
+                {blockedPeriods.length === 0 ? (
+                  <p className="text-sm text-gray-400">Žádné blokace.</p>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {blockedPeriods.map(p => (
+                      <div key={p._id} className="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                        <div>
+                          <div className="text-sm font-medium text-orange-800">{p.label}</div>
+                          <div className="text-xs text-orange-600">
+                            {new Date(p.startDate).toLocaleDateString('cs-CZ')} – {new Date(p.endDate).toLocaleDateString('cs-CZ')}
+                          </div>
+                        </div>
+                        <button onClick={() => deleteBlockedPeriod(p._id)} className="text-red-400 hover:text-red-600 ml-3" title="Smazat">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="mb-6 flex flex-wrap gap-2">
           {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => (

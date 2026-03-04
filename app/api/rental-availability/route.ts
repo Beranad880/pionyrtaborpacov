@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Rental from '@/models/Rental';
 import RentalRequest from '@/models/RentalRequest';
+import BlockedPeriod from '@/models/BlockedPeriod';
 
 export async function GET() {
   try {
@@ -26,6 +27,11 @@ export async function GET() {
       .select('startDate endDate')
       .lean();
 
+    // Get admin-blocked periods
+    const blockedPeriods = await BlockedPeriod.find({ endDate: { $gte: today } })
+      .select('startDate endDate')
+      .lean();
+
     // Combine and format the occupied periods
     const occupiedPeriods = [
       ...approvedRequests.map(r => ({
@@ -33,6 +39,10 @@ export async function GET() {
         endDate: r.endDate.toISOString().split('T')[0]
       })),
       ...confirmedRentals.map(r => ({
+        startDate: r.startDate.toISOString().split('T')[0],
+        endDate: r.endDate.toISOString().split('T')[0]
+      })),
+      ...blockedPeriods.map(r => ({
         startDate: r.startDate.toISOString().split('T')[0],
         endDate: r.endDate.toISOString().split('T')[0]
       }))
