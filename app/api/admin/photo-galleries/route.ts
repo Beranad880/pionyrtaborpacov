@@ -5,16 +5,21 @@ import { requireAuth } from '@/lib/auth-middleware';
 
 // GET - Načíst fotogalerie
 export async function GET(request: NextRequest) {
-  const authError = requireAuth(request);
-  if (authError) return authError;
+  const { searchParams } = new URL(request.url);
+  const isPublicParam = searchParams.get('isPublic');
+
+  // Vyžadovat auth pouze pokud se nepožadují veřejné galerie
+  if (isPublicParam !== 'true') {
+    const authError = requireAuth(request);
+    if (authError) return authError;
+  }
 
   try {
     await connectToMongoose();
 
-    const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '12');
-    const isPublic = searchParams.get('isPublic');
+    const isPublic = isPublicParam;
 
     const skip = (page - 1) * limit;
     const filter: any = {};
