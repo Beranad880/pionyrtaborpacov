@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { allPagesContent } from '@/data/content';
 
 export default function PionyrseOddilyPage() {
-  const [content, setContent] = useState(allPagesContent.pioneerGroups);
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState<typeof allPagesContent.pioneerGroups | null>(null);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -15,17 +14,33 @@ export default function PionyrseOddilyPage() {
           const result = await response.json();
           if (result.success && result.data) {
             setContent(result.data);
+            return;
           }
         }
       } catch (error) {
         console.log('Failed to fetch content, using static data');
-      } finally {
-        setLoading(false);
       }
+      setContent(allPagesContent.pioneerGroups);
     };
 
     fetchContent();
   }, []);
+
+  if (!content) {
+    return (
+      <main className="container mx-auto px-4 py-8 animate-pulse">
+        <div className="h-9 bg-slate-200 rounded w-64 mb-6"></div>
+        <div className="h-5 bg-slate-200 rounded w-full mb-2"></div>
+        <div className="h-5 bg-slate-200 rounded w-4/5 mb-6"></div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-slate-100 p-6 rounded-lg h-48"></div>
+          ))}
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">{content.title}</h1>

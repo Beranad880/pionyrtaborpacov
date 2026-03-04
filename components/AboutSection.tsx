@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { pageContent } from '@/data/content';
 
 export default function AboutSection() {
-  const [content, setContent] = useState(pageContent);
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState<typeof pageContent | null>(null);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -15,17 +14,45 @@ export default function AboutSection() {
           const result = await response.json();
           if (result.success && result.data) {
             setContent(result.data);
+            return;
           }
         }
       } catch (error) {
         console.log('Failed to fetch content, using static data');
-      } finally {
-        setLoading(false);
       }
+      setContent(pageContent);
     };
 
     fetchContent();
   }, []);
+
+  if (!content) {
+    return (
+      <section id="about-section" className="py-16 bg-gradient-to-b from-white to-slate-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto animate-pulse">
+            <div className="text-center mb-12">
+              <div className="h-10 bg-slate-200 rounded-lg max-w-sm mx-auto mb-6"></div>
+              <div className="h-6 bg-slate-200 rounded-lg max-w-2xl mx-auto mb-2"></div>
+              <div className="h-6 bg-slate-200 rounded-lg max-w-xl mx-auto"></div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div className="space-y-4">
+                <div className="h-4 bg-slate-200 rounded w-full"></div>
+                <div className="h-4 bg-slate-200 rounded w-5/6"></div>
+                <div className="h-4 bg-slate-200 rounded w-full"></div>
+                <div className="h-4 bg-slate-200 rounded w-4/5"></div>
+              </div>
+              <div className="flex justify-center">
+                <div className="w-80 h-80 bg-slate-200 rounded-xl"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="about-section" className="py-16 bg-gradient-to-b from-white to-slate-50">
       <div className="container mx-auto px-4">

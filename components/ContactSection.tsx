@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { siteData } from '@/data/content';
 
 export default function ContactSection() {
-  const [data, setData] = useState(siteData);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<typeof siteData | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -15,17 +14,40 @@ export default function ContactSection() {
           const result = await response.json();
           if (result.success && result.data) {
             setData(result.data);
+            return;
           }
         }
       } catch (error) {
         console.log('Failed to fetch site data, using static data');
-      } finally {
-        setLoading(false);
       }
+      setData(siteData);
     };
 
     fetchData();
   }, []);
+
+  if (!data) {
+    return (
+      <section className="py-16 bg-slate-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto animate-pulse">
+            <div className="text-center mb-12">
+              <div className="h-10 bg-slate-200 rounded-lg max-w-md mx-auto"></div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div className="w-full h-96 bg-slate-200 rounded-xl"></div>
+              <div className="space-y-6">
+                <div className="h-16 bg-slate-200 rounded-lg"></div>
+                <div className="h-16 bg-slate-200 rounded-lg"></div>
+                <div className="h-16 bg-slate-200 rounded-lg"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 bg-slate-50">
       <div className="container mx-auto px-4">

@@ -40,8 +40,7 @@ const purposeOptions = [
 ];
 
 export default function HajenkabelaPage() {
-  const [content, setContent] = useState(allPagesContent.hajenkaBela);
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState<typeof allPagesContent.hajenkaBela | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -70,13 +69,13 @@ export default function HajenkabelaPage() {
           const result = await response.json();
           if (result.success && result.data) {
             setContent(result.data);
+            return;
           }
         }
       } catch (error) {
         console.log('Failed to fetch content, using static data');
-      } finally {
-        setLoading(false);
       }
+      setContent(allPagesContent.hajenkaBela);
     };
 
     fetchContent();
@@ -185,6 +184,20 @@ export default function HajenkabelaPage() {
   const estimatedPrice = calculateEstimatedPrice();
   const days = formData.startDate && formData.endDate ?
     Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+
+  if (!content) {
+    return (
+      <main className="container mx-auto px-4 py-8 animate-pulse">
+        <div className="h-9 bg-slate-200 rounded w-80 mb-4"></div>
+        <div className="h-5 bg-slate-200 rounded w-full mb-2"></div>
+        <div className="h-5 bg-slate-200 rounded w-3/4 mb-8"></div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-slate-200 rounded-lg"></div>)}
+        </div>
+        <div className="h-96 bg-slate-200 rounded-xl"></div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-50">
