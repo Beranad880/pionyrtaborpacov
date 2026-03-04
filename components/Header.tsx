@@ -11,17 +11,10 @@ export default function Header() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = () => {
-      const cookie = document.cookie.split(';').find(c => c.trim().startsWith('admin_auth='));
-      setIsAdminLoggedIn(!!cookie);
-    };
-    checkAuth();
-
-    // Listen for changes in localStorage or other events if needed
-    window.addEventListener('storage', checkAuth);
-    return () => {
-      window.removeEventListener('storage', checkAuth);
-    };
+    fetch('/api/auth/verify')
+      .then(res => res.json())
+      .then(data => setIsAdminLoggedIn(data.success === true))
+      .catch(() => setIsAdminLoggedIn(false));
   }, []);
 
   const handleLogout = async () => {
