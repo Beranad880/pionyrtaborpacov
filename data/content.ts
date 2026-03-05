@@ -137,51 +137,39 @@ export const allPagesContent: PageContent = {
 
   // Pionýrské oddíly
   pioneerGroups: {
-    title: "Pionýrské oddíly",
-    description: "Naše pionýrské oddíly poskytují zážitkové aktivity pro děti a mládež různých věkových kategorií.",
-    groups: [
-      {
-        name: "Mladší pionýři",
-        ageRange: "6-10 let",
-        description: "Hry, rukodělné aktivity, poznávání přírody a základy táborových dovedností.",
-        activities: [
-          "Táborové hry",
-          "Rukodělné aktivity",
-          "Poznávání přírody",
-          "Základy táborových dovedností",
-          "Sportovní hry"
-        ]
-      },
-      {
-        name: "Starší pionýři",
-        ageRange: "11-15 let",
-        description: "Dobrodružné výpravy, sportovní aktivity, projekty a komunitní služba.",
-        activities: [
-          "Dobrodružné výpravy",
-          "Sportovní aktivity",
-          "Komunitní projekty",
-          "Leadership aktivity",
-          "Outdoorové dovednosti"
-        ]
-      },
-      {
-        name: "Roveři",
-        ageRange: "16+ let",
-        description: "Vedení mladších skupin, organizace akcí a rozvoj leadership dovedností.",
-        activities: [
-          "Vedení mladších skupin",
-          "Organizace akcí",
-          "Leadership dovednosti",
-          "Mentoring",
-          "Projektové řízení"
-        ]
-      }
-    ],
-    joinInfo: {
-      title: "Jak se zapojit?",
-      description: "Pokud máte zájem o zapojení do našich oddílů, kontaktujte nás pomocí níže uvedených údajů nebo navštivte některou z našich akcí."
+  title: "Pionýrské oddíly",
+  description: "Naše pionýrské oddíly poskytují zážitkové aktivity pro děti a mládež různých věkových kategorií.",
+  groups: [
+    {
+      name: "Běláci",
+      ageRange: "8–15 let",
+      description: "Oddíl zaměřený na pobyt v přírodě, výpravy, táborové dovednosti a týmové hry.",
+      activities: [
+        "Výpravy do přírody",
+        "Táborové hry",
+        "Stavění přístřešků",
+        "Orientace v terénu",
+        "Táboráky a zpívání"
+      ]
+    },
+    {
+      name: "Mažoretky",
+      ageRange: "6–15 let",
+      description: "Oddíl zaměřený na tanec, pohybovou průpravu a vystoupení na kulturních akcích.",
+      activities: [
+        "Trénink choreografií",
+        "Práce s hůlkou (baton)",
+        "Taneční vystoupení",
+        "Pohybová průprava",
+        "Vystoupení na akcích"
+      ]
     }
-  },
+  ],
+  joinInfo: {
+    title: "Jak se zapojit?",
+    description: "Pokud máte zájem o zapojení do některého z našich oddílů, kontaktujte nás nebo přijďte na některou z našich akcí."
+  }
+},
 
   // Hájenka Bělá
   hajenkaBela: {
