@@ -106,7 +106,7 @@ export async function DELETE(
     await connectToMongoose();
     const { slug } = await params;
 
-    const article = await Article.findOneAndDelete({ slug });
+    const article = await Article.findByIdAndDelete(slug);
 
     if (!article) {
       return NextResponse.json(
