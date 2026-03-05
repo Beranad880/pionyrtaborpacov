@@ -43,14 +43,11 @@ export default function KalendarAkciPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('/api/admin/events?upcoming=true');
+        const response = await fetch('/api/events?upcoming=true');
         const result = await response.json();
 
         if (result.success) {
-          const publicEvents = result.data.events.filter((event: Event) =>
-            event.isPublic && event.status !== 'cancelled'
-          );
-          setEvents(publicEvents);
+          setEvents(result.data.events);
         }
       } catch (error) {
         console.error('Failed to fetch events:', error);
