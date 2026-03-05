@@ -3,6 +3,9 @@ import connectToMongoose from '@/lib/mongoose';
 import Rental from '@/models/Rental';
 import RentalRequest from '@/models/RentalRequest';
 import { requireAuth } from '@/lib/auth-middleware';
+import { parsePagination, paginationMeta } from '@/lib/pagination';
+import { validateDateRange } from '@/lib/validation';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst pronájmy
 export async function GET(request: NextRequest) {
@@ -13,16 +16,11 @@ export async function GET(request: NextRequest) {
     await connectToMongoose();
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const { page, limit, skip } = parsePagination(searchParams);
     const status = searchParams.get('status');
 
-    const skip = (page - 1) * limit;
     const filter: any = {};
-
-    if (status && status !== 'all') {
-      filter.status = status;
-    }
+    if (status && status !== 'all') filter.status = status;
 
     const rentals = await Rental.find(filter)
       .sort({ startDate: -1 })
@@ -36,20 +34,11 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         rentals,
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit)
-        }
+        pagination: paginationMeta(page, limit, total),
       }
     });
-  } catch (error: any) {
-    console.error('GET /api/admin/rental error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch rentals', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/rental error:');
   }
 }
 
@@ -75,27 +64,20 @@ export async function POST(request: NextRequest) {
 
     const startDate = new Date(body.startDate);
     const endDate = new Date(body.endDate);
-
-    if (endDate <= startDate) {
-      return NextResponse.json(
-        { success: false, message: 'Datum odjezdu musí být po datu příjezdu' },
-        { status: 400 }
-      );
+    const dateError = validateDateRange(startDate, endDate);
+    if (dateError) {
+      return NextResponse.json({ success: false, message: dateError }, { status: 400 });
     }
 
-    // Check for conflicts with existing approved requests and confirmed rentals
+    // Kontrola konfliktů s existujícími schválenými žádostmi a potvrzenými pronájmy
     const conflictingRequests = await RentalRequest.find({
       status: 'approved',
-      $or: [
-        { startDate: { $lte: endDate }, endDate: { $gte: startDate } }
-      ]
+      $or: [{ startDate: { $lte: endDate }, endDate: { $gte: startDate } }]
     });
 
     const conflictingRentals = await Rental.find({
       status: { $in: ['confirmed', 'paid'] },
-      $or: [
-        { startDate: { $lte: endDate }, endDate: { $gte: startDate } }
-      ]
+      $or: [{ startDate: { $lte: endDate }, endDate: { $gte: startDate } }]
     });
 
     if (conflictingRequests.length > 0 || conflictingRentals.length > 0) {
@@ -105,7 +87,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const rental = new Rental(body);
+    const rental = new Rental({
+      name: body.name,
+      email: body.email,
+      phone: body.phone,
+      organization: body.organization,
+      startDate,
+      endDate,
+      guestCount: parseInt(body.guestCount),
+      purpose: body.purpose,
+      facilities: body.facilities || [],
+      message: body.message,
+      status: body.status || 'confirmed',
+      price: body.price,
+      invoiceId: body.invoiceId,
+      adminNotes: body.adminNotes,
+    });
 
     await rental.save();
 
@@ -116,19 +113,10 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('POST /api/admin/rental error:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json(
-        { success: false, message: 'Validace selhala', errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Failed to create rental', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'POST /api/admin/rental error:');
   }
 }

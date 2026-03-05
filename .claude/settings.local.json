@@ -24,7 +24,9 @@
       "Bash(find:*)",
       "Bash(npm uninstall:*)",
       "Bash(git config:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(npx tsc:*)",
+      "Bash(xargs grep:*)"
     ],
     "deny": [],
     "ask": []

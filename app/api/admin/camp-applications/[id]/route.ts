@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import CampApplication from '@/models/CampApplication';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst jednu přihlášku
 export async function GET(
@@ -24,16 +25,9 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: application
-    });
-  } catch (error: any) {
-    console.error('GET /api/admin/camp-applications/[id] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Nepodařilo se načíst přihlášku', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, data: application });
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/camp-applications/[id] error:');
   }
 }
 
@@ -69,7 +63,6 @@ export async function PUT(
       );
     }
 
-    // Aktualizace přihlášky
     application.status = status;
     application.adminNotes = adminNotes;
     application.processedBy = user?.username || 'admin';
@@ -85,12 +78,8 @@ export async function PUT(
       message: `Přihláška byla ${status === 'approved' ? 'schválena' : status === 'rejected' ? 'zamítnuta' : 'aktualizována'}`,
       data: application
     });
-  } catch (error: any) {
-    console.error('PUT /api/admin/camp-applications/[id] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Nepodařilo se aktualizovat přihlášku', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'PUT /api/admin/camp-applications/[id] error:');
   }
 }
 
@@ -115,15 +104,8 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Přihláška byla smazána'
-    });
-  } catch (error: any) {
-    console.error('DELETE /api/admin/camp-applications/[id] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Nepodařilo se smazat přihlášku', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, message: 'Přihláška byla smazána' });
+  } catch (error) {
+    return dbError(error, 'DELETE /api/admin/camp-applications/[id] error:');
   }
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Content from '@/models/Content';
 import { allPagesContent, siteData, pageContent } from '@/data/content';
+import { requireAuth } from '@/lib/auth-middleware';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst obsah stránky (pro frontend)
 export async function GET(request: NextRequest) {
@@ -19,7 +21,6 @@ export async function GET(request: NextRequest) {
     try {
       await connectToMongoose();
 
-      // Pokusit se načíst obsah z databáze
       const content = await Content.findOne({ page });
 
       if (content) {
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
           version: content.version,
         });
       }
-    } catch (dbError) {
+    } catch {
       console.log('Database not available, falling back to static content');
     }
 
@@ -65,17 +66,16 @@ export async function GET(request: NextRequest) {
       data: staticContent,
       source: 'static',
     });
-  } catch (error: any) {
-    console.error('GET /api/content error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch content', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'GET /api/content error:');
   }
 }
 
-// POST - Uložit nebo aktualizovat obsah stránky
+// POST - Uložit nebo aktualizovat obsah stránky (pouze admin)
 export async function POST(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const { page, data } = body;
@@ -89,7 +89,6 @@ export async function POST(request: NextRequest) {
 
     await connectToMongoose();
 
-    // Aktualizovat nebo vytvořit obsah
     const savedContent = await Content.findOneAndUpdate(
       { page },
       {
@@ -112,9 +111,6 @@ export async function POST(request: NextRequest) {
       data: savedContent,
     });
   } catch (error: any) {
-    console.error('POST /api/content error:', error);
-
-    // Handle mongoose validation errors
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((err: any) => err.message);
       return NextResponse.json(
@@ -122,10 +118,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Failed to save content', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'POST /api/content error:');
   }
 }

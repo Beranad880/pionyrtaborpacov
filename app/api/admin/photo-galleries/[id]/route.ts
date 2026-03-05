@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import PhotoGallery from '@/models/PhotoGallery';
 import { requireAuth } from '@/lib/auth-middleware';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst konkrétní galerii
 export async function GET(
@@ -24,16 +25,9 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: gallery
-    });
-  } catch (error: any) {
-    console.error('GET /api/admin/photo-galleries/[id] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch photo gallery', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, data: gallery });
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/photo-galleries/[id] error:');
   }
 }
 
@@ -50,7 +44,6 @@ export async function PUT(
     const { id } = await params;
 
     const body = await request.json();
-
     const gallery = await PhotoGallery.findById(id);
 
     if (!gallery) {
@@ -60,18 +53,13 @@ export async function PUT(
       );
     }
 
-    // Update fields
     if (body.title) gallery.title = body.title;
     if (body.description) gallery.description = body.description;
     if (body.event) gallery.event = body.event;
     if (body.date) gallery.date = new Date(body.date);
     if (body.coverPhoto) gallery.coverPhoto = body.coverPhoto;
     if (body.isPublic !== undefined) gallery.isPublic = body.isPublic;
-
-    // Handle photos array updates
-    if (body.photos) {
-      gallery.photos = body.photos;
-    }
+    if (body.photos) gallery.photos = body.photos;
 
     await gallery.save();
 
@@ -82,20 +70,11 @@ export async function PUT(
     });
 
   } catch (error: any) {
-    console.error('PUT /api/admin/photo-galleries/[id] error:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json(
-        { success: false, message: 'Validace selhala', errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Failed to update photo gallery', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'PUT /api/admin/photo-galleries/[id] error:');
   }
 }
 
@@ -120,16 +99,9 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Galerie byla úspěšně smazána'
-    });
+    return NextResponse.json({ success: true, message: 'Galerie byla úspěšně smazána' });
 
-  } catch (error: any) {
-    console.error('DELETE /api/admin/photo-galleries/[id] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to delete photo gallery', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'DELETE /api/admin/photo-galleries/[id] error:');
   }
 }

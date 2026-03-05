@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import CampApplication from '@/models/CampApplication';
 import { requireAuth } from '@/lib/auth-middleware';
+import { parsePagination, paginationMeta } from '@/lib/pagination';
+import { escapeRegex } from '@/lib/validation';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst táborové přihlášky (pouze pro adminy)
 export async function GET(request: NextRequest) {
@@ -12,12 +15,10 @@ export async function GET(request: NextRequest) {
     await connectToMongoose();
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const { page, limit, skip } = parsePagination(searchParams);
     const status = searchParams.get('status');
     const search = searchParams.get('search');
 
-    const skip = (page - 1) * limit;
     const filter: any = {};
 
     if (status && status !== 'all') {
@@ -25,10 +26,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       filter.$or = [
-        { participantName: { $regex: search, $options: 'i' } },
-        { guardianName: { $regex: search, $options: 'i' } },
-        { guardianEmail: { $regex: search, $options: 'i' } },
+        { participantName: { $regex: safeSearch, $options: 'i' } },
+        { guardianName: { $regex: safeSearch, $options: 'i' } },
+        { guardianEmail: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
@@ -42,20 +44,10 @@ export async function GET(request: NextRequest) {
 
     // Statistiky podle statusu
     const statusStats = await CampApplication.aggregate([
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
+      { $group: { _id: '$status', count: { $sum: 1 } } }
     ]);
 
-    const stats = {
-      pending: 0,
-      approved: 0,
-      rejected: 0,
-      total: total
-    };
+    const stats = { pending: 0, approved: 0, rejected: 0, total };
 
     statusStats.forEach(stat => {
       if (stat._id in stats) {
@@ -67,21 +59,12 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         applications,
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit)
-        },
+        pagination: paginationMeta(page, limit, total),
         stats
       }
     });
-  } catch (error: any) {
-    console.error('GET /api/admin/camp-applications error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Nepodařilo se načíst přihlášky', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/camp-applications error:');
   }
 }
 
@@ -92,17 +75,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Validace required fields
     const requiredFields = [
-      'participantName',
-      'grade',
-      'dateOfBirth',
-      'birthNumber',
-      'guardianName',
-      'guardianPhone',
-      'guardianEmail',
-      'secondContactName',
-      'secondContactPhone'
+      'participantName', 'grade', 'dateOfBirth', 'birthNumber',
+      'guardianName', 'guardianPhone', 'guardianEmail',
+      'secondContactName', 'secondContactPhone'
     ];
 
     for (const field of requiredFields) {
@@ -114,7 +90,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validace adresních údajů
     if (!body.address || !body.address.street || !body.address.city) {
       return NextResponse.json(
         { success: false, message: 'Adresa účastníka je povinná' },
@@ -122,7 +97,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Kontrola duplicit podle rodného čísla nebo emailu
     const existingApplication = await CampApplication.findOne({
       $or: [
         { birthNumber: body.birthNumber },
@@ -167,8 +141,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('POST /api/admin/camp-applications error:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((e: any) => e.message);
       return NextResponse.json(
@@ -176,10 +148,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Nepodařilo se vytvořit přihlášku', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'POST /api/admin/camp-applications error:');
   }
 }

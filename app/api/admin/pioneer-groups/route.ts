@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import PioneerGroup from '@/models/PioneerGroup';
 import { requireAuth } from '@/lib/auth-middleware';
+import { dbError } from '@/lib/api-response';
 
 // GET - Získat všechny pionýrské oddíly
 export async function GET(request: NextRequest) {
@@ -12,21 +13,9 @@ export async function GET(request: NextRequest) {
     await connectToMongoose();
     const groups = await PioneerGroup.find({ isActive: true }).sort({ createdAt: -1 });
 
-    return NextResponse.json({
-      success: true,
-      data: groups
-    });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error('GET /api/admin/pioneer-groups error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to fetch pioneer groups',
-        error: error.message
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, data: groups });
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/pioneer-groups error:');
   }
 }
 
@@ -39,7 +28,19 @@ export async function POST(request: NextRequest) {
     await connectToMongoose();
     const body = await request.json();
 
-    const group = new PioneerGroup(body);
+    const group = new PioneerGroup({
+      name: body.name,
+      ageRange: body.ageRange,
+      description: body.description,
+      activities: body.activities || [],
+      leader: body.leader,
+      meetingDay: body.meetingDay,
+      meetingTime: body.meetingTime,
+      location: body.location,
+      maxMembers: body.maxMembers,
+      currentMembers: body.currentMembers || 0,
+    });
+
     await group.save();
 
     return NextResponse.json({
@@ -47,17 +48,12 @@ export async function POST(request: NextRequest) {
       data: group,
       message: 'Pioneer group created successfully'
     });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error('POST /api/admin/pioneer-groups error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to create pioneer group',
-        error: error.message
-      },
-      { status: 500 }
-    );
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((e: any) => e.message);
+      return NextResponse.json({ success: false, message: errors.join(', ') }, { status: 400 });
+    }
+    return dbError(error, 'POST /api/admin/pioneer-groups error:');
   }
 }
 
@@ -73,10 +69,7 @@ export async function PUT(request: NextRequest) {
 
     if (!_id) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'ID is required for update'
-        },
+        { success: false, message: 'ID is required for update' },
         { status: 400 }
       );
     }
@@ -89,10 +82,7 @@ export async function PUT(request: NextRequest) {
 
     if (!group) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'Pioneer group not found'
-        },
+        { success: false, message: 'Pioneer group not found' },
         { status: 404 }
       );
     }
@@ -102,16 +92,8 @@ export async function PUT(request: NextRequest) {
       data: group,
       message: 'Pioneer group updated successfully'
     });
-  } catch (error: any) {
-    console.error('PUT /api/admin/pioneer-groups error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to update pioneer group',
-        error: error.message
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'PUT /api/admin/pioneer-groups error:');
   }
 }
 
@@ -127,10 +109,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'ID is required for delete'
-        },
+        { success: false, message: 'ID is required for delete' },
         { status: 400 }
       );
     }
@@ -143,27 +122,13 @@ export async function DELETE(request: NextRequest) {
 
     if (!group) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'Pioneer group not found'
-        },
+        { success: false, message: 'Pioneer group not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Pioneer group deleted successfully'
-    });
-  } catch (error: any) {
-    console.error('DELETE /api/admin/pioneer-groups error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to delete pioneer group',
-        error: error.message
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, message: 'Pioneer group deleted successfully' });
+  } catch (error) {
+    return dbError(error, 'DELETE /api/admin/pioneer-groups error:');
   }
 }

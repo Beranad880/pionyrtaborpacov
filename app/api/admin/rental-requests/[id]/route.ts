@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import RentalRequest from '@/models/RentalRequest';
 import { requireAuth } from '@/lib/auth-middleware';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst konkrétní žádost
 export async function GET(
@@ -24,16 +25,9 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: rentalRequest
-    });
-  } catch (error: any) {
-    console.error('GET /api/admin/rental-requests/[id] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch rental request', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, data: rentalRequest });
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/rental-requests/[id] error:');
   }
 }
 
@@ -50,7 +44,6 @@ async function updateRentalRequest(
     const { id } = await params;
 
     const body = await request.json();
-
     const rentalRequest = await RentalRequest.findById(id);
 
     if (!rentalRequest) {
@@ -60,7 +53,6 @@ async function updateRentalRequest(
       );
     }
 
-    // Update allowed fields
     if (body.status && ['pending', 'approved', 'rejected'].includes(body.status)) {
       rentalRequest.status = body.status;
 
@@ -69,17 +61,15 @@ async function updateRentalRequest(
         rentalRequest.processedBy = body.processedBy || 'admin';
       }
 
-      // Check for conflicts when approving
+      // Kontrola konfliktů při schválení
       if (body.status === 'approved') {
         const conflictingRequests = await RentalRequest.find({
           _id: { $ne: id },
           status: 'approved',
-          $or: [
-            {
-              startDate: { $lte: rentalRequest.endDate },
-              endDate: { $gte: rentalRequest.startDate }
-            }
-          ]
+          $or: [{
+            startDate: { $lte: rentalRequest.endDate },
+            endDate: { $gte: rentalRequest.startDate }
+          }]
         });
 
         if (conflictingRequests.length > 0) {
@@ -104,20 +94,11 @@ async function updateRentalRequest(
     });
 
   } catch (error: any) {
-    console.error('PUT /api/admin/rental-requests/[id] error:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json(
-        { success: false, message: 'Validace selhala', errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Failed to update rental request', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'PUT /api/admin/rental-requests/[id] error:');
   }
 }
 
@@ -145,16 +126,9 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Žádost byla úspěšně smazána'
-    });
+    return NextResponse.json({ success: true, message: 'Žádost byla úspěšně smazána' });
 
-  } catch (error: any) {
-    console.error('DELETE /api/admin/rental-requests/[id] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to delete rental request', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'DELETE /api/admin/rental-requests/[id] error:');
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Facility from '@/models/Facility';
 import { requireAuth } from '@/lib/auth-middleware';
+import { dbError } from '@/lib/api-response';
 
 // GET - Získat všechna zařízení
 export async function GET(request: NextRequest) {
@@ -12,20 +13,9 @@ export async function GET(request: NextRequest) {
     await connectToMongoose();
     const facilities = await Facility.find({ isActive: true }).sort({ createdAt: -1 });
 
-    return NextResponse.json({
-      success: true,
-      data: facilities
-    });
-  } catch (error: any) {
-    console.error('GET /api/admin/facilities error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to fetch facilities',
-        error: error.message
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, data: facilities });
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/facilities error:');
   }
 }
 
@@ -38,7 +28,20 @@ export async function POST(request: NextRequest) {
     await connectToMongoose();
     const body = await request.json();
 
-    const facility = new Facility(body);
+    const facility = new Facility({
+      name: body.name,
+      type: body.type,
+      description: body.description,
+      details: body.details,
+      location: body.location,
+      equipment: body.equipment || [],
+      activities: body.activities || [],
+      capacity: body.capacity,
+      images: body.images || [],
+      contact: body.contact,
+      rental: body.rental,
+    });
+
     await facility.save();
 
     return NextResponse.json({
@@ -47,15 +50,11 @@ export async function POST(request: NextRequest) {
       message: 'Facility created successfully'
     });
   } catch (error: any) {
-    console.error('POST /api/admin/facilities error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to create facility',
-        error: error.message
-      },
-      { status: 500 }
-    );
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((e: any) => e.message);
+      return NextResponse.json({ success: false, message: errors.join(', ') }, { status: 400 });
+    }
+    return dbError(error, 'POST /api/admin/facilities error:');
   }
 }
 
@@ -71,10 +70,7 @@ export async function PUT(request: NextRequest) {
 
     if (!_id) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'ID is required for update'
-        },
+        { success: false, message: 'ID is required for update' },
         { status: 400 }
       );
     }
@@ -87,10 +83,7 @@ export async function PUT(request: NextRequest) {
 
     if (!facility) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'Facility not found'
-        },
+        { success: false, message: 'Facility not found' },
         { status: 404 }
       );
     }
@@ -100,16 +93,8 @@ export async function PUT(request: NextRequest) {
       data: facility,
       message: 'Facility updated successfully'
     });
-  } catch (error: any) {
-    console.error('PUT /api/admin/facilities error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to update facility',
-        error: error.message
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'PUT /api/admin/facilities error:');
   }
 }
 
@@ -125,10 +110,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'ID is required for delete'
-        },
+        { success: false, message: 'ID is required for delete' },
         { status: 400 }
       );
     }
@@ -141,27 +123,13 @@ export async function DELETE(request: NextRequest) {
 
     if (!facility) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'Facility not found'
-        },
+        { success: false, message: 'Facility not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Facility deleted successfully'
-    });
-  } catch (error: any) {
-    console.error('DELETE /api/admin/facilities error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to delete facility',
-        error: error.message
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, message: 'Facility deleted successfully' });
+  } catch (error) {
+    return dbError(error, 'DELETE /api/admin/facilities error:');
   }
 }

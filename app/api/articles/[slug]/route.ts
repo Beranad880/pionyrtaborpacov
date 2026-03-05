@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Article from '@/models/Article';
+import { requireAuth } from '@/lib/auth-middleware';
+import { dbError } from '@/lib/api-response';
 
 export async function GET(
   request: NextRequest,
@@ -11,11 +13,7 @@ export async function GET(
     await connectToMongoose();
     const { slug } = await params;
 
-    const article = await Article.findOne({
-      slug: slug,
-      status: 'published'
-    })
-      .lean();
+    const article = await Article.findOne({ slug, status: 'published' }).lean();
 
     if (!article) {
       return NextResponse.json(
@@ -24,19 +22,11 @@ export async function GET(
       );
     }
 
-    // Increment views
     await Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } });
 
-    return NextResponse.json({
-      success: true,
-      data: article
-    });
-  } catch (error: any) {
-    console.error('GET /api/articles/[slug] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch article', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, data: article });
+  } catch (error) {
+    return dbError(error, 'GET /api/articles/[slug] error:');
   }
 }
 
@@ -44,23 +34,16 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  try {
-    // Kontrola autentifikace
-    const authCookie = request.cookies.get('admin_auth');
-    if (!authCookie) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const authError = requireAuth(request);
+  if (authError) return authError;
 
+  try {
     await connectToMongoose();
     const { slug: slugParam } = await params;
 
     const body = await request.json();
     const { title, slug, content, excerpt, category, tags, status } = body;
 
-    // Find article by ID (assuming slug param is actually an ID in admin context)
     const article = await Article.findById(slugParam);
 
     if (!article) {
@@ -70,7 +53,6 @@ export async function PUT(
       );
     }
 
-    // Check if new slug already exists (if slug is being changed)
     if (slug && slug !== article.slug) {
       const existingArticle = await Article.findOne({ slug, _id: { $ne: slugParam } });
       if (existingArticle) {
@@ -81,10 +63,7 @@ export async function PUT(
       }
     }
 
-    // Update article
-    const updateData: any = {
-      updatedAt: new Date()
-    };
+    const updateData: any = { updatedAt: new Date() };
 
     if (title) updateData.title = title;
     if (slug) updateData.slug = slug;
@@ -99,11 +78,7 @@ export async function PUT(
       }
     }
 
-    const updatedArticle = await Article.findByIdAndUpdate(
-      slugParam,
-      updateData,
-      { new: true }
-    );
+    const updatedArticle = await Article.findByIdAndUpdate(slugParam, updateData, { new: true });
 
     return NextResponse.json({
       success: true,
@@ -112,20 +87,11 @@ export async function PUT(
     });
 
   } catch (error: any) {
-    console.error('PUT /api/articles/[slug] error:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((err: any) => err.message);
-      return NextResponse.json(
-        { success: false, message: errors.join(', ') },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: errors.join(', ') }, { status: 400 });
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Chyba při aktualizaci článku', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'PUT /api/articles/[slug] error:');
   }
 }
 
@@ -133,20 +99,13 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  try {
-    // Kontrola autentifikace
-    const authCookie = request.cookies.get('admin_auth');
-    if (!authCookie) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const authError = requireAuth(request);
+  if (authError) return authError;
 
+  try {
     await connectToMongoose();
     const { slug } = await params;
 
-    // Find and delete article by ID
     const article = await Article.findByIdAndDelete(slug);
 
     if (!article) {
@@ -156,16 +115,9 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Článek byl úspěšně smazán'
-    });
+    return NextResponse.json({ success: true, message: 'Článek byl úspěšně smazán' });
 
-  } catch (error: any) {
-    console.error('DELETE /api/articles/[slug] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Chyba při mazání článku', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'DELETE /api/articles/[slug] error:');
   }
 }

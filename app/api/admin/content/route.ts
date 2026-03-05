@@ -4,6 +4,7 @@ import Content from '@/models/Content';
 import fs from 'fs/promises';
 import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst obsah stránky
 export async function GET(request: NextRequest) {
@@ -32,16 +33,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: content,
-    });
-  } catch (error: any) {
-    console.error('GET /api/admin/content error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch content', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, data: content });
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/content error:');
   }
 }
 
@@ -63,7 +57,6 @@ export async function POST(request: NextRequest) {
 
     await connectToMongoose();
 
-    // Aktualizovat nebo vytvořit obsah
     const savedContent = await Content.findOneAndUpdate(
       { page },
       {
@@ -73,14 +66,9 @@ export async function POST(request: NextRequest) {
         lastModified: new Date(),
         $inc: { version: 1 }
       },
-      {
-        new: true,
-        upsert: true,
-        runValidators: true
-      }
+      { new: true, upsert: true, runValidators: true }
     );
 
-    // Také aktualizovat soubor content.ts pro statickou dostupnost
     await updateContentFile(page, content);
 
     return NextResponse.json({
@@ -89,9 +77,6 @@ export async function POST(request: NextRequest) {
       data: savedContent,
     });
   } catch (error: any) {
-    console.error('POST /api/admin/content error:', error);
-
-    // If MongoDB is not available, save to static content file as fallback
     if (error.message?.includes('connect ECONNREFUSED')) {
       try {
         const body = await request.json();
@@ -106,55 +91,21 @@ export async function POST(request: NextRequest) {
         console.error('File save also failed:', fileError);
       }
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Failed to save content', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'POST /api/admin/content error:');
   }
 }
 
-// Pomocná funkce pro aktualizaci souboru content.ts
-async function updateContentFile(page: string, content: any) {
-  try {
-    const contentFilePath = path.join(process.cwd(), 'data', 'content.ts');
-    let fileContent = await fs.readFile(contentFilePath, 'utf-8');
-
-    // Pro jednoduchost zatím jen logujeme - v produkci by se dalo implementovat
-    // pokročilejší nahrazování obsahu v souboru
-    console.log(`Content updated for page: ${page}`);
-    console.log('New content:', JSON.stringify(content, null, 2));
-
-    // Alternativně můžeme uložit aktuální obsah do backup souboru
-    const backupPath = path.join(process.cwd(), 'data', `content-backup-${Date.now()}.json`);
-    await fs.writeFile(backupPath, JSON.stringify({ page, content }, null, 2));
-
-  } catch (error) {
-    console.error('Failed to update content file:', error);
-    // Nechyba - pokračujeme i když se nepodaří aktualizovat soubor
-  }
-}
-
-// GET ALL - Načíst všechen obsah
+// PUT - Načíst všechen obsah
 export async function PUT(request: NextRequest) {
   const authError = requireAuth(request);
   if (authError) return authError;
 
   try {
     await connectToMongoose();
-
     const allContent = await Content.find({}).sort({ lastModified: -1 });
-
-    return NextResponse.json({
-      success: true,
-      data: allContent,
-    });
-  } catch (error: any) {
-    console.error('PUT /api/admin/content error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch all content', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, data: allContent });
+  } catch (error) {
+    return dbError(error, 'PUT /api/admin/content error:');
   }
 }
 
@@ -190,11 +141,17 @@ export async function DELETE(request: NextRequest) {
       message: 'Content deleted successfully',
       data: deletedContent,
     });
-  } catch (error: any) {
-    console.error('DELETE /api/admin/content error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to delete content', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'DELETE /api/admin/content error:');
+  }
+}
+
+async function updateContentFile(page: string, content: any) {
+  try {
+    console.log(`Content updated for page: ${page}`);
+    const backupPath = path.join(process.cwd(), 'data', `content-backup-${Date.now()}.json`);
+    await fs.writeFile(backupPath, JSON.stringify({ page, content }, null, 2));
+  } catch (error) {
+    console.error('Failed to update content file:', error);
   }
 }

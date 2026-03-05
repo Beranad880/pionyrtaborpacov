@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import RentalRequest from '@/models/RentalRequest';
 import { requireAuth } from '@/lib/auth-middleware';
+import { parsePagination, paginationMeta } from '@/lib/pagination';
+import { validateDateRange } from '@/lib/validation';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst žádosti o pronájem (pouze pro adminy)
 export async function GET(request: NextRequest) {
@@ -12,16 +15,11 @@ export async function GET(request: NextRequest) {
     await connectToMongoose();
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const { page, limit, skip } = parsePagination(searchParams);
     const status = searchParams.get('status');
 
-    const skip = (page - 1) * limit;
     const filter: any = {};
-
-    if (status && status !== 'all') {
-      filter.status = status;
-    }
+    if (status && status !== 'all') filter.status = status;
 
     const requests = await RentalRequest.find(filter)
       .sort({ createdAt: -1 })
@@ -35,20 +33,11 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         requests,
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit)
-        }
+        pagination: paginationMeta(page, limit, total),
       }
     });
-  } catch (error: any) {
-    console.error('GET /api/admin/rental-requests error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch rental requests', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/rental-requests error:');
   }
 }
 
@@ -59,7 +48,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Validace required fields
     const requiredFields = ['name', 'email', 'phone', 'startDate', 'endDate', 'guestCount', 'purpose'];
     for (const field of requiredFields) {
       if (!body[field]) {
@@ -70,7 +58,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check date validity
     const startDate = new Date(body.startDate);
     const endDate = new Date(body.endDate);
 
@@ -86,19 +73,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (endDate <= startDate) {
-      return NextResponse.json(
-        { success: false, message: 'Datum odjezdu musí být po datu příjezdu' },
-        { status: 400 }
-      );
+    const dateError = validateDateRange(startDate, endDate);
+    if (dateError) {
+      return NextResponse.json({ success: false, message: dateError }, { status: 400 });
     }
 
-    // Check for conflicts with existing approved requests
     const conflictingRequests = await RentalRequest.find({
       status: 'approved',
-      $or: [
-        { startDate: { $lte: endDate }, endDate: { $gte: startDate } }
-      ]
+      $or: [{ startDate: { $lte: endDate }, endDate: { $gte: startDate } }]
     });
 
     if (conflictingRequests.length > 0) {
@@ -131,19 +113,10 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('POST /api/admin/rental-requests error:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json(
-        { success: false, message: 'Validace selhala', errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Failed to create rental request', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'POST /api/admin/rental-requests error:');
   }
 }

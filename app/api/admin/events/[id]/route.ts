@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Event from '@/models/Event';
 import { requireAuth } from '@/lib/auth-middleware';
+import { validateDateRange } from '@/lib/validation';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst konkrétní akci
 export async function GET(
@@ -24,16 +26,9 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: event
-    });
-  } catch (error: any) {
-    console.error('GET /api/admin/events/[id] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch event', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, data: event });
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/events/[id] error:');
   }
 }
 
@@ -50,7 +45,6 @@ export async function PUT(
     const { id } = await context.params;
 
     const body = await request.json();
-
     const event = await Event.findById(id);
 
     if (!event) {
@@ -60,7 +54,6 @@ export async function PUT(
       );
     }
 
-    // Update fields
     if (body.title) event.title = body.title;
     if (body.description) event.description = body.description;
     if (body.location) event.location = body.location;
@@ -68,18 +61,13 @@ export async function PUT(
     if (body.organizer) event.organizer = body.organizer;
     if (body.status) event.status = body.status;
 
-    if (body.startDate) {
-      const startDate = new Date(body.startDate);
-      event.startDate = startDate;
-    }
+    if (body.startDate) event.startDate = new Date(body.startDate);
 
     if (body.endDate) {
       const endDate = new Date(body.endDate);
-      if (endDate < event.startDate) {
-        return NextResponse.json(
-          { success: false, message: 'Datum konce musí být stejné nebo po datu začátku' },
-          { status: 400 }
-        );
+      const dateError = validateDateRange(event.startDate, endDate);
+      if (dateError) {
+        return NextResponse.json({ success: false, message: dateError }, { status: 400 });
       }
       event.endDate = endDate;
     }
@@ -102,20 +90,11 @@ export async function PUT(
     });
 
   } catch (error: any) {
-    console.error('PUT /api/admin/events/[id] error:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json(
-        { success: false, message: 'Validace selhala', errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Failed to update event', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'PUT /api/admin/events/[id] error:');
   }
 }
 
@@ -140,16 +119,9 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Akce byla úspěšně smazána'
-    });
+    return NextResponse.json({ success: true, message: 'Akce byla úspěšně smazána' });
 
-  } catch (error: any) {
-    console.error('DELETE /api/admin/events/[id] error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to delete event', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'DELETE /api/admin/events/[id] error:');
   }
 }

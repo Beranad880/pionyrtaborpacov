@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Event from '@/models/Event';
 import { requireAuth } from '@/lib/auth-middleware';
+import { parsePagination, paginationMeta } from '@/lib/pagination';
+import { validateDateRange } from '@/lib/validation';
+import { uniqueSlug } from '@/lib/slug';
+import { dbError } from '@/lib/api-response';
 
 // GET - Načíst akce
 export async function GET(request: NextRequest) {
@@ -12,26 +16,16 @@ export async function GET(request: NextRequest) {
     await connectToMongoose();
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const { page, limit, skip } = parsePagination(searchParams, 20);
     const status = searchParams.get('status');
     const type = searchParams.get('type');
     const upcoming = searchParams.get('upcoming');
 
-    const skip = (page - 1) * limit;
     const filter: any = {};
 
-    if (status && status !== 'all') {
-      filter.status = status;
-    }
-
-    if (type && type !== 'all') {
-      filter.type = type;
-    }
-
-    if (upcoming === 'true') {
-      filter.startDate = { $gte: new Date() };
-    }
+    if (status && status !== 'all') filter.status = status;
+    if (type && type !== 'all') filter.type = type;
+    if (upcoming === 'true') filter.startDate = { $gte: new Date() };
 
     const events = await Event.find(filter)
       .sort({ startDate: -1 })
@@ -45,20 +39,11 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         events,
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit)
-        }
+        pagination: paginationMeta(page, limit, total),
       }
     });
-  } catch (error: any) {
-    console.error('GET /api/admin/events error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch events', error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/events error:');
   }
 }
 
@@ -72,7 +57,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Validace required fields
     const requiredFields = ['title', 'description', 'startDate', 'endDate', 'location', 'type', 'organizer'];
     for (const field of requiredFields) {
       if (!body[field]) {
@@ -83,28 +67,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check date validity
     const startDate = new Date(body.startDate);
     const endDate = new Date(body.endDate);
-
-    if (endDate < startDate) {
-      return NextResponse.json(
-        { success: false, message: 'Datum konce musí být stejné nebo po datu začátku' },
-        { status: 400 }
-      );
+    const dateError = validateDateRange(startDate, endDate);
+    if (dateError) {
+      return NextResponse.json({ success: false, message: dateError }, { status: 400 });
     }
 
-    // Generate unique slug
-    let slug = body.title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-');
-
-    const existingEvent = await Event.findOne({ slug });
-    if (existingEvent) {
-      slug = `${slug}-${Date.now()}`;
-    }
+    const slug = await uniqueSlug(Event, body.title);
 
     const event = new Event({
       title: body.title,
@@ -135,26 +105,16 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('POST /api/admin/events error:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json(
-        { success: false, message: 'Validace selhala', errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
     }
-
     if (error.code === 11000) {
       return NextResponse.json(
         { success: false, message: 'Akce s tímto názvem již existuje' },
         { status: 409 }
       );
     }
-
-    return NextResponse.json(
-      { success: false, message: 'Failed to create event', error: error.message },
-      { status: 500 }
-    );
+    return dbError(error, 'POST /api/admin/events error:');
   }
 }
