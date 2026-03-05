@@ -248,6 +248,28 @@ export default function RentalRequestsAdmin() {
     }
   };
 
+  const deleteRequest = async (requestId: string) => {
+    if (!confirm('Opravdu chcete tuto žádost smazat?')) return;
+    try {
+      const response = await fetch(`/api/admin/rental-requests/${requestId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (response.ok) {
+        setRequests(prev => prev.filter(r => r._id !== requestId));
+        if (selectedRequest?._id === requestId) {
+          setShowModal(false);
+          setSelectedRequest(null);
+        }
+      } else {
+        alert('Chyba při mazání žádosti');
+      }
+    } catch (error) {
+      console.error('Error deleting rental request:', error);
+      alert('Chyba při mazání žádosti');
+    }
+  };
+
   const openModal = (request: RentalRequest) => {
     setSelectedRequest(request);
     setAdminNotes(request.adminNotes || '');
@@ -480,14 +502,22 @@ export default function RentalRequestsAdmin() {
                       )}
                     </div>
 
-                    {request.status === 'pending' && (
+                    <div className="flex gap-2">
+                      {request.status === 'pending' && (
+                        <button
+                          onClick={() => openModal(request)}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                        >
+                          Zpracovat
+                        </button>
+                      )}
                       <button
-                        onClick={() => openModal(request)}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                        onClick={() => deleteRequest(request._id)}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                       >
-                        Zpracovat
+                        Smazat
                       </button>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
