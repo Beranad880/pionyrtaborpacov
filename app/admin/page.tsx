@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 const adminCards = [
@@ -76,31 +76,31 @@ const adminCards = [
   },
 ];
 
-const recentActivity = [
-  {
-    action: 'Úprava článku',
-    item: 'Letní tábor 2024',
-    time: 'před 2 hodinami',
-    user: 'Admin'
-  },
-  {
-    action: 'Přidána akce',
-    item: 'Vánoční schůzka',
-    time: 'včera',
-    user: 'Admin'
-  },
-  {
-    action: 'Aktualizace kontaktů',
-    item: 'Telefon vedoucího',
-    time: 'před 3 dny',
-    user: 'Admin'
-  }
-];
+function formatRelativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'právě teď';
+  if (minutes < 60) return `před ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `před ${hours} hod`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'včera';
+  if (days < 7) return `před ${days} dny`;
+  return new Date(iso).toLocaleDateString('cs-CZ');
+}
 
 export default function AdminDashboard() {
   const [dbStatus, setDbStatus] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/admin/activity')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success) setRecentActivity(data.data); })
+      .catch(() => {});
+  }, []);
 
   const checkDatabaseStatus = async () => {
     try {
@@ -338,18 +338,22 @@ export default function AdminDashboard() {
           Nedávná aktivita
         </h2>
         <div className="space-y-3">
-          {recentActivity.map((activity, index) => (
-            <div key={index} className="flex items-center space-x-3 p-3 rounded-lg bg-slate-50">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm">
-                  <span className="font-medium">{activity.action}:</span>{' '}
-                  <span className="text-slate-600">{activity.item}</span>
-                </p>
-                <p className="text-xs text-slate-500">{activity.time} • {activity.user}</p>
+          {recentActivity.length === 0 ? (
+            <p className="text-sm text-slate-500">Zatím žádná aktivita.</p>
+          ) : (
+            recentActivity.map((activity, index) => (
+              <div key={index} className="flex items-center space-x-3 p-3 rounded-lg bg-slate-50">
+                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                <div className="flex-1">
+                  <p className="text-sm">
+                    <span className="font-medium">{activity.action}:</span>{' '}
+                    <span className="text-slate-600">{activity.item}</span>
+                  </p>
+                  <p className="text-xs text-slate-500">{formatRelativeTime(activity.date)} • {activity.user}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
