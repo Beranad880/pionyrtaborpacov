@@ -57,7 +57,7 @@ export async function GET() {
   } catch (error: any) {
     console.error('GET /api/rental-availability error:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch availability', error: error.message },
+      { success: false, message: 'Failed to fetch availability' },
       { status: 500 }
     );
   }

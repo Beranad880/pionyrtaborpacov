@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Uložit nebo aktualizovat obsah stránky (pouze admin)
 export async function POST(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {

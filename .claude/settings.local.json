@@ -26,7 +26,11 @@
       "Bash(git config:*)",
       "Bash(done)",
       "Bash(npx tsc:*)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(xargs sed:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(echo exit: $?:*)"
     ],
     "deny": [],
     "ask": []

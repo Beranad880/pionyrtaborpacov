@@ -9,7 +9,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -36,13 +36,13 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
     await connectToMongoose();
 
-    const user = getUserFromToken(request);
+    const user = await getUserFromToken(request);
     const body = await request.json();
     const { status, adminNotes } = body;
 
@@ -88,7 +88,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {

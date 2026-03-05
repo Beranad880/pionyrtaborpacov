@@ -88,24 +88,3 @@ export function useAdminAuth() {
     logout,
   };
 }
-
-// Middleware pro ověření admin API requestů
-export function verifyAdminRequest(request: Request): boolean {
-  const authHeader = request.headers.get('Authorization');
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return false;
-  }
-
-  const token = authHeader.substring(7);
-
-  try {
-    const decoded = atob(token);
-    const [username] = decoded.split(':');
-
-    // Admin credentials check se provádí v API endpointech
-    return !!(username && username.length >= 3);
-  } catch {
-    return false;
-  }
-}

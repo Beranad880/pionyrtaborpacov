@@ -9,7 +9,7 @@ import { dbError } from '@/lib/api-response';
 
 // GET - Načíst pronájmy
 export async function GET(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Vytvořit nový pronájem
 export async function POST(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {

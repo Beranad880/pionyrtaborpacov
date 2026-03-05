@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     // Ověřit auth cookie pro admin přístup
     const authCookie = request.cookies.get('admin_auth');
-    const isAdmin = authCookie && requireAuth(request) === null;
+    const isAdmin = authCookie && (await requireAuth(request)) === null;
 
     let filter: any = isAdmin ? {} : { status: 'published' };
     if (category) filter.category = category;
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {

@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import DatabaseInitializer from '@/components/DatabaseInitializer';
 import { Analytics } from "@vercel/analytics/next"
 
 
@@ -45,7 +44,6 @@ export default function RootLayout({
   return (
     <html lang="cs">
       <body className={`${inter.variable} font-sans antialiased`} suppressHydrationWarning>
-        <DatabaseInitializer />
         <Header />
         {children}
         <Footer />

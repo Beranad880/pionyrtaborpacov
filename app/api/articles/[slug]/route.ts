@@ -34,7 +34,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -99,14 +99,14 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
     await connectToMongoose();
     const { slug } = await params;
 
-    const article = await Article.findByIdAndDelete(slug);
+    const article = await Article.findOneAndDelete({ slug });
 
     if (!article) {
       return NextResponse.json(

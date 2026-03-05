@@ -4,11 +4,12 @@ import CampApplication from '@/models/CampApplication';
 import { requireAuth } from '@/lib/auth-middleware';
 import { parsePagination, paginationMeta } from '@/lib/pagination';
 import { escapeRegex } from '@/lib/validation';
+import { checkRateLimit, FORM_MAX } from '@/lib/rate-limit';
 import { dbError } from '@/lib/api-response';
 
 // GET - Načíst táborové přihlášky (pouze pro adminy)
 export async function GET(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -70,6 +71,15 @@ export async function GET(request: NextRequest) {
 
 // POST - Vytvořit novou táborovou přihlášku (veřejné API)
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+  const rateCheck = checkRateLimit(`camp-application:${ip}`, FORM_MAX);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { success: false, message: `Příliš mnoho požadavků. Zkuste to znovu za ${rateCheck.retryAfter} sekund.` },
+      { status: 429 }
+    );
+  }
+
   try {
     await connectToMongoose();
 

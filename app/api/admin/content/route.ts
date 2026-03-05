@@ -8,7 +8,7 @@ import { dbError } from '@/lib/api-response';
 
 // GET - Načíst obsah stránky
 export async function GET(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Uložit nebo aktualizovat obsah stránky
 export async function POST(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -77,27 +77,13 @@ export async function POST(request: NextRequest) {
       data: savedContent,
     });
   } catch (error: any) {
-    if (error.message?.includes('connect ECONNREFUSED')) {
-      try {
-        const body = await request.json();
-        const { page, content } = body;
-        await updateContentFile(page, content);
-        return NextResponse.json({
-          success: true,
-          message: 'Content saved to file (MongoDB offline)',
-          data: { page, content, offline: true },
-        });
-      } catch (fileError) {
-        console.error('File save also failed:', fileError);
-      }
-    }
     return dbError(error, 'POST /api/admin/content error:');
   }
 }
 
 // PUT - Načíst všechen obsah
 export async function PUT(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -111,7 +97,7 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Smazat obsah stránky
 export async function DELETE(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {

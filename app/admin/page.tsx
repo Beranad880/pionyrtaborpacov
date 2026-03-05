@@ -204,7 +204,7 @@ export default function AdminDashboard() {
           </div>
 
           {dbStatus.totalCollections > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-7 gap-3 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
                 <p className="text-xs text-blue-600">Stránky</p>
                 <p className="font-bold text-blue-800">{dbStatus.contentPages || 0}</p>
@@ -212,18 +212,6 @@ export default function AdminDashboard() {
               <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-center">
                 <p className="text-xs text-green-600">Oddíly</p>
                 <p className="font-bold text-green-800">{dbStatus.pioneerGroups || 0}</p>
-              </div>
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-center">
-                <p className="text-xs text-orange-600">Zařízení</p>
-                <p className="font-bold text-orange-800">{dbStatus.facilities || 0}</p>
-              </div>
-              <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-center">
-                <p className="text-xs text-purple-600">Statistiky</p>
-                <p className="font-bold text-purple-800">{dbStatus.statistics || 0}</p>
-              </div>
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                <p className="text-xs text-yellow-600">Kontakty</p>
-                <p className="font-bold text-yellow-800">{dbStatus.contacts || 0}</p>
               </div>
               <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-center">
                 <p className="text-xs text-indigo-600">Články</p>

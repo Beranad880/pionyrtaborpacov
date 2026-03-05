@@ -3,28 +3,26 @@ import connectToMongoose from '@/lib/mongoose';
 import AdminUser from '@/models/AdminUser';
 import Article from '@/models/Article';
 import Content from '@/models/Content';
-import Facility from '@/models/Facility';
 import PioneerGroup from '@/models/PioneerGroup';
 import { requireAuth } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 
 // GET - Stav databáze
 export async function GET(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
     await connectToMongoose();
 
-    const [contentPages, pioneerGroups, facilities, articles, adminUsers] = await Promise.all([
+    const [contentPages, pioneerGroups, articles, adminUsers] = await Promise.all([
       Content.countDocuments(),
       PioneerGroup.countDocuments(),
-      Facility.countDocuments(),
       Article.countDocuments(),
       AdminUser.countDocuments(),
     ]);
 
-    const totalCollections = contentPages + pioneerGroups + facilities + articles + adminUsers;
+    const totalCollections = contentPages + pioneerGroups + articles + adminUsers;
 
     return NextResponse.json({
       success: true,
@@ -34,7 +32,6 @@ export async function GET(request: NextRequest) {
         totalCollections,
         contentPages,
         pioneerGroups,
-        facilities,
         statistics: 0,
         contacts: 0,
         articles,
@@ -50,7 +47,6 @@ export async function GET(request: NextRequest) {
         totalCollections: 0,
         contentPages: 0,
         pioneerGroups: 0,
-        facilities: 0,
         statistics: 0,
         contacts: 0,
         articles: 0,
@@ -62,7 +58,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Inicializace nebo reset databáze
 export async function POST(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -82,7 +78,6 @@ export async function POST(request: NextRequest) {
       await Promise.all([
         Content.deleteMany({}),
         PioneerGroup.deleteMany({}),
-        Facility.deleteMany({}),
         Article.deleteMany({}),
       ]);
     }

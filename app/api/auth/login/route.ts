@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import AdminUser from '@/models/AdminUser';
 import { checkRateLimit, resetRateLimit } from '@/lib/rate-limit';
+import { signToken } from '@/lib/jwt';
 
 export async function POST(request: NextRequest) {
-  // Rate limiting podle IP adresy
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     || request.headers.get('x-real-ip')
     || 'unknown';
@@ -47,10 +47,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Úspěšné přihlášení - resetovat rate limit
     resetRateLimit(`login:${ip}`);
-
     await AdminUser.findByIdAndUpdate(userDoc._id, { lastLogin: new Date() });
+
+    const token = await signToken({
+      userId: userDoc._id.toString(),
+      username: userDoc.username,
+    });
 
     const response = NextResponse.json({
       success: true,
@@ -58,18 +61,16 @@ export async function POST(request: NextRequest) {
       user: {
         id: userDoc._id,
         username: userDoc.username,
-        lastLogin: new Date()
-      }
+        lastLogin: new Date(),
+      },
     });
 
-    const authToken = Buffer.from(`${userDoc._id}:${userDoc.username}:${Date.now()}`).toString('base64');
-
-    response.cookies.set('admin_auth', authToken, {
+    response.cookies.set('admin_auth', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 dní
-      path: '/'
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 365 * 10, // 10 let
+      path: '/',
     });
 
     return response;

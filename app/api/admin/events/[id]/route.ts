@@ -10,7 +10,7 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -37,7 +37,7 @@ export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -103,7 +103,7 @@ export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {

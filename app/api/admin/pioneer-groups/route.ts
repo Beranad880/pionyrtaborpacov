@@ -6,7 +6,7 @@ import { dbError } from '@/lib/api-response';
 
 // GET - Získat všechny pionýrské oddíly
 export async function GET(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Vytvořit nový pionýrský oddíl
 export async function POST(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
@@ -59,19 +59,25 @@ export async function POST(request: NextRequest) {
 
 // PUT - Aktualizovat pionýrský oddíl
 export async function PUT(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
     await connectToMongoose();
     const body = await request.json();
-    const { _id, ...updateData } = body;
+    const { _id } = body;
 
     if (!_id) {
       return NextResponse.json(
         { success: false, message: 'ID is required for update' },
         { status: 400 }
       );
+    }
+
+    const allowedFields = ['name', 'ageRange', 'description', 'activities', 'leader', 'meetingDay', 'meetingTime', 'location', 'maxMembers', 'currentMembers', 'isActive'];
+    const updateData: Record<string, unknown> = {};
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) updateData[field] = body[field];
     }
 
     const group = await PioneerGroup.findByIdAndUpdate(
@@ -99,7 +105,7 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Smazat pionýrský oddíl (soft delete)
 export async function DELETE(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {

@@ -7,10 +7,11 @@ interface Entry {
 
 const store = new Map<string, Entry>();
 
-const MAX_ATTEMPTS = 5;
+const LOGIN_MAX = 5;
+const FORM_MAX = 10;
 const WINDOW_MS = 15 * 60 * 1000; // 15 minut
 
-export function checkRateLimit(key: string): { allowed: boolean; retryAfter?: number } {
+export function checkRateLimit(key: string, max = LOGIN_MAX): { allowed: boolean; retryAfter?: number } {
   const now = Date.now();
   const entry = store.get(key);
 
@@ -19,7 +20,7 @@ export function checkRateLimit(key: string): { allowed: boolean; retryAfter?: nu
     return { allowed: true };
   }
 
-  if (entry.count >= MAX_ATTEMPTS) {
+  if (entry.count >= max) {
     return { allowed: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
   }
 
@@ -30,3 +31,5 @@ export function checkRateLimit(key: string): { allowed: boolean; retryAfter?: nu
 export function resetRateLimit(key: string): void {
   store.delete(key);
 }
+
+export { FORM_MAX };

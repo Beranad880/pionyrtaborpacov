@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   // Vyžadovat auth pouze pokud se nepožadují veřejné galerie
   if (isPublicParam !== 'true') {
-    const authError = requireAuth(request);
+    const authError = await requireAuth(request);
     if (authError) return authError;
   }
 
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Vytvořit novou galerii
 export async function POST(request: NextRequest) {
-  const authError = requireAuth(request);
+  const authError = await requireAuth(request);
   if (authError) return authError;
 
   try {
