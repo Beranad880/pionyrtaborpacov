@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import PageContent from '@/models/PageContent';
 import { requireAuth } from '@/lib/auth-middleware';
+import { dbError } from '@/lib/api-response';
 
 // GET - Získat obsah stránek
 export async function GET(request: NextRequest) {
@@ -13,10 +14,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const pageId = searchParams.get('pageId');
 
-    let query: any = { isActive: true };
-    if (pageId) {
-      query = { ...query, pageId };
-    }
+    const query: any = { isActive: true };
+    if (pageId) query.pageId = pageId;
 
     const pages = await PageContent.find(query).sort({ 'metadata.lastModified': -1 });
 
@@ -24,16 +23,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: pageId ? (pages[0] || null) : pages
     });
-  } catch (error: any) {
-    console.error('GET /api/admin/page-contents error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to fetch page contents',
-        error: error.message
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'GET /api/admin/page-contents error:');
   }
 }
 
@@ -46,15 +37,11 @@ export async function POST(request: NextRequest) {
     await connectToMongoose();
     const body = await request.json();
 
-    // Zkontrolovat, zda stránka s tímto pageId už existuje
     const existingPage = await PageContent.findOne({ pageId: body.pageId, isActive: true });
 
     if (existingPage) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'Page with this pageId already exists'
-        },
+        { success: false, message: 'Page with this pageId already exists' },
         { status: 400 }
       );
     }
@@ -67,16 +54,8 @@ export async function POST(request: NextRequest) {
       data: pageContent,
       message: 'Page content created successfully'
     });
-  } catch (error: any) {
-    console.error('POST /api/admin/page-contents error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to create page content',
-        error: error.message
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'POST /api/admin/page-contents error:');
   }
 }
 
@@ -92,15 +71,11 @@ export async function PUT(request: NextRequest) {
 
     if (!_id) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'ID is required for update'
-        },
+        { success: false, message: 'ID is required for update' },
         { status: 400 }
       );
     }
 
-    // Automaticky aktualizovat metadata
     updateData.metadata = {
       ...updateData.metadata,
       lastModified: new Date(),
@@ -115,10 +90,7 @@ export async function PUT(request: NextRequest) {
 
     if (!pageContent) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'Page content not found'
-        },
+        { success: false, message: 'Page content not found' },
         { status: 404 }
       );
     }
@@ -128,16 +100,8 @@ export async function PUT(request: NextRequest) {
       data: pageContent,
       message: 'Page content updated successfully'
     });
-  } catch (error: any) {
-    console.error('PUT /api/admin/page-contents error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to update page content',
-        error: error.message
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    return dbError(error, 'PUT /api/admin/page-contents error:');
   }
 }
 
@@ -153,10 +117,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'ID is required for delete'
-        },
+        { success: false, message: 'ID is required for delete' },
         { status: 400 }
       );
     }
@@ -169,27 +130,13 @@ export async function DELETE(request: NextRequest) {
 
     if (!pageContent) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'Page content not found'
-        },
+        { success: false, message: 'Page content not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Page content deleted successfully'
-    });
-  } catch (error: any) {
-    console.error('DELETE /api/admin/page-contents error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to delete page content',
-        error: error.message
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, message: 'Page content deleted successfully' });
+  } catch (error) {
+    return dbError(error, 'DELETE /api/admin/page-contents error:');
   }
 }
