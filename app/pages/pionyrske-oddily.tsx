@@ -53,7 +53,7 @@ export default function PionyrseOddilyPage() {
 
         {/* Mřížka oddílů - striktně 2 sloupce na desktopu */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {content.groups?.map((group: any, index: number) => (
+          {content.groups?.filter((group: any) => group.name)?.map((group: any, index: number) => (
             <div key={index} className="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex flex-col">
               <h2 className="text-xl font-bold text-red-700 mb-3">{group.name}</h2>
               
