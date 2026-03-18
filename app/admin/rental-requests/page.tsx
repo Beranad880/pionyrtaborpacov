@@ -277,7 +277,8 @@ export default function RentalRequestsAdmin() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('cs-CZ');
+    const [y, m, d] = dateString.split('T')[0].split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('cs-CZ');
   };
 
   const formatDateTime = (dateString: string) => {
@@ -392,7 +393,7 @@ export default function RentalRequestsAdmin() {
                         <div>
                           <div className="text-sm font-medium text-orange-800">{p.label}</div>
                           <div className="text-xs text-orange-600">
-                            {new Date(p.startDate).toLocaleDateString('cs-CZ')} – {new Date(p.endDate).toLocaleDateString('cs-CZ')}
+                            {formatDate(p.startDate)} – {formatDate(p.endDate)}
                           </div>
                         </div>
                         <button onClick={() => deleteBlockedPeriod(p._id)} className="text-red-400 hover:text-red-600 ml-3" title="Smazat">
