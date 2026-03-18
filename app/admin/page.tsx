@@ -91,11 +91,36 @@ function formatRelativeTime(iso: string): string {
 
 export default function AdminDashboard() {
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [stats, setStats] = useState({ pages: 0, members: 0, upcomingEvents: 0, articles: 0 });
 
   useEffect(() => {
     fetch('/api/admin/activity')
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data?.success) setRecentActivity(data.data); })
+      .catch(() => {});
+
+    // Celkem stránek
+    fetch('/api/admin/content', { method: 'PUT' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success) setStats(s => ({ ...s, pages: data.data.length })); })
+      .catch(() => {});
+
+    // Celkem členů
+    fetch('/api/content?page=siteData')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success && data.data?.statistics?.total) setStats(s => ({ ...s, members: data.data.statistics.total })); })
+      .catch(() => {});
+
+    // Nadcházející akce
+    fetch('/api/events?upcoming=true')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success) setStats(s => ({ ...s, upcomingEvents: data.data.events?.length ?? 0 })); })
+      .catch(() => {});
+
+    // Články
+    fetch('/api/articles?limit=1')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success) setStats(s => ({ ...s, articles: data.data.pagination?.total ?? 0 })); })
       .catch(() => {});
   }, []);
 
@@ -120,7 +145,7 @@ export default function AdminDashboard() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-slate-600">Celkem stránek</p>
-              <p className="text-xl font-semibold text-slate-800">8</p>
+              <p className="text-xl font-semibold text-slate-800">{stats.pages}</p>
             </div>
           </div>
         </div>
@@ -132,7 +157,7 @@ export default function AdminDashboard() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-slate-600">Celkem členů</p>
-              <p className="text-xl font-semibold text-slate-800">75</p>
+              <p className="text-xl font-semibold text-slate-800">{stats.members}</p>
             </div>
           </div>
         </div>
@@ -144,7 +169,7 @@ export default function AdminDashboard() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-slate-600">Nadcházející akce</p>
-              <p className="text-xl font-semibold text-slate-800">5</p>
+              <p className="text-xl font-semibold text-slate-800">{stats.upcomingEvents}</p>
             </div>
           </div>
         </div>
@@ -156,7 +181,7 @@ export default function AdminDashboard() {
             </div>
             <div className="ml-3">
               <p className="text-sm text-slate-600">Články</p>
-              <p className="text-xl font-semibold text-slate-800">12</p>
+              <p className="text-xl font-semibold text-slate-800">{stats.articles}</p>
             </div>
           </div>
         </div>
