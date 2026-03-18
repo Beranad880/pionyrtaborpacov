@@ -7,7 +7,7 @@ import Rental from '@/models/Rental';
 import Event from '@/models/Event';
 import Content from '@/models/Content';
 import PhotoGallery from '@/models/PhotoGallery';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 
 interface ActivityItem {
@@ -20,6 +20,9 @@ interface ActivityItem {
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
   if (authError) return authError;
+
+  const tokenUser = await getUserFromToken(request);
+  const fallbackUser = tokenUser?.username ?? 'Admin';
 
   try {
     await connectToMongoose();
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
         action: isNew(a) ? 'Nový článek' : `Úprava článku (${a.status === 'published' ? 'publikován' : 'koncept'})`,
         item: (a as any).title,
         date: a.updatedAt.toISOString(),
-        user: (a as any).processedBy || 'Admin',
+        user: (a as any).processedBy || fallbackUser,
       });
     }
 
@@ -56,7 +59,7 @@ export async function GET(request: NextRequest) {
       let action = isNew(c) ? 'Nová přihláška na tábor' : 'Přihláška aktualizována';
       if (!isNew(c) && ca.status === 'approved') action = 'Přihláška schválena';
       if (!isNew(c) && ca.status === 'rejected') action = 'Přihláška zamítnuta';
-      items.push({ action, item: ca.participantName, date: c.updatedAt.toISOString(), user: ca.processedBy || 'Admin' });
+      items.push({ action, item: ca.participantName, date: c.updatedAt.toISOString(), user: ca.processedBy || fallbackUser });
     }
 
     for (const r of rentalRequests) {
@@ -64,7 +67,7 @@ export async function GET(request: NextRequest) {
       let action = isNew(r) ? 'Nová žádost o pronájem' : 'Žádost aktualizována';
       if (!isNew(r) && rr.status === 'approved') action = 'Žádost o pronájem schválena';
       if (!isNew(r) && rr.status === 'rejected') action = 'Žádost o pronájem zamítnuta';
-      items.push({ action, item: rr.name, date: r.updatedAt.toISOString(), user: rr.processedBy || 'Admin' });
+      items.push({ action, item: rr.name, date: r.updatedAt.toISOString(), user: rr.processedBy || fallbackUser });
     }
 
     for (const r of rentals) {
@@ -73,7 +76,7 @@ export async function GET(request: NextRequest) {
         action: isNew(r) ? 'Nový pronájem' : 'Pronájem aktualizován',
         item: rn.name,
         date: r.updatedAt.toISOString(),
-        user: rn.createdBy || 'Admin',
+        user: rn.createdBy || fallbackUser,
       });
     }
 
@@ -83,7 +86,7 @@ export async function GET(request: NextRequest) {
         action: isNew(e) ? 'Nová akce v kalendáři' : 'Akce aktualizována',
         item: ev.title,
         date: e.updatedAt.toISOString(),
-        user: ev.modifiedBy || 'Admin',
+        user: ev.modifiedBy || fallbackUser,
       });
     }
 
@@ -99,7 +102,7 @@ export async function GET(request: NextRequest) {
         action: 'Obsah upraven',
         item: pageLabels[co.page] || co.page,
         date: c.updatedAt.toISOString(),
-        user: co.modifiedBy || 'Admin',
+        user: co.modifiedBy || fallbackUser,
       });
     }
 
@@ -109,7 +112,7 @@ export async function GET(request: NextRequest) {
         action: isNew(g) ? 'Nová fotogalerie' : 'Galerie aktualizována',
         item: ga.title,
         date: g.updatedAt.toISOString(),
-        user: ga.createdBy || 'Admin',
+        user: ga.createdBy || fallbackUser,
       });
     }
 
