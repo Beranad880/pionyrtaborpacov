@@ -204,6 +204,19 @@ export default function HomeAdminPage() {
     }));
   };
 
+  const removeMenuItem = (index: number) => {
+    setContactData(prev => ({
+      ...prev,
+      menu: prev.menu.filter((_: any, i: number) => i !== index)
+    }));
+  };
+
+  const updateMenuItem = (index: number, field: 'title' | 'href', value: string) => {
+    const newMenu = [...contactData.menu];
+    newMenu[index] = { ...newMenu[index], [field]: value };
+    setContactData(prev => ({ ...prev, menu: newMenu }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -408,6 +421,38 @@ export default function HomeAdminPage() {
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Menu Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Navigační menu</h2>
+        <div className="space-y-2">
+          {contactData.menu.map((item: any, index: number) => (
+            <div key={index} className="flex items-center gap-3">
+              <input
+                type="text"
+                value={item.title}
+                onChange={(e) => updateMenuItem(index, 'title', e.target.value)}
+                placeholder="Název"
+                className="w-40 px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500 text-sm"
+              />
+              <input
+                type="text"
+                value={item.href}
+                onChange={(e) => updateMenuItem(index, 'href', e.target.value)}
+                placeholder="URL"
+                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500 text-sm"
+              />
+              <button
+                onClick={() => removeMenuItem(index)}
+                className="text-red-600 hover:text-red-800 font-bold text-lg leading-none px-2"
+                title="Odstranit položku"
+              >
+                ×
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 

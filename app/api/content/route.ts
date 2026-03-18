@@ -24,9 +24,14 @@ export async function GET(request: NextRequest) {
       const content = await Content.findOne({ page });
 
       if (content) {
+        let data = content.content;
+        if (page === 'siteData' && Array.isArray(data?.menu)) {
+          const removed = ['aktuality-2026', 'rok-2026'];
+          data = { ...data, menu: data.menu.filter((item: any) => !removed.some(r => item.href?.includes(r))) };
+        }
         return NextResponse.json({
           success: true,
-          data: content.content,
+          data,
           source: 'database',
           lastModified: content.lastModified,
           version: content.version,
