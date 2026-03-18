@@ -12,8 +12,6 @@ import TaborovePrihlaskyPage from './taborove-prihlasky';
 import ClankyPage from './clanky';
 import FotkyZAkciPage from './fotky-z-akci';
 import MestoPacovPage from './mesto-pacov';
-import Aktuality2026Page from './aktuality-2026';
-import Rok2026Page from './rok-2026';
 
 function PagesContent() {
   const searchParams = useSearchParams();
@@ -38,9 +36,7 @@ function PagesContent() {
     case 'mestopacov':
       return <MestoPacovPage />;
     case 'aktuality-2026':
-      return <Aktuality2026Page />;
-    case 'rok-2026':
-      return <Rok2026Page />;
+      return <ClankyPage />;
     default:
       return <UvodPage />;
   }
