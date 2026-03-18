@@ -82,6 +82,8 @@ export const siteData = {
     { title: "Články", href: "/pages?page=clanky" },
     { title: "Fotky z akcí", href: "/pages?page=fotky-z-akci" },
     { title: "Město Pacov", href: "/pages?page=mestopacov" },
+    { title: "Aktuality 2026", href: "/pages?page=aktuality-2026" },
+    { title: "Rok 2026", href: "/pages?page=rok-2026" },
     { title: "Přihlášky na tábor", href: "https://www.ldtbela.cz/" },
   ] as MenuItem[]
 };
