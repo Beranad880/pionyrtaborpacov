@@ -716,6 +716,7 @@ export default function CalendarAdminPage() {
                     name="maxParticipants"
                     value={formData.maxParticipants}
                     onChange={handleFormChange}
+                    onFocus={(e) => e.target.select()}
                     min="1"
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="30"
@@ -731,6 +732,7 @@ export default function CalendarAdminPage() {
                     name="price"
                     value={formData.price}
                     onChange={handleFormChange}
+                    onFocus={(e) => e.target.select()}
                     min="0"
                     step="0.01"
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"

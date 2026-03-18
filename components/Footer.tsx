@@ -116,10 +116,10 @@ export default function Footer() {
 
         <div className="border-t border-slate-300 pt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-500">
           <div className="mb-2 sm:mb-0">
-            <p>&copy; 2025 {siteInfo.title}. Všechna práva vyhrazena.</p>
+            <p>&copy; 2026 {siteInfo.title}. Všechna práva vyhrazena.</p>
           </div>
           <div className="text-center">
-            <p>Aktualizace 2025</p>
+            <p>Aktualizace 2026</p>
           </div>
         </div>
       </div>

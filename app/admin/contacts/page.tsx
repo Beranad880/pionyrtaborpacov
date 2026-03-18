@@ -353,6 +353,7 @@ export default function ContactsAdminPage() {
                   placeholder="Počet"
                   value={group.count}
                   onChange={(e) => updateAgeGroup(index, 'count', parseInt(e.target.value) || 0)}
+                  onFocus={(e) => e.target.select()}
                   className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-red-500 focus:border-red-500"
                 />
               </div>
@@ -370,6 +371,7 @@ export default function ContactsAdminPage() {
               type="number"
               value={data.statistics.total}
               onChange={(e) => updateStatistics('total', parseInt(e.target.value) || 0)}
+              onFocus={(e) => e.target.select()}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
             />
           </div>
@@ -381,6 +383,7 @@ export default function ContactsAdminPage() {
               type="number"
               value={data.statistics.councilMembers}
               onChange={(e) => updateStatistics('councilMembers', parseInt(e.target.value) || 0)}
+              onFocus={(e) => e.target.select()}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
             />
           </div>
@@ -392,6 +395,7 @@ export default function ContactsAdminPage() {
               type="number"
               value={data.statistics.leadershipMembers}
               onChange={(e) => updateStatistics('leadershipMembers', parseInt(e.target.value) || 0)}
+              onFocus={(e) => e.target.select()}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
             />
           </div>
@@ -403,6 +407,7 @@ export default function ContactsAdminPage() {
               type="number"
               value={data.statistics.krpDelegates}
               onChange={(e) => updateStatistics('krpDelegates', parseInt(e.target.value) || 0)}
+              onFocus={(e) => e.target.select()}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
             />
           </div>
@@ -414,6 +419,7 @@ export default function ContactsAdminPage() {
               type="number"
               value={data.statistics.foundedGroups}
               onChange={(e) => updateStatistics('foundedGroups', parseInt(e.target.value) || 0)}
+              onFocus={(e) => e.target.select()}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-red-500 focus:border-red-500"
             />
           </div>
