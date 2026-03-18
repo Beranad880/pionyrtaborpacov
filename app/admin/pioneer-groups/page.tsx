@@ -1,12 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { allPagesContent } from '@/data/content';
 
 export default function PioneerGroupsAdminPage() {
   const [content, setContent] = useState(allPagesContent.pioneerGroups);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    fetch('/api/admin/content?page=pioneerGroups')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data?.content) {
+          setContent(data.data.content);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSave = async () => {
     setIsLoading(true);
