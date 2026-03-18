@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Event from '@/models/Event';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { validateDateRange } from '@/lib/validation';
 import { dbError } from '@/lib/api-response';
 
@@ -39,6 +39,8 @@ export async function PUT(
 ) {
   const authError = await requireAuth(request);
   if (authError) return authError;
+
+  const tokenUser = await getUserFromToken(request);
 
   try {
     await connectToMongoose();
@@ -80,6 +82,7 @@ export async function PUT(
     if (body.equipment) event.equipment = body.equipment;
     if (body.images) event.images = body.images;
     if (body.ageGroup) event.ageGroup = body.ageGroup;
+    if (tokenUser?.username) event.modifiedBy = tokenUser.username;
 
     await event.save();
 

@@ -31,10 +31,10 @@ export async function GET(request: NextRequest) {
       Article.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`title status processedBy ${select}`).lean(),
       CampApplication.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`participantName status processedBy ${select}`).lean(),
       RentalRequest.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`name status processedBy ${select}`).lean(),
-      Rental.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`name status ${select}`).lean(),
-      Event.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`title ${select}`).lean(),
+      Rental.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`name status createdBy ${select}`).lean(),
+      Event.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`title modifiedBy ${select}`).lean(),
       Content.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`page modifiedBy ${select}`).lean(),
-      PhotoGallery.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`title ${select}`).lean(),
+      PhotoGallery.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`title createdBy ${select}`).lean(),
     ]);
 
     const items: ActivityItem[] = [];
@@ -73,16 +73,17 @@ export async function GET(request: NextRequest) {
         action: isNew(r) ? 'Nový pronájem' : 'Pronájem aktualizován',
         item: rn.name,
         date: r.updatedAt.toISOString(),
-        user: 'Admin',
+        user: rn.createdBy || 'Admin',
       });
     }
 
     for (const e of events) {
+      const ev = e as any;
       items.push({
         action: isNew(e) ? 'Nová akce v kalendáři' : 'Akce aktualizována',
-        item: (e as any).title,
+        item: ev.title,
         date: e.updatedAt.toISOString(),
-        user: 'Admin',
+        user: ev.modifiedBy || 'Admin',
       });
     }
 
@@ -103,11 +104,12 @@ export async function GET(request: NextRequest) {
     }
 
     for (const g of galleries) {
+      const ga = g as any;
       items.push({
         action: isNew(g) ? 'Nová fotogalerie' : 'Galerie aktualizována',
-        item: (g as any).title,
+        item: ga.title,
         date: g.updatedAt.toISOString(),
-        user: 'Admin',
+        user: ga.createdBy || 'Admin',
       });
     }
 

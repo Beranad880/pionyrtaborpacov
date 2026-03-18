@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Rental from '@/models/Rental';
 import RentalRequest from '@/models/RentalRequest';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { parsePagination, paginationMeta } from '@/lib/pagination';
 import { validateDateRange } from '@/lib/validation';
 import { dbError } from '@/lib/api-response';
@@ -46,6 +46,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const authError = await requireAuth(request);
   if (authError) return authError;
+
+  const tokenUser = await getUserFromToken(request);
 
   try {
     await connectToMongoose();
@@ -102,6 +104,7 @@ export async function POST(request: NextRequest) {
       price: body.price,
       invoiceId: body.invoiceId,
       adminNotes: body.adminNotes,
+      createdBy: tokenUser?.username,
     });
 
     await rental.save();

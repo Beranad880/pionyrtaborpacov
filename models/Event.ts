@@ -38,6 +38,7 @@ export interface IEvent extends Document {
     additionalInfo?: any;
     registeredAt: Date;
   }[];
+  modifiedBy?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -142,6 +143,10 @@ const EventSchema = new Schema<IEvent>(
       type: String,
       match: [/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i, 'Neplatná URL obrázku'],
     }],
+    modifiedBy: {
+      type: String,
+      trim: true,
+    },
     registrationForm: {
       fields: [{
         name: {

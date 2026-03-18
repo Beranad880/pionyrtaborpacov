@@ -25,7 +25,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { isAuthenticated, isLoading, logout } = useAdminAuth();
+  const { isAuthenticated, isLoading, user } = useAdminAuth();
 
   // VŽDY volat useEffect bez ohledu na podmínky
   useEffect(() => {
@@ -85,26 +85,11 @@ export default function AdminLayout({
               </svg>
             </Link>
 
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                  A
-                </div>
-                <span className="text-sm text-slate-600">Admin</span>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                {user?.username?.[0]?.toUpperCase() ?? 'A'}
               </div>
-
-              <button
-                onClick={() => {
-                  logout();
-                  router.push('/admin/login');
-                }}
-                className="text-sm text-slate-600 hover:text-red-600 transition-colors"
-                title="Odhlásit se"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+              <span className="text-sm text-slate-600">{user?.username ?? 'Admin'}</span>
             </div>
           </div>
         </div>
