@@ -10,8 +10,23 @@ export default function HomeAdminPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    fetchHomeContent();
     fetchContactData();
   }, []);
+
+  const fetchHomeContent = async () => {
+    try {
+      const response = await fetch('/api/admin/content?page=home');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data?.content) {
+          setHomeContent(result.data.content);
+        }
+      }
+    } catch (error) {
+      console.log('Failed to fetch home content, using static data');
+    }
+  };
 
   const fetchContactData = async () => {
     try {

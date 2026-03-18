@@ -1,9 +1,21 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { pageContent } from '@/data/content';
 
 export default function Hero() {
-  const heroData = pageContent.hero;
+  const [heroData, setHeroData] = useState(pageContent.hero);
+
+  useEffect(() => {
+    fetch('/api/content?page=home')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.data?.hero) {
+          setHeroData(result.data.hero);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const scrollToAbout = () => {
     const aboutSection = document.getElementById('about-section');

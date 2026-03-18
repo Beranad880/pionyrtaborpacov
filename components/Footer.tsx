@@ -1,20 +1,34 @@
+'use client';
+
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { siteData } from '@/data/content';
 
 export default function Footer() {
+  const [siteInfo, setSiteInfo] = useState(siteData);
+
+  useEffect(() => {
+    fetch('/api/content?page=siteData')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.data) setSiteInfo(result.data);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <footer className="bg-slate-50 border-t border-slate-200 py-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Organization Info */}
           <div>
-            <h3 className="font-bold text-xl mb-4 text-slate-800">{siteData.title}</h3>
+            <h3 className="font-bold text-xl mb-4 text-slate-800">{siteInfo.title}</h3>
             <p className="text-slate-600 mb-4">Pionýr, z.s.</p>
             <div className="space-y-2 text-sm text-slate-600">
-              <p>{siteData.contact.address}</p>
-              <p>IČ: {siteData.contact.ico}</p>
-              <p>DIČ: {siteData.contact.dic}</p>
-              <p>Č.ú.: {siteData.contact.bankAccount}</p>
+              <p>{siteInfo.contact.address}</p>
+              <p>IČ: {siteInfo.contact.ico}</p>
+              <p>DIČ: {siteInfo.contact.dic}</p>
+              <p>Č.ú.: {siteInfo.contact.bankAccount}</p>
             </div>
           </div>
 
@@ -24,14 +38,14 @@ export default function Footer() {
             <div className="space-y-2 text-sm text-slate-600">
               <p>
                 <span className="font-medium">Email:</span>{' '}
-                <a href={`mailto:${siteData.contact.email}`} className="hover:text-[#0070af] transition-colors">
-                  {siteData.contact.email}
+                <a href={`mailto:${siteInfo.contact.email}`} className="hover:text-[#0070af] transition-colors">
+                  {siteInfo.contact.email}
                 </a>
               </p>
               <p>
                 <span className="font-medium">Telefon:</span>{' '}
-                <a href={`tel:${siteData.contact.phone}`} className="hover:text-[#0070af] transition-colors">
-                  {siteData.contact.phone}
+                <a href={`tel:${siteInfo.contact.phone}`} className="hover:text-[#0070af] transition-colors">
+                  {siteInfo.contact.phone}
                 </a>
               </p>
             </div>
@@ -39,7 +53,7 @@ export default function Footer() {
             {/* Social Media */}
             <div className="flex space-x-4 mt-4">
               <a
-                href={siteData.social.facebook}
+                href={siteInfo.social.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-600 hover:text-blue-600 transition-colors"
@@ -49,7 +63,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href={siteData.social.instagram}
+                href={siteInfo.social.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-600 hover:text-pink-500 transition-colors"
@@ -102,7 +116,7 @@ export default function Footer() {
 
         <div className="border-t border-slate-300 pt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-500">
           <div className="mb-2 sm:mb-0">
-            <p>&copy; 2025 {siteData.title}. Všechna práva vyhrazena.</p>
+            <p>&copy; 2025 {siteInfo.title}. Všechna práva vyhrazena.</p>
           </div>
           <div className="text-center">
             <p>Aktualizace 2025</p>

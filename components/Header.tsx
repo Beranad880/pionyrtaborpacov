@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [siteInfo, setSiteInfo] = useState(siteData);
   const router = useRouter();
 
   useEffect(() => {
@@ -15,6 +16,13 @@ export default function Header() {
       .then(res => res.json())
       .then(data => setIsAdminLoggedIn(data.success === true))
       .catch(() => setIsAdminLoggedIn(false));
+
+    fetch('/api/content?page=siteData')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.data) setSiteInfo(result.data);
+      })
+      .catch(() => {});
   }, []);
 
   const handleLogout = async () => {
@@ -39,7 +47,7 @@ export default function Header() {
         <div className="container mx-auto px-4 flex flex-col sm:flex-row justify-between items-center text-sm">
           <div className="flex space-x-4 items-center">
             <a
-              href={siteData.social.facebook}
+              href={siteInfo.social.facebook}
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-600 hover:text-blue-600 transition-colors"
@@ -49,7 +57,7 @@ export default function Header() {
               </svg>
             </a>
             <a
-              href={siteData.social.instagram}
+              href={siteInfo.social.instagram}
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-600 hover:text-pink-500 transition-colors"
@@ -60,11 +68,11 @@ export default function Header() {
             </a>
           </div>
           <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-4 mt-2 sm:mt-0">
-            <a href={`mailto:${siteData.contact.email}`} className="text-slate-600 hover:text-[#0070af] transition-colors">
-              {siteData.contact.email}
+            <a href={`mailto:${siteInfo.contact.email}`} className="text-slate-600 hover:text-[#0070af] transition-colors">
+              {siteInfo.contact.email}
             </a>
-            <a href={`tel:${siteData.contact.phone}`} className="text-slate-600 hover:text-[#0070af] transition-colors">
-              {siteData.contact.phone}
+            <a href={`tel:${siteInfo.contact.phone}`} className="text-slate-600 hover:text-[#0070af] transition-colors">
+              {siteInfo.contact.phone}
             </a>
           </div>
         </div>
@@ -82,13 +90,13 @@ export default function Header() {
                 className="h-12 w-auto"
               />
               <div>
-                <div className="font-bold text-lg text-slate-800">{siteData.title}</div>
+                <div className="font-bold text-lg text-slate-800">{siteInfo.title}</div>
               </div>
             </Link>
 
             {/* Desktop Menu */}
             <div className="hidden lg:flex items-center space-x-8">
-              {siteData.menu.map((item, index) => {
+              {siteInfo.menu.map((item, index) => {
                 const isExternal = item.href.startsWith('http');
                 return (
                   <div key={index} className="relative group">
@@ -167,7 +175,7 @@ export default function Header() {
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
             <div className="lg:hidden border-t py-4">
-              {siteData.menu.map((item, index) => {
+              {siteInfo.menu.map((item, index) => {
                 const isExternal = item.href.startsWith('http');
                 return (
                   <div key={index} className="mb-2">
