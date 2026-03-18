@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 const adminCards = [
@@ -90,9 +90,6 @@ function formatRelativeTime(iso: string): string {
 }
 
 export default function AdminDashboard() {
-  const [dbStatus, setDbStatus] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
   useEffect(() => {
@@ -102,154 +99,17 @@ export default function AdminDashboard() {
       .catch(() => {});
   }, []);
 
-  const checkDatabaseStatus = async () => {
-    try {
-      const response = await fetch('/api/admin/init');
-      const result = await response.json();
-      setDbStatus(result.data);
-    } catch (error) {
-      console.error('Failed to check database status:', error);
-    }
-  };
-
-  const initializeDatabase = async (action: 'init' | 'reset' = 'init') => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/admin/init', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setMessage(action === 'reset' ? 'Databáze byla resetována!' : 'Databáze byla inicializována!');
-        await checkDatabaseStatus();
-      } else {
-        setMessage('Chyba při práci s databází');
-      }
-    } catch (error) {
-      setMessage('Chyba při komunikaci s databází');
-    } finally {
-      setIsLoading(false);
-      setTimeout(() => setMessage(''), 3000);
-    }
-  };
-
-  React.useEffect(() => {
-    checkDatabaseStatus();
-  }, []);
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">
-              Vítejte v admin panelu
-            </h1>
-            <p className="text-slate-600">
-              Spravujte obsah webových stránek Pionýrské skupiny Pacov
-            </p>
-          </div>
-
-          {/* Database Status */}
-          <div className="text-right">
-            {dbStatus && (
-              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
-                dbStatus.databaseConnected
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-yellow-100 text-yellow-700'
-              }`}>
-                <div className={`w-2 h-2 rounded-full mr-2 ${
-                  dbStatus.databaseConnected ? 'bg-green-500' : 'bg-yellow-500'
-                }`}></div>
-                {dbStatus.databaseConnected ? 'MongoDB připojena' : 'Statický režim'}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Message */}
-        {message && (
-          <div className="mt-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg">
-            {message}
-          </div>
-        )}
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">
+          Vítejte v admin panelu
+        </h1>
+        <p className="text-slate-600">
+          Spravujte obsah webových stránek Pionýrské skupiny Pacov
+        </p>
       </div>
-
-      {/* Database Management */}
-      {dbStatus && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">Správa databáze</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="p-4 bg-slate-50 rounded-lg">
-              <p className="text-sm text-slate-600">Stav připojení</p>
-              <p className="font-semibold">{dbStatus.databaseConnected ? 'Připojeno' : 'Odpojeno'}</p>
-            </div>
-
-            <div className="p-4 bg-slate-50 rounded-lg">
-              <p className="text-sm text-slate-600">Celkem záznamů</p>
-              <p className="font-semibold">{dbStatus.totalCollections || 0}</p>
-            </div>
-
-            <div className="p-4 bg-slate-50 rounded-lg">
-              <p className="text-sm text-slate-600">Inicializováno</p>
-              <p className="font-semibold">{dbStatus.isInitialized ? 'Ano' : 'Ne'}</p>
-            </div>
-          </div>
-
-          {dbStatus.totalCollections > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                <p className="text-xs text-blue-600">Stránky</p>
-                <p className="font-bold text-blue-800">{dbStatus.contentPages || 0}</p>
-              </div>
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-center">
-                <p className="text-xs text-green-600">Oddíly</p>
-                <p className="font-bold text-green-800">{dbStatus.pioneerGroups || 0}</p>
-              </div>
-              <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-center">
-                <p className="text-xs text-indigo-600">Články</p>
-                <p className="font-bold text-indigo-800">{dbStatus.articles || 0}</p>
-              </div>
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-center">
-                <p className="text-xs text-red-600">Admini</p>
-                <p className="font-bold text-red-800">{dbStatus.adminUsers || 0}</p>
-              </div>
-            </div>
-          )}
-
-          <div className="flex space-x-3">
-            <button
-              onClick={() => initializeDatabase('init')}
-              disabled={isLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            >
-              {isLoading ? 'Pracuji...' : 'Inicializovat DB'}
-            </button>
-
-            <button
-              onClick={() => initializeDatabase('reset')}
-              disabled={isLoading}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
-            >
-              Reset DB
-            </button>
-
-            <button
-              onClick={checkDatabaseStatus}
-              className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
-            >
-              Obnovit stav
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
