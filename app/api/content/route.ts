@@ -27,7 +27,16 @@ export async function GET(request: NextRequest) {
         let data = content.content;
         if (page === 'siteData' && Array.isArray(data?.menu)) {
           const removed = ['aktuality-2026', 'rok-2026'];
-          data = { ...data, menu: data.menu.filter((item: any) => !removed.some(r => item.href?.includes(r))) };
+          data = {
+            ...data,
+            menu: data.menu
+              .filter((item: any) => !removed.some(r => item.href?.includes(r)))
+              .map((item: any) =>
+                item.href?.includes('ldtbela.cz')
+                  ? { ...item, href: '/pages?page=taborove-prihlasky', highlight: true }
+                  : item
+              ),
+          };
         }
         return NextResponse.json({
           success: true,

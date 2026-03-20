@@ -2,6 +2,7 @@ interface MenuItem {
   title: string;
   href: string;
   submenu?: MenuItem[];
+  highlight?: boolean;
 }
 
 interface AgeGroup {
@@ -83,7 +84,7 @@ export const siteData = {
     { title: "Fotky z akcí", href: "/pages?page=fotky-z-akci" },
     { title: "Město Pacov", href: "/pages?page=mestopacov" },
     
-    { title: "Přihlášky na tábor", href: "https://www.ldtbela.cz/" },
+    { title: "Přihlášky na tábor", href: "/pages?page=taborove-prihlasky", highlight: true },
   ] as MenuItem[]
 };
 

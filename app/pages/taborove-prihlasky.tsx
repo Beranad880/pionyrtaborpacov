@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { siteData } from '@/data/content';
 
 interface CampApplicationForm {
@@ -34,7 +34,7 @@ const gradeOptions = [
   { value: '8', label: '9. třída' }
 ];
 
-const campInfo = {
+const defaultCampInfo = {
   theme: "Dobrodružství v přírodě",
   dates: "15. - 25. července 2025",
   price: 8500,
@@ -44,6 +44,15 @@ const campInfo = {
 };
 
 export default function CampApplications() {
+  const [campInfo, setCampInfo] = useState(defaultCampInfo);
+
+  useEffect(() => {
+    fetch('/api/content?page=campInfo')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success && data.data) setCampInfo({ ...defaultCampInfo, ...data.data }); })
+      .catch(() => {});
+  }, []);
+
   const [formData, setFormData] = useState<CampApplicationForm>({
     participantName: '',
     grade: '',

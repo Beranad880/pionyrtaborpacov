@@ -112,6 +112,13 @@ export default function Header() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </a>
+                    ) : item.highlight ? (
+                      <Link
+                        href={item.href}
+                        className="bg-red-600 text-white hover:bg-red-700 transition-colors px-4 py-2 rounded-lg font-medium inline-flex items-center gap-1"
+                      >
+                        {item.title}
+                      </Link>
                     ) : (
                       <Link
                         href={item.href}
@@ -192,6 +199,14 @@ export default function Header() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </a>
+                    ) : item.highlight ? (
+                      <Link
+                        href={item.href}
+                        className="inline-flex items-center gap-2 py-2 px-4 bg-red-600 text-white hover:bg-red-700 transition-colors rounded-lg font-medium"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {item.title}
+                      </Link>
                     ) : (
                       <Link
                         href={item.href}

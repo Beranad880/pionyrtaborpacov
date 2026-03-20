@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function CampRegistrationBanner() {
   return (
     <div className="bg-gradient-to-br from-[#0070af] to-[#005a8c] rounded-2xl p-6 md:p-8 h-full flex flex-col justify-between">
@@ -21,20 +23,15 @@ export default function CampRegistrationBanner() {
       </div>
 
       <div className="text-center">
-        <a
-          href="https://www.ldtbela.cz/"
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/pages?page=taborove-prihlasky"
           className="inline-flex items-center gap-2 bg-white text-[#0070af] font-bold px-6 py-3 rounded-xl hover:bg-slate-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
         >
           <span>Přihlásit se na tábor</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-        </a>
-        <p className="mt-3 text-xs text-white/60">
-          ldtbela.cz
-        </p>
+        </Link>
       </div>
     </div>
   );
