@@ -32,19 +32,22 @@ export async function GET() {
       .select('startDate endDate')
       .lean();
 
+    const formatDate = (date: Date) =>
+      new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Prague' }).format(date);
+
     // Combine and format the occupied periods
     const occupiedPeriods = [
       ...approvedRequests.map(r => ({
-        startDate: r.startDate.toISOString().split('T')[0],
-        endDate: r.endDate.toISOString().split('T')[0]
+        startDate: formatDate(r.startDate),
+        endDate: formatDate(r.endDate)
       })),
       ...confirmedRentals.map(r => ({
-        startDate: r.startDate.toISOString().split('T')[0],
-        endDate: r.endDate.toISOString().split('T')[0]
+        startDate: formatDate(r.startDate),
+        endDate: formatDate(r.endDate)
       })),
       ...blockedPeriods.map(r => ({
-        startDate: r.startDate.toISOString().split('T')[0],
-        endDate: r.endDate.toISOString().split('T')[0]
+        startDate: formatDate(r.startDate),
+        endDate: formatDate(r.endDate)
       }))
     ];
 

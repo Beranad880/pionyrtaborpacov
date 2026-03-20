@@ -45,7 +45,7 @@ export default function RentalCalendar({ className = '' }: RentalCalendarProps) 
   };
 
   const isDateOccupied = (date: Date): boolean => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Prague' }).format(date);
     return occupiedPeriods.some(period => {
       return dateStr >= period.startDate && dateStr <= period.endDate;
     });
