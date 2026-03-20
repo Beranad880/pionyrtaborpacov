@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Article from '@/models/Article';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 
 export async function GET(
@@ -37,6 +37,8 @@ export async function PUT(
   const authError = await requireAuth(request);
   if (authError) return authError;
 
+  const tokenUser = await getUserFromToken(request);
+
   try {
     await connectToMongoose();
     const { slug: slugParam } = await params;
@@ -63,7 +65,7 @@ export async function PUT(
       }
     }
 
-    const updateData: any = { updatedAt: new Date() };
+    const updateData: any = { updatedAt: new Date(), processedBy: tokenUser?.username };
 
     if (title) updateData.title = title;
     if (slug) updateData.slug = slug;

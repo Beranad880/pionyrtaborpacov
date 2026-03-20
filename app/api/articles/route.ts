@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Article from '@/models/Article';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { parsePagination, paginationMeta } from '@/lib/pagination';
 import { dbError } from '@/lib/api-response';
 
@@ -70,6 +70,8 @@ export async function POST(request: NextRequest) {
   const authError = await requireAuth(request);
   if (authError) return authError;
 
+  const tokenUser = await getUserFromToken(request);
+
   try {
     await connectToMongoose();
 
@@ -96,11 +98,12 @@ export async function POST(request: NextRequest) {
       slug,
       content,
       excerpt,
-      author: author || 'Admin',
+      author: author || tokenUser?.username || 'Admin',
       category,
       tags: tags || [],
       status: status || 'draft',
-      publishedAt: status === 'published' ? new Date() : undefined
+      publishedAt: status === 'published' ? new Date() : undefined,
+      processedBy: tokenUser?.username,
     });
 
     await article.save();

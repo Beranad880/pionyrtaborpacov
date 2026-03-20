@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import RentalRequest from '@/models/RentalRequest';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 
 // GET - Načíst konkrétní žádost
@@ -39,6 +39,8 @@ async function updateRentalRequest(
   const authError = await requireAuth(request);
   if (authError) return authError;
 
+  const tokenUser = await getUserFromToken(request);
+
   try {
     await connectToMongoose();
     const { id } = await params;
@@ -58,7 +60,7 @@ async function updateRentalRequest(
 
       if (body.status !== 'pending') {
         rentalRequest.processedAt = new Date();
-        rentalRequest.processedBy = body.processedBy || 'admin';
+        rentalRequest.processedBy = tokenUser?.username ?? 'admin';
       }
 
       // Kontrola konfliktů při schválení

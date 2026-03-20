@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import PhotoGallery from '@/models/PhotoGallery';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 
 // GET - Načíst konkrétní galerii
@@ -39,6 +39,8 @@ export async function PUT(
   const authError = await requireAuth(request);
   if (authError) return authError;
 
+  const tokenUser = await getUserFromToken(request);
+
   try {
     await connectToMongoose();
     const { id } = await params;
@@ -60,6 +62,7 @@ export async function PUT(
     if (body.coverPhoto) gallery.coverPhoto = body.coverPhoto;
     if (body.isPublic !== undefined) gallery.isPublic = body.isPublic;
     if (body.photos) gallery.photos = body.photos;
+    if (tokenUser?.username) gallery.createdBy = tokenUser.username;
 
     await gallery.save();
 

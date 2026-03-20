@@ -3,7 +3,7 @@ import connectToMongoose from '@/lib/mongoose';
 import Content from '@/models/Content';
 import fs from 'fs/promises';
 import path from 'path';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 
 // GET - Načíst obsah stránky
@@ -44,6 +44,8 @@ export async function POST(request: NextRequest) {
   const authError = await requireAuth(request);
   if (authError) return authError;
 
+  const tokenUser = await getUserFromToken(request);
+
   try {
     const body = await request.json();
     const { page, content } = body;
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest) {
       {
         page,
         content,
-        modifiedBy: 'admin',
+        modifiedBy: tokenUser?.username ?? 'admin',
         lastModified: new Date(),
         $inc: { version: 1 }
       },

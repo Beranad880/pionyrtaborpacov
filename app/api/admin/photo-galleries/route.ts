@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import PhotoGallery from '@/models/PhotoGallery';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { parsePagination, paginationMeta } from '@/lib/pagination';
 import { uniqueSlug } from '@/lib/slug';
 import { dbError } from '@/lib/api-response';
@@ -51,12 +51,14 @@ export async function POST(request: NextRequest) {
   const authError = await requireAuth(request);
   if (authError) return authError;
 
+  const tokenUser = await getUserFromToken(request);
+
   try {
     await connectToMongoose();
 
     const body = await request.json();
 
-    const requiredFields = ['title', 'description', 'event', 'date', 'createdBy'];
+    const requiredFields = ['title', 'description', 'event', 'date'];
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
       photos: body.photos || [],
       coverPhoto: body.coverPhoto,
       isPublic: body.isPublic !== false,
-      createdBy: body.createdBy,
+      createdBy: tokenUser?.username ?? body.createdBy,
     });
 
     await gallery.save();
