@@ -39,10 +39,20 @@ const purposeOptions = [
   'Jiné'
 ];
 
+const defaultRentalSettings = {
+  pricePerDayShort: 1500,
+  pricePerDayWeek: 1200,
+  weekThreshold: 7,
+  capacity: 35,
+  minDays: 1,
+  note: 'Cena nezahrnuje energie',
+};
+
 export default function HajenkabelaPage() {
   const [content, setContent] = useState<typeof allPagesContent.hajenkaBela | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [rentalSettings, setRentalSettings] = useState(defaultRentalSettings);
 
   // Rental form state
   const [formData, setFormData] = useState<RentalFormData>({
@@ -60,6 +70,13 @@ export default function HajenkabelaPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/content?page=rentalSettings')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success && data.data) setRentalSettings({ ...defaultRentalSettings, ...data.data }); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -133,7 +150,7 @@ export default function HajenkabelaPage() {
 
     if (days <= 0) return 0;
 
-    const dailyRate = days >= 7 ? 1200 : 1500;
+    const dailyRate = days >= rentalSettings.weekThreshold ? rentalSettings.pricePerDayWeek : rentalSettings.pricePerDayShort;
     return days * dailyRate;
   };
 
@@ -151,8 +168,8 @@ export default function HajenkabelaPage() {
       return;
     }
 
-    if (formData.guestCount > 35) {
-      setError('Kapacita hájenky je maximálně 35 osob');
+    if (formData.guestCount > rentalSettings.capacity) {
+      setError(`Kapacita hájenky je maximálně ${rentalSettings.capacity} osob`);
       return;
     }
 
@@ -457,7 +474,7 @@ export default function HajenkabelaPage() {
                         onChange={handleInputChange}
                         required
                         min="1"
-                        max="35"
+                        max={rentalSettings.capacity}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0070af] focus:border-[#0070af]"
                       />
                     </div>
@@ -484,10 +501,10 @@ export default function HajenkabelaPage() {
                   {days > 0 && (
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <div className="flex justify-between text-sm">
-                        <span>{days} {days === 1 ? 'den' : days < 5 ? 'dny' : 'dní'} × {days >= 7 ? '1 200' : '1 500'} Kč</span>
+                        <span>{days} {days === 1 ? 'den' : days < 5 ? 'dny' : 'dní'} × {(days >= rentalSettings.weekThreshold ? rentalSettings.pricePerDayWeek : rentalSettings.pricePerDayShort).toLocaleString()} Kč</span>
                         <span className="font-bold text-blue-600">{estimatedPrice.toLocaleString()} Kč</span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">* Orientační cena bez energií</p>
+                      <p className="text-xs text-slate-500 mt-1">* {rentalSettings.note}</p>
                     </div>
                   )}
 

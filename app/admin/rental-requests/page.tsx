@@ -33,6 +33,24 @@ interface RentalRequest {
   updatedAt: string;
 }
 
+interface RentalSettings {
+  pricePerDayShort: number;
+  pricePerDayWeek: number;
+  weekThreshold: number;
+  capacity: number;
+  minDays: number;
+  note: string;
+}
+
+const defaultRentalSettings: RentalSettings = {
+  pricePerDayShort: 1500,
+  pricePerDayWeek: 1200,
+  weekThreshold: 7,
+  capacity: 35,
+  minDays: 1,
+  note: 'Cena nezahrnuje energie',
+};
+
 const facilityNames: Record<string, string> = {
   kitchen: 'Kuchyně',
   wifi: 'Wi-Fi',
@@ -69,6 +87,12 @@ export default function RentalRequestsAdmin() {
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
 
+  // Nastavení pronájmu
+  const [rentalSettings, setRentalSettings] = useState<RentalSettings>(defaultRentalSettings);
+  const [showRentalSettings, setShowRentalSettings] = useState(false);
+  const [isSavingRental, setIsSavingRental] = useState(false);
+  const [rentalSaved, setRentalSaved] = useState(false);
+
   // Kalendář blokovaných termínů
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [blockedPeriods, setBlockedPeriods] = useState<BlockedPeriod[]>([]);
@@ -78,7 +102,25 @@ export default function RentalRequestsAdmin() {
   const [blockLabel, setBlockLabel] = useState('');
   const [isSavingBlock, setIsSavingBlock] = useState(false);
 
-  useEffect(() => { fetchBlockedPeriods(); }, []);
+  useEffect(() => {
+    fetchBlockedPeriods();
+    fetch('/api/content?page=rentalSettings')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success && data.data) setRentalSettings({ ...defaultRentalSettings, ...data.data }); })
+      .catch(() => {});
+  }, []);
+
+  const saveRentalSettings = async () => {
+    setIsSavingRental(true);
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: 'rentalSettings', data: rentalSettings }),
+      });
+      if (res.ok) { setRentalSaved(true); setTimeout(() => setRentalSaved(false), 3000); }
+    } finally { setIsSavingRental(false); }
+  };
 
   const fetchBlockedPeriods = async () => {
     try {
@@ -315,6 +357,112 @@ export default function RentalRequestsAdmin() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+
+        {/* Nastavení pronájmu */}
+        <div className="bg-white rounded-xl shadow mb-6">
+          <button
+            onClick={() => setShowRentalSettings(v => !v)}
+            className="w-full flex items-center justify-between p-4 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg">💰</span>
+              <span className="font-semibold text-gray-900">Nastavení pronájmu</span>
+              <span className="text-sm text-gray-500">(ceny a podmínky zobrazené na stránce hájenky)</span>
+            </div>
+            <svg className={`w-5 h-5 text-gray-500 transition-transform ${showRentalSettings ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showRentalSettings && (
+            <div className="px-4 pb-4 border-t border-gray-100 pt-4">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cena za den — krátký pobyt (Kč)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.pricePerDayShort}
+                    onChange={e => setRentalSettings(p => ({ ...p, pricePerDayShort: parseInt(e.target.value) || 0 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cena za den — týden a déle (Kč)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.pricePerDayWeek}
+                    onChange={e => setRentalSettings(p => ({ ...p, pricePerDayWeek: parseInt(e.target.value) || 0 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Práh pro týdenní sazbu (dní)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.weekThreshold}
+                    onChange={e => setRentalSettings(p => ({ ...p, weekThreshold: parseInt(e.target.value) || 1 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Maximální kapacita (osob)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.capacity}
+                    onChange={e => setRentalSettings(p => ({ ...p, capacity: parseInt(e.target.value) || 1 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Minimální délka pobytu (dní)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.minDays}
+                    onChange={e => setRentalSettings(p => ({ ...p, minDays: parseInt(e.target.value) || 1 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Poznámka k ceně
+                  </label>
+                  <input
+                    type="text"
+                    value={rentalSettings.note}
+                    onChange={e => setRentalSettings(p => ({ ...p, note: e.target.value }))}
+                    placeholder="např. Cena nezahrnuje energie"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                Orientační výpočet: pobyt do {rentalSettings.weekThreshold - 1} dní = <strong>{rentalSettings.pricePerDayShort.toLocaleString()} Kč/den</strong>,
+                od {rentalSettings.weekThreshold} dní = <strong>{rentalSettings.pricePerDayWeek.toLocaleString()} Kč/den</strong>.
+                Kapacita: <strong>{rentalSettings.capacity} osob</strong>.
+              </div>
+              <div className="flex items-center gap-3 mt-4">
+                <button
+                  onClick={saveRentalSettings}
+                  disabled={isSavingRental}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {isSavingRental ? 'Ukládám...' : 'Uložit'}
+                </button>
+                {rentalSaved && <span className="text-green-600 text-sm font-medium">✓ Uloženo</span>}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Kalendář blokovaných termínů */}
         <div className="bg-white rounded-xl shadow mb-8 p-6">
