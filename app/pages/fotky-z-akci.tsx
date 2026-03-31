@@ -68,17 +68,17 @@ export default function FotkyZAkciPage() {
 
   if (loading) {
     return (
-      <main className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Fotky z akci</h1>
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Fotky z akci</h1>
 
       <p className="text-lg text-gray-700 mb-8">
@@ -203,6 +203,6 @@ export default function FotkyZAkciPage() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }

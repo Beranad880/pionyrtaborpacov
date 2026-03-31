@@ -180,7 +180,7 @@ export default function CampApplications() {
 
   if (submitStatus === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-blue-50 py-12">
+      <div className="bg-gradient-to-b from-green-50 to-blue-50 py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8 text-center">
             <div className="text-green-600 text-6xl mb-4">✓</div>
@@ -210,7 +210,7 @@ export default function CampApplications() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-blue-50 py-12">
+    <div className="bg-gradient-to-b from-green-50 to-blue-50 py-12">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="max-w-4xl mx-auto mb-8">

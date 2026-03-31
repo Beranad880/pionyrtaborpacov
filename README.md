@@ -334,6 +334,36 @@ npm run admin:remove olduser             # Odstraní z MongoDB + JSON
 - **Middleware ochrana** - Všechny admin stránky jsou automaticky chráněny
 - **Session timeout** - Automatické odhlášení po 7 dnech neaktivity
 
+## Emailové notifikace (Maileroo)
+
+Po odeslání žádosti o pronájem hájenky systém automaticky pošle notifikační email na zvolenou adresu.
+
+### Nastavení
+
+1. Přihlaste se na [maileroo.com](https://maileroo.com) a zkopírujte API klíč z **Settings → API Keys**.
+
+2. Přidejte tyto proměnné do `.env.local` (lokálně) nebo do **Vercel → Settings → Environment Variables** (produkce):
+
+   ```env
+   MAILEROO_API_KEY=váš_api_klíč
+   NOTIFICATION_EMAIL=admin@example.com
+   MAILEROO_FROM=noreply@vaše-doména.cz
+   ```
+
+   | Proměnná | Popis |
+   |---|---|
+   | `MAILEROO_API_KEY` | API klíč z Maileroo dashboardu |
+   | `NOTIFICATION_EMAIL` | Adresa, kam přijdou notifikace |
+   | `MAILEROO_FROM` | Odesílací adresa (musí být ověřena v Maileroo) |
+
+3. V Maileroo ověřte odesílací doménu nebo adresu (**Sending Domains** v dashboardu).
+
+### Jak to funguje
+
+- Notifikace se odešle po každé nové žádosti o pronájem (formulář na stránce Hájenka Bělá).
+- Email obsahuje jméno, kontakt, termín, počet osob a účel pobytu.
+- Pokud `MAILEROO_API_KEY` nebo `NOTIFICATION_EMAIL` chybí, notifikace se přeskočí (jen varování v logu) — ostatní funkce webu tím nejsou ovlivněny.
+
 ## Konfigurace obsahu
 
 Veškerý obsah stránek je centralizovaný v souboru `data/content.ts`. Můžete zde upravovat:

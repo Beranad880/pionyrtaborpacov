@@ -204,7 +204,7 @@ export default function HajenkabelaPage() {
 
   if (!content) {
     return (
-      <main className="container mx-auto px-4 py-8 animate-pulse">
+      <div className="container mx-auto px-4 py-8 animate-pulse">
         <div className="h-9 bg-slate-200 rounded w-80 mb-4"></div>
         <div className="h-5 bg-slate-200 rounded w-full mb-2"></div>
         <div className="h-5 bg-slate-200 rounded w-3/4 mb-8"></div>
@@ -212,12 +212,12 @@ export default function HajenkabelaPage() {
           {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-slate-200 rounded-lg"></div>)}
         </div>
         <div className="h-96 bg-slate-200 rounded-xl"></div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <div className="bg-slate-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -620,6 +620,6 @@ export default function HajenkabelaPage() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }

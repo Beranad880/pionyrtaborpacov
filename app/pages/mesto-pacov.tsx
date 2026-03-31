@@ -61,7 +61,7 @@ export default function MestoPacovPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <div className="bg-slate-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#0070af] to-[#005a8c] text-white py-16">
         <div className="container mx-auto px-4">
@@ -138,6 +138,6 @@ export default function MestoPacovPage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

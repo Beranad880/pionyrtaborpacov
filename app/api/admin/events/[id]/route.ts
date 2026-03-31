@@ -16,7 +16,6 @@ export async function GET(
   try {
     await connectToMongoose();
     const { id } = await context.params;
-
     const event = await Event.findById(id);
 
     if (!event) {

@@ -4,9 +4,9 @@ import AboutSection from '@/components/AboutSection';
 
 export default function UvodPage() {
   return (
-    <main>
+    <div>
       <Hero />
       <AboutSection />
-    </main>
+    </div>
   );
 }

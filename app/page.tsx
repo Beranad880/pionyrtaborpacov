@@ -7,7 +7,7 @@ import { Analytics } from '@vercel/analytics/next';
 
 export default function HomePage() {
   return (
-    <main>
+    <>
       <Hero />
       <section className="py-12 bg-slate-100">
         <div className="container mx-auto px-4">
@@ -19,7 +19,6 @@ export default function HomePage() {
       <AboutSection />
       <EvidencniListy />
       <ContactSection />
-      <Analytics/>
-    </main>
+    </>
   );
 }

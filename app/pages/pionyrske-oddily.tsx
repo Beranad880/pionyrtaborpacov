@@ -28,7 +28,7 @@ export default function PionyrseOddilyPage() {
 
   if (!content) {
     return (
-      <main className="container mx-auto px-4 py-8 animate-pulse">
+      <div className="container mx-auto px-4 py-8 animate-pulse">
         <div className="h-9 bg-slate-200 rounded w-64 mb-6"></div>
         <div className="h-5 bg-slate-200 rounded w-full mb-2"></div>
         <div className="h-5 bg-slate-200 rounded w-4/5 mb-8"></div>
@@ -38,12 +38,12 @@ export default function PionyrseOddilyPage() {
             <div key={i} className="bg-slate-100 p-6 rounded-lg h-64"></div>
           ))}
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">{content.title}</h1>
 
       <div className="max-w-none">
@@ -110,6 +110,6 @@ export default function PionyrseOddilyPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

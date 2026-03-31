@@ -77,7 +77,7 @@ export default function ArticleDetailPage() {
 
   if (loading) {
     return (
-      <main className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-300 rounded w-3/4 mb-4"></div>
@@ -89,13 +89,13 @@ export default function ArticleDetailPage() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   if (error || !article) {
     return (
-      <main className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             {error === 'Article not found' ? 'Článek nenalezen' : 'Chyba při načítání'}
@@ -112,14 +112,14 @@ export default function ArticleDetailPage() {
             Zpět na články
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
   const categoryInfo = categoryLabels[article.category] || { label: article.category, color: 'bg-gray-100 text-gray-800' };
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         {/* Breadcrumb */}
         <nav className="mb-6">
@@ -245,6 +245,6 @@ export default function ArticleDetailPage() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

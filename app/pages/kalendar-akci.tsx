@@ -99,7 +99,7 @@ export default function KalendarAkciPage() {
 
   if (loading) {
     return (
-      <main className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Kalendář akcí</h1>
         <div className="animate-pulse space-y-4">
           <div className="bg-white border rounded-xl h-80"></div>
@@ -107,12 +107,12 @@ export default function KalendarAkciPage() {
             <div key={i} className="bg-white border-l-4 border-gray-300 p-6 shadow-sm h-24"></div>
           ))}
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalendář akcí</h1>
       <p className="text-lg text-gray-700 mb-8">
         Přehled akcí, táborů a aktivit naší pionýrské skupiny.
@@ -314,6 +314,6 @@ export default function KalendarAkciPage() {
           <p><strong>Vedoucí:</strong> Mgr. Ladislav Mareš</p>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
