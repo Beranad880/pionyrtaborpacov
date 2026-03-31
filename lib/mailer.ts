@@ -44,18 +44,18 @@ export async function sendRentalNotification(data: {
     </a></p>
   `;
 
+  const form = new FormData();
+  form.append('from', fromEmail);
+  form.append('to', toEmail);
+  form.append('subject', `Nova rezervace hajenky - ${data.name} (${formatDate(data.startDate)} - ${formatDate(data.endDate)})`);
+  form.append('html_body', html);
+
   const res = await fetch('https://smtp.maileroo.com/send', {
     method: 'POST',
     headers: {
       'X-API-Key': apiKey,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      from: fromEmail,
-      to: toEmail,
-      subject: `Nová rezervace hájenky – ${data.name} (${formatDate(data.startDate)} – ${formatDate(data.endDate)})`,
-      html,
-    }),
+    body: form,
   });
 
   if (!res.ok) {
@@ -106,18 +106,18 @@ export async function sendCampApplicationNotification(data: {
     </a></p>
   `;
 
+  const form = new FormData();
+  form.append('from', fromEmail);
+  form.append('to', toEmail);
+  form.append('subject', `Nova prihláška na tábor - ${data.participantName}`);
+  form.append('html_body', html);
+
   const res = await fetch('https://smtp.maileroo.com/send', {
     method: 'POST',
     headers: {
       'X-API-Key': apiKey,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      from: fromEmail,
-      to: toEmail,
-      subject: `Nová přihláška na tábor – ${data.participantName}`,
-      html,
-    }),
+    body: form,
   });
 
   if (!res.ok) {
