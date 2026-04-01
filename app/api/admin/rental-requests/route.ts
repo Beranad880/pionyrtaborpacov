@@ -6,6 +6,7 @@ import { parsePagination, paginationMeta } from '@/lib/pagination';
 import { validateDateRange } from '@/lib/validation';
 import { checkRateLimit, FORM_MAX } from '@/lib/rate-limit';
 import { dbError } from '@/lib/api-response';
+import { sendRentalNotification } from '@/lib/mailer';
 // GET - Načíst žádosti o pronájem (pouze pro adminy)
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -114,6 +115,19 @@ export async function POST(request: NextRequest) {
     });
 
     await rentalRequest.save();
+
+    sendRentalNotification({
+      name: body.name,
+      email: body.email,
+      phone: body.phone,
+      organization: body.organization,
+      startDate,
+      endDate,
+      guestCount: parseInt(body.guestCount),
+      purpose: body.purpose,
+      facilities: body.facilities || [],
+      message: body.message,
+    }).catch((err) => console.error('sendRentalNotification selhalo:', err));
 
     return NextResponse.json({
       success: true,
