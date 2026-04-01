@@ -13,9 +13,10 @@ const transport = nodemailer.createTransport({
   },
 });
 
-const NOTIFICATION_EMAILS = (process.env.NOTIFICATION_EMAIL || 'adamhumblee150@gmail.com')
-  .split(',')
-  .map(e => e.trim());
+const NOTIFICATION_EMAILS = [
+  process.env.NOTIFICATION_EMAIL || 'adamhumblee150@gmail.com',
+  process.env.NOTIFICATION_EMAIL_2,
+].filter(Boolean).map(e => e!.trim());
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://pionyrtaborpacov.cz';
 
