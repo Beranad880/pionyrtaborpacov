@@ -126,6 +126,7 @@ export async function POST(request: NextRequest) {
       endDate,
       guestCount: parseInt(body.guestCount),
       purpose: body.purpose,
+      facilities: body.facilities || [],
       message: body.message,
     }).catch((err) => console.error('sendRentalNotification selhalo:', err));
 

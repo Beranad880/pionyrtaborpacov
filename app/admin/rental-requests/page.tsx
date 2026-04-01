@@ -561,21 +561,29 @@ export default function RentalRequestsAdmin() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === status
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-              }`}
-            >
-              {status === 'all' ? 'Všechny' : statusNames[status]}
-            </button>
-          ))}
+        {/* Filters + Export */}
+        <div className="mb-6 flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex flex-wrap gap-2">
+            {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilter(status)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  filter === status
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                }`}
+              >
+                {status === 'all' ? 'Všechny' : statusNames[status]}
+              </button>
+            ))}
+          </div>
+          <a
+            href={`/api/admin/rental-requests/export?status=${filter}`}
+            className="px-4 py-2 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition-colors"
+          >
+            ↓ Exportovat CSV
+          </a>
         </div>
 
         {/* Requests List */}

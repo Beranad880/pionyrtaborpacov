@@ -247,7 +247,7 @@ export default function CampApplicationsAdmin() {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => (
                 <button
                   key={status}
@@ -261,6 +261,12 @@ export default function CampApplicationsAdmin() {
                   {status === 'all' ? 'Všechny' : statusNames[status]}
                 </button>
               ))}
+              <a
+                href={`/api/admin/camp-applications/export?status=${filter}${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ''}`}
+                className="px-4 py-2 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition-colors"
+              >
+                ↓ Exportovat CSV
+              </a>
             </div>
           </div>
         </div>
