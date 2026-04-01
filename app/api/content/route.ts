@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
         });
       }
     } catch {
-      console.log('Database not available, falling back to static content');
+      // DB nedostupná, fallback na statický obsah
     }
 
     // Fallback na statický obsah ze souboru

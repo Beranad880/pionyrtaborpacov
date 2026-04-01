@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Content from '@/models/Content';
-import fs from 'fs/promises';
-import path from 'path';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 
@@ -71,8 +69,6 @@ export async function POST(request: NextRequest) {
       { new: true, upsert: true, runValidators: true }
     );
 
-    await updateContentFile(page, content);
-
     return NextResponse.json({
       success: true,
       message: 'Content saved successfully',
@@ -134,12 +130,3 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-async function updateContentFile(page: string, content: any) {
-  try {
-    console.log(`Content updated for page: ${page}`);
-    const backupPath = path.join(process.cwd(), 'data', `content-backup-${Date.now()}.json`);
-    await fs.writeFile(backupPath, JSON.stringify({ page, content }, null, 2));
-  } catch (error) {
-    console.error('Failed to update content file:', error);
-  }
-}

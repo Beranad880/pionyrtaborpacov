@@ -3,39 +3,7 @@ import connectToMongoose from '@/lib/mongoose';
 import CampApplication from '@/models/CampApplication';
 import { requireAuth } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
-
-const GRADE_LABELS: Record<string, string> = {
-  '0': 'Předškolák',
-  '1': '1. třída',
-  '2': '2. třída',
-  '3': '3. třída',
-  '4': '4. třída',
-  '5': '5. třída',
-  '6': '6. třída',
-  '7': '7. třída',
-  '8': '8. třída',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'Čeká',
-  approved: 'Schváleno',
-  rejected: 'Zamítnuto',
-};
-
-function csvEscape(value: unknown): string {
-  if (value === undefined || value === null) return '';
-  const str = String(value);
-  if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
-    return '"' + str.replace(/"/g, '""') + '"';
-  }
-  return str;
-}
-
-function formatDate(d: Date | string | null | undefined): string {
-  if (!d) return '';
-  const date = typeof d === 'string' ? new Date(d) : d;
-  return date.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+import { csvEscape, formatDate, STATUS_LABELS, GRADE_LABELS } from '@/lib/csv';
 
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);

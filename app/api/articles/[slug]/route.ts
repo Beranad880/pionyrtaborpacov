@@ -46,7 +46,7 @@ export async function PUT(
     const body = await request.json();
     const { title, slug, content, excerpt, category, tags, status } = body;
 
-    const article = await Article.findById(slugParam);
+    const article = await Article.findOne({ slug: slugParam });
 
     if (!article) {
       return NextResponse.json(
@@ -56,7 +56,7 @@ export async function PUT(
     }
 
     if (slug && slug !== article.slug) {
-      const existingArticle = await Article.findOne({ slug, _id: { $ne: slugParam } });
+      const existingArticle = await Article.findOne({ slug, _id: { $ne: article._id } });
       if (existingArticle) {
         return NextResponse.json(
           { success: false, message: 'Článek s tímto slug již existuje' },
@@ -80,7 +80,7 @@ export async function PUT(
       }
     }
 
-    const updatedArticle = await Article.findByIdAndUpdate(slugParam, updateData, { new: true });
+    const updatedArticle = await Article.findByIdAndUpdate(article._id, updateData, { new: true });
 
     return NextResponse.json({
       success: true,
@@ -108,7 +108,7 @@ export async function DELETE(
     await connectToMongoose();
     const { slug } = await params;
 
-    const article = await Article.findByIdAndDelete(slug);
+    const article = await Article.findOneAndDelete({ slug });
 
     if (!article) {
       return NextResponse.json(

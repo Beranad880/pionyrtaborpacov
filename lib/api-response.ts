@@ -10,7 +10,3 @@ export function dbError(error: unknown, context?: string): NextResponse {
     { status: 500 }
   );
 }
-
-export function validationErrors(errors: string[]): NextResponse {
-  return NextResponse.json({ success: false, message: errors.join(', ') }, { status: 400 });
-}
