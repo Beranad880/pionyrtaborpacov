@@ -6,8 +6,6 @@ import { parsePagination, paginationMeta } from '@/lib/pagination';
 import { escapeRegex } from '@/lib/validation';
 import { checkRateLimit, FORM_MAX } from '@/lib/rate-limit';
 import { dbError } from '@/lib/api-response';
-import { sendCampApplicationNotification } from '@/lib/mailer';
-
 // GET - Načíst táborové přihlášky (pouze pro adminy)
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -144,23 +142,6 @@ export async function POST(request: NextRequest) {
     });
 
     await campApplication.save();
-
-    sendCampApplicationNotification({
-      participantName: body.participantName,
-      grade: body.grade,
-      dateOfBirth: body.dateOfBirth,
-      birthNumber: body.birthNumber,
-      address: { street: body.address.street, city: body.address.city },
-      guardianName: body.guardianName,
-      guardianPhone: body.guardianPhone,
-      guardianEmail: body.guardianEmail,
-      guardianAddress: body.guardianAddress,
-      secondContactName: body.secondContactName,
-      secondContactPhone: body.secondContactPhone,
-      secondContactEmail: body.secondContactEmail,
-      secondContactAddress: body.secondContactAddress,
-      campInfo: body.campInfo,
-    }).catch((err) => console.error('sendCampApplicationNotification selhalo:', err));
 
     return NextResponse.json({
       success: true,
