@@ -197,7 +197,7 @@ export const allPagesContent: PageContent = {
     ],
     location: {
       title: "Poloha a dostupnost",
-      description: "Hájenka Bělá se nachází v klidné přírodní lokalitě s dobrou dostupností jak automobilem, tak veřejnou dopravou. Okolí nabízí mnoho možností pro turistiku a poznávání přírody.",
+      description: "Hájenka Bělá se nachází v klidné přírodní lokalitě. Okolí nabízí mnoho možností pro turistiku a poznávání přírody.",
       address: "Červená Řečice 27, Červená Řečice, 394 46, Pelhřimov",
       gps: "49.5045563N, 15.1379789E",
       nearestTown: "Červená Řečice (1 km)"
