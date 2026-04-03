@@ -238,6 +238,30 @@ export default function HajenkabelaPage() {
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Left column - About */}
           <div className="space-y-6">
+            <div className="bg-[#0070af] p-6 rounded-xl shadow-md border border-[#005a8c]">
+              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {content.location?.title || 'Poloha a dostupnost'}
+              </h2>
+              <p className="text-blue-100 mb-5">
+                {content.location?.description || 'Hájenka Bělá se nachází v klidné přírodní lokalitě s dobrou dostupností.'}
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="bg-white/15 rounded-lg p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-200 mb-1">Adresa</p>
+                  <p className="text-white font-semibold text-base leading-snug">{content.location?.address || 'Červená Řečice 27, Červená Řečice, 394 46, Pelhřimov'}</p>
+                </div>
+                <div className="bg-white/15 rounded-lg p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-200 mb-1">GPS souřadnice</p>
+                  <p className="text-white font-semibold text-base font-mono">{content.location?.gps || 'Budou upřesněny'}</p>
+                  <p className="text-blue-200 text-xs mt-1">Nejbližší: {content.location?.nearestTown || 'Červená Řečice (1 km)'}</p>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
               <h2 className="text-xl font-bold text-slate-800 mb-4">O hájence</h2>
               <p className="text-gray-700 mb-4">{content.description}</p>
@@ -270,23 +294,6 @@ export default function HajenkabelaPage() {
                   </li>
                 ))}
               </ul>
-            </div>
-
-            <div className="bg-green-50 p-6 rounded-xl border border-green-200">
-              <h2 className="text-xl font-bold text-slate-800 mb-3">{content.location?.title || 'Poloha a dostupnost'}</h2>
-              <p className="text-gray-700 mb-4">
-                {content.location?.description || 'Hájenka Bělá se nachází v klidné přírodní lokalitě s dobrou dostupností.'}
-              </p>
-              <div className="grid sm:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-medium text-slate-700">GPS souřadnice:</p>
-                  <p className="text-gray-600">{content.location?.gps || 'Budou upřesněny'}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-slate-700">Nejbližší město:</p>
-                  <p className="text-gray-600">{content.location?.nearestTown || 'Pacov (5 km)'}</p>
-                </div>
-              </div>
             </div>
 
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
