@@ -3,9 +3,9 @@ import connectToMongoose from '@/lib/mongoose';
 import CampApplication from '@/models/CampApplication';
 import { requireAuth } from '@/lib/auth-middleware';
 import { parsePagination, paginationMeta } from '@/lib/pagination';
-import { escapeRegex } from '@/lib/validation';
+import { escapeRegex, isValidEmail, isValidPhone, parseStatusFilter } from '@/lib/validation';
 import { checkRateLimit, FORM_MAX } from '@/lib/rate-limit';
-import { dbError } from '@/lib/api-response';
+import { dbError, isValidationError, validationError } from '@/lib/api-response';
 import { sendCampApplicationNotification } from '@/lib/mailer';
 // GET - Načíst táborové přihlášky (pouze pro adminy)
 export async function GET(request: NextRequest) {
@@ -20,10 +20,11 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const search = searchParams.get('search');
 
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
 
-    if (status && status !== 'all') {
-      filter.status = status;
+    const validStatus = parseStatusFilter(status);
+    if (validStatus) {
+      filter.status = validStatus;
     }
 
     if (search) {
@@ -107,6 +108,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!isValidEmail(body.guardianEmail)) {
+      return NextResponse.json(
+        { success: false, message: 'Neplatný formát emailu zákonného zástupce' },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidPhone(body.guardianPhone)) {
+      return NextResponse.json(
+        { success: false, message: 'Neplatný formát telefonu zákonného zástupce' },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidPhone(body.secondContactPhone)) {
+      return NextResponse.json(
+        { success: false, message: 'Neplatný formát telefonu druhého kontaktu' },
+        { status: 400 }
+      );
+    }
+
     const existingApplication = await CampApplication.findOne({
       $or: [
         { birthNumber: body.birthNumber },
@@ -167,14 +189,8 @@ export async function POST(request: NextRequest) {
       data: campApplication
     }, { status: 201 });
 
-  } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json(
-        { success: false, message: 'Validace selhala', errors },
-        { status: 400 }
-      );
-    }
+  } catch (error: unknown) {
+    if (isValidationError(error)) return validationError(error);
     return dbError(error, 'POST /api/admin/camp-applications error:');
   }
 }

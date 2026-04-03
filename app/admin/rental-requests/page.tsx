@@ -2,9 +2,9 @@
 
 import { useState, useEffect, type JSX } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
+import { STATUS_LABELS, STATUS_COLORS, FACILITY_LABELS, DAYS_CS, MONTHS_CS } from '@/lib/labels';
 
-const DAYS_CS = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
-const MONTHS_CS = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
 
 interface BlockedPeriod {
   _id: string;
@@ -51,29 +51,6 @@ const defaultRentalSettings: RentalSettings = {
   note: 'Cena nezahrnuje energie',
 };
 
-const facilityNames: Record<string, string> = {
-  kitchen: 'Kuchyně',
-  wifi: 'Wi-Fi',
-  fireplace: 'Krb',
-  parking: 'Parkování',
-  heating: 'Topení',
-  electricity: 'Elektřina',
-  water: 'Voda',
-  outdoor_grill: 'Venkovní gril',
-  sports_equipment: 'Sportovní vybavení'
-};
-
-const statusNames: Record<string, string> = {
-  pending: 'Čekající',
-  approved: 'Schváleno',
-  rejected: 'Odmítnuto'
-};
-
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  approved: 'bg-green-100 text-green-800 border-green-200',
-  rejected: 'bg-red-100 text-red-800 border-red-200'
-};
 
 export default function RentalRequestsAdmin() {
   const [requests, setRequests] = useState<RentalRequest[]>([]);
@@ -86,6 +63,7 @@ export default function RentalRequestsAdmin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
+  const { toast } = useToast();
 
   // Nastavení pronájmu
   const [rentalSettings, setRentalSettings] = useState<RentalSettings>(defaultRentalSettings);
@@ -284,12 +262,13 @@ export default function RentalRequestsAdmin() {
         setShowModal(false);
         setSelectedRequest(null);
         setAdminNotes('');
+        toast('Žádost byla úspěšně aktualizována', 'success');
       } else {
-        alert('Chyba při aktualizaci žádosti');
+        toast('Chyba při aktualizaci žádosti', 'error');
       }
     } catch (error) {
       console.error('Error updating rental request:', error);
-      alert('Chyba při aktualizaci žádosti');
+      toast('Chyba při aktualizaci žádosti', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -308,12 +287,13 @@ export default function RentalRequestsAdmin() {
           setShowModal(false);
           setSelectedRequest(null);
         }
+        toast('Žádost byla smazána', 'success');
       } else {
-        alert('Chyba při mazání žádosti');
+        toast('Chyba při mazání žádosti', 'error');
       }
     } catch (error) {
       console.error('Error deleting rental request:', error);
-      alert('Chyba při mazání žádosti');
+      toast('Chyba při mazání žádosti', 'error');
     }
   };
 
@@ -574,7 +554,7 @@ export default function RentalRequestsAdmin() {
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
                 }`}
               >
-                {status === 'all' ? 'Všechny' : statusNames[status]}
+                {status === 'all' ? 'Všechny' : STATUS_LABELS[status]}
               </button>
             ))}
           </div>
@@ -609,8 +589,8 @@ export default function RentalRequestsAdmin() {
                         <p className="text-gray-600">{request.organization}</p>
                       )}
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${statusColors[request.status]}`}>
-                      {statusNames[request.status]}
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${STATUS_COLORS[request.status]}`}>
+                      {STATUS_LABELS[request.status]}
                     </span>
                   </div>
 
@@ -634,7 +614,7 @@ export default function RentalRequestsAdmin() {
                               key={index}
                               className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
                             >
-                              {facilityNames[facility] || facility}
+                              {FACILITY_LABELS[facility] || facility}
                             </span>
                           ))}
                         </div>

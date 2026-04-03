@@ -3,7 +3,7 @@ import connectToMongoose from '@/lib/mongoose';
 import Content from '@/models/Content';
 import { allPagesContent, siteData, pageContent } from '@/data/content';
 import { requireAuth } from '@/lib/auth-middleware';
-import { dbError } from '@/lib/api-response';
+import { dbError, isValidationError, validationError } from '@/lib/api-response';
 
 // GET - Načíst obsah stránky (pro frontend)
 export async function GET(request: NextRequest) {
@@ -115,14 +115,8 @@ export async function POST(request: NextRequest) {
       message: 'Content saved successfully',
       data: savedContent,
     });
-  } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((err: any) => err.message);
-      return NextResponse.json(
-        { success: false, message: errors.join(', ') },
-        { status: 400 }
-      );
-    }
+  } catch (error: unknown) {
+    if (isValidationError(error)) return validationError(error);
     return dbError(error, 'POST /api/content error:');
   }
 }

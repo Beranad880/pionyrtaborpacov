@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
+import { STATUS_LABELS, STATUS_COLORS, GRADE_LABELS } from '@/lib/labels';
 
 interface CampApplication {
   _id: string;
@@ -41,29 +43,6 @@ interface Stats {
   total: number;
 }
 
-const statusNames: Record<string, string> = {
-  pending: 'Čekající',
-  approved: 'Schváleno',
-  rejected: 'Odmítnuto'
-};
-
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  approved: 'bg-green-100 text-green-800 border-green-200',
-  rejected: 'bg-red-100 text-red-800 border-red-200'
-};
-
-const gradeNames: Record<string, string> = {
-  '0': '1. třída',
-  '1': '2. třída',
-  '2': '3. třída',
-  '3': '4. třída',
-  '4': '5. třída',
-  '5': '6. třída',
-  '6': '7. třída',
-  '7': '8. třída',
-  '8': '9. třída'
-};
 
 export default function CampApplicationsAdmin() {
   const [applications, setApplications] = useState<CampApplication[]>([]);
@@ -79,6 +58,7 @@ export default function CampApplicationsAdmin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchApplications();
@@ -132,12 +112,13 @@ export default function CampApplicationsAdmin() {
         setShowModal(false);
         setSelectedApplication(null);
         setAdminNotes('');
+        toast('Přihláška byla úspěšně aktualizována', 'success');
       } else {
-        alert('Chyba při aktualizaci přihlášky');
+        toast('Chyba při aktualizaci přihlášky', 'error');
       }
     } catch (error) {
       console.error('Error updating camp application:', error);
-      alert('Chyba při aktualizaci přihlášky');
+      toast('Chyba při aktualizaci přihlášky', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -155,12 +136,13 @@ export default function CampApplicationsAdmin() {
         fetchApplications();
         setShowDetailModal(false);
         setSelectedApplication(null);
+        toast('Přihláška byla smazána', 'success');
       } else {
-        alert('Chyba při mazání přihlášky');
+        toast('Chyba při mazání přihlášky', 'error');
       }
     } catch (error) {
       console.error('Error deleting camp application:', error);
-      alert('Chyba při mazání přihlášky');
+      toast('Chyba při mazání přihlášky', 'error');
     }
   };
 
@@ -258,7 +240,7 @@ export default function CampApplicationsAdmin() {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  {status === 'all' ? 'Všechny' : statusNames[status]}
+                  {status === 'all' ? 'Všechny' : STATUS_LABELS[status]}
                 </button>
               ))}
               <a
@@ -290,14 +272,14 @@ export default function CampApplicationsAdmin() {
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">{application.participantName}</h3>
                       <p className="text-gray-600">
-                        {gradeNames[application.grade]} • Věk: {calculateAge(application.dateOfBirth)} let
+                        {GRADE_LABELS[application.grade]} • Věk: {calculateAge(application.dateOfBirth)} let
                       </p>
                       <p className="text-gray-600">{application.guardianName}</p>
                       <p className="text-gray-600">{application.guardianEmail} • {application.guardianPhone}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${statusColors[application.status]}`}>
-                        {statusNames[application.status]}
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${STATUS_COLORS[application.status]}`}>
+                        {STATUS_LABELS[application.status]}
                       </span>
                     </div>
                   </div>
@@ -400,7 +382,7 @@ export default function CampApplicationsAdmin() {
 
               <div className="mb-4">
                 <h4 className="font-medium text-gray-900 mb-2">{selectedApplication.participantName}</h4>
-                <p className="text-sm text-gray-600">{gradeNames[selectedApplication.grade]}</p>
+                <p className="text-sm text-gray-600">{GRADE_LABELS[selectedApplication.grade]}</p>
                 <p className="text-sm text-gray-600">Rodič: {selectedApplication.guardianName}</p>
                 <p className="text-sm text-gray-600">Email: {selectedApplication.guardianEmail}</p>
               </div>
@@ -459,7 +441,7 @@ export default function CampApplicationsAdmin() {
                   <h4 className="font-medium text-gray-900 mb-2">Údaje o účastníkovi</h4>
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                     <p><span className="font-medium">Jméno:</span> {selectedApplication.participantName}</p>
-                    <p><span className="font-medium">Třída:</span> {gradeNames[selectedApplication.grade]}</p>
+                    <p><span className="font-medium">Třída:</span> {GRADE_LABELS[selectedApplication.grade]}</p>
                     <p><span className="font-medium">Datum narození:</span> {selectedApplication.dateOfBirth} (Věk: {calculateAge(selectedApplication.dateOfBirth)} let)</p>
                     <p><span className="font-medium">Rodné číslo:</span> {selectedApplication.birthNumber}</p>
                     <p><span className="font-medium">Adresa:</span> {selectedApplication.address.street}, {selectedApplication.address.city}</p>
@@ -508,8 +490,8 @@ export default function CampApplicationsAdmin() {
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                     <p>
                       <span className="font-medium">Status:</span>
-                      <span className={`ml-2 px-2 py-1 rounded text-sm ${statusColors[selectedApplication.status]}`}>
-                        {statusNames[selectedApplication.status]}
+                      <span className={`ml-2 px-2 py-1 rounded text-sm ${STATUS_COLORS[selectedApplication.status]}`}>
+                        {STATUS_LABELS[selectedApplication.status]}
                       </span>
                     </p>
                     <p><span className="font-medium">Vytvořeno:</span> {formatDateTime(selectedApplication.createdAt)}</p>

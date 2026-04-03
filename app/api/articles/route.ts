@@ -3,7 +3,7 @@ import connectToMongoose from '@/lib/mongoose';
 import Article from '@/models/Article';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { parsePagination, paginationMeta } from '@/lib/pagination';
-import { dbError } from '@/lib/api-response';
+import { dbError, isValidationError, validationError, isDuplicateKeyError } from '@/lib/api-response';
 
 export async function GET(request: NextRequest) {
   try {
@@ -114,12 +114,9 @@ export async function POST(request: NextRequest) {
       message: 'Článek byl úspěšně vytvořen'
     }, { status: 201 });
 
-  } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((err: any) => err.message);
-      return NextResponse.json({ success: false, message: errors.join(', ') }, { status: 400 });
-    }
-    if (error.code === 11000) {
+  } catch (error: unknown) {
+    if (isValidationError(error)) return validationError(error);
+    if (isDuplicateKeyError(error)) {
       return NextResponse.json(
         { success: false, message: 'Článek s tímto slug již existuje' },
         { status: 409 }

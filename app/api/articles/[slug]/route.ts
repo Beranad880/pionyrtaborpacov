@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Article from '@/models/Article';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
-import { dbError } from '@/lib/api-response';
+import { dbError, isValidationError, validationError } from '@/lib/api-response';
 
 export async function GET(
   request: NextRequest,
@@ -88,11 +88,8 @@ export async function PUT(
       message: 'Článek byl úspěšně aktualizován'
     });
 
-  } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((err: any) => err.message);
-      return NextResponse.json({ success: false, message: errors.join(', ') }, { status: 400 });
-    }
+  } catch (error: unknown) {
+    if (isValidationError(error)) return validationError(error);
     return dbError(error, 'PUT /api/articles/[slug] error:');
   }
 }

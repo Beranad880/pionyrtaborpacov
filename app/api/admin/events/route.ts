@@ -5,7 +5,7 @@ import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { parsePagination, paginationMeta } from '@/lib/pagination';
 import { validateDateRange } from '@/lib/validation';
 import { uniqueSlug } from '@/lib/slug';
-import { dbError } from '@/lib/api-response';
+import { dbError, isValidationError, validationError, isDuplicateKeyError } from '@/lib/api-response';
 
 // GET - Načíst akce
 export async function GET(request: NextRequest) {
@@ -107,12 +107,9 @@ export async function POST(request: NextRequest) {
       data: event
     }, { status: 201 });
 
-  } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
-    }
-    if (error.code === 11000) {
+  } catch (error: unknown) {
+    if (isValidationError(error)) return validationError(error);
+    if (isDuplicateKeyError(error)) {
       return NextResponse.json(
         { success: false, message: 'Akce s tímto názvem již existuje' },
         { status: 409 }

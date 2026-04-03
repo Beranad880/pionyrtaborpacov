@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, type JSX } from 'react';
+import { DAYS_CS, MONTHS_CS } from '@/lib/labels';
 
 interface OccupiedPeriod {
   startDate: string;
@@ -11,11 +12,6 @@ interface RentalCalendarProps {
   className?: string;
 }
 
-const DAYS_CS = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
-const MONTHS_CS = [
-  'Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen',
-  'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'
-];
 
 export default function RentalCalendar({ className = '' }: RentalCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());

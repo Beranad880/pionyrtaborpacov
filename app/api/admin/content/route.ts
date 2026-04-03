@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       message: 'Content saved successfully',
       data: savedContent,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return dbError(error, 'POST /api/admin/content error:');
   }
 }

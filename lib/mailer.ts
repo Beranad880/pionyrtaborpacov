@@ -1,6 +1,10 @@
 import { Resend } from 'resend';
 import { FACILITY_LABELS, GRADE_LABELS } from './csv';
 
+if (!process.env.RESEND_API_KEY) {
+  console.warn('[mailer] RESEND_API_KEY není nastaven — emaily nebudou odesílány.');
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 function esc(str: string | undefined | null): string {
@@ -12,6 +16,10 @@ const ADMIN_EMAILS = [
   process.env.NOTIFICATION_EMAIL,
   process.env.NOTIFICATION_EMAIL_2,
 ].filter(Boolean) as string[];
+
+if (ADMIN_EMAILS.length === 0) {
+  console.warn('[mailer] NOTIFICATION_EMAIL není nastaven — adminové nebudou dostávat notifikace.');
+}
 
 const FROM = process.env.RESEND_FROM || 'Pionýr Pacov <onboarding@resend.dev>';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://pionyrtaborpacov.cz';

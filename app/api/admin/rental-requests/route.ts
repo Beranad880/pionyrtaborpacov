@@ -3,9 +3,9 @@ import connectToMongoose from '@/lib/mongoose';
 import RentalRequest from '@/models/RentalRequest';
 import { requireAuth } from '@/lib/auth-middleware';
 import { parsePagination, paginationMeta } from '@/lib/pagination';
-import { validateDateRange } from '@/lib/validation';
+import { validateDateRange, isValidEmail, isValidPhone, parseStatusFilter } from '@/lib/validation';
 import { checkRateLimit, FORM_MAX } from '@/lib/rate-limit';
-import { dbError } from '@/lib/api-response';
+import { dbError, isValidationError, validationError } from '@/lib/api-response';
 import { sendRentalNotification } from '@/lib/mailer';
 // GET - Načíst žádosti o pronájem (pouze pro adminy)
 export async function GET(request: NextRequest) {
@@ -19,8 +19,9 @@ export async function GET(request: NextRequest) {
     const { page, limit, skip } = parsePagination(searchParams);
     const status = searchParams.get('status');
 
-    const filter: any = {};
-    if (status && status !== 'all') filter.status = status;
+    const filter: Record<string, unknown> = {};
+    const validStatus = parseStatusFilter(status);
+    if (validStatus) filter.status = validStatus;
 
     const requests = await RentalRequest.find(filter)
       .sort({ createdAt: -1 })
@@ -66,6 +67,20 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+    }
+
+    if (!isValidEmail(body.email)) {
+      return NextResponse.json(
+        { success: false, message: 'Neplatný formát emailové adresy' },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidPhone(body.phone)) {
+      return NextResponse.json(
+        { success: false, message: 'Neplatný formát telefonního čísla' },
+        { status: 400 }
+      );
     }
 
     const startDate = new Date(body.startDate);
@@ -135,11 +150,8 @@ export async function POST(request: NextRequest) {
       data: rentalRequest
     }, { status: 201 });
 
-  } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
-    }
+  } catch (error: unknown) {
+    if (isValidationError(error)) return validationError(error);
     return dbError(error, 'POST /api/admin/rental-requests error:');
   }
 }

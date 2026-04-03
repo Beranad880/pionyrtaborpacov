@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import RentalRequest from '@/models/RentalRequest';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
-import { dbError } from '@/lib/api-response';
+import { dbError, isValidationError, validationError } from '@/lib/api-response';
 
 // GET - Načíst konkrétní žádost
 export async function GET(
@@ -95,11 +95,8 @@ async function updateRentalRequest(
       data: rentalRequest
     });
 
-  } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
-    }
+  } catch (error: unknown) {
+    if (isValidationError(error)) return validationError(error);
     return dbError(error, 'PUT /api/admin/rental-requests/[id] error:');
   }
 }

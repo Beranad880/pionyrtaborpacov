@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useToast } from '@/components/Toast';
 
 interface Event {
   _id: string;
@@ -36,6 +37,7 @@ const eventStatuses = [
 ];
 
 export default function CalendarAdminPage() {
+  const { toast } = useToast();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -246,6 +248,7 @@ export default function CalendarAdminPage() {
       if (result.success) {
         setEvents(prev => [result.data, ...prev]);
         setShowAddForm(false);
+        toast('Akce byla úspěšně vytvořena', 'success');
         setFormData({
           title: '',
           description: '',
@@ -260,11 +263,11 @@ export default function CalendarAdminPage() {
           price: '',
         });
       } else {
-        alert(`Chyba: ${result.message}`);
+        toast(result.message || 'Chyba při vytváření akce', 'error');
       }
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Chyba při vytváření akce');
+      toast('Chyba při vytváření akce', 'error');
     }
   };
 

@@ -4,6 +4,9 @@ import CampApplication from '@/models/CampApplication';
 import { requireAuth } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 import { csvEscape, formatDate, STATUS_LABELS, GRADE_LABELS } from '@/lib/csv';
+import { escapeRegex, parseStatusFilter } from '@/lib/validation';
+
+const MAX_EXPORT_ROWS = 5000;
 
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -17,14 +20,23 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
 
     const filter: Record<string, unknown> = {};
-    if (status && status !== 'all') filter.status = status;
+    const validStatus = parseStatusFilter(status);
+    if (validStatus) filter.status = validStatus;
     if (search) {
-      const safe = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const safe = escapeRegex(search);
       filter.$or = [
         { participantName: { $regex: safe, $options: 'i' } },
         { guardianName: { $regex: safe, $options: 'i' } },
         { guardianEmail: { $regex: safe, $options: 'i' } },
       ];
+    }
+
+    const total = await CampApplication.countDocuments(filter);
+    if (total > MAX_EXPORT_ROWS) {
+      return NextResponse.json(
+        { success: false, message: `Export obsahuje příliš mnoho záznamů (${total}). Použijte filtr pro zúžení výběru (max ${MAX_EXPORT_ROWS}).` },
+        { status: 400 }
+      );
     }
 
     const applications = await CampApplication.find(filter).sort({ createdAt: -1 }).lean();

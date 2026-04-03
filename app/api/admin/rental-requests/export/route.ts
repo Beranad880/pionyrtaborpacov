@@ -4,6 +4,9 @@ import RentalRequest from '@/models/RentalRequest';
 import { requireAuth } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 import { csvEscape, formatDate, STATUS_LABELS, FACILITY_LABELS } from '@/lib/csv';
+import { parseStatusFilter } from '@/lib/validation';
+
+const MAX_EXPORT_ROWS = 5000;
 
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -16,7 +19,16 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
 
     const filter: Record<string, unknown> = {};
-    if (status && status !== 'all') filter.status = status;
+    const validStatus = parseStatusFilter(status);
+    if (validStatus) filter.status = validStatus;
+
+    const total = await RentalRequest.countDocuments(filter);
+    if (total > MAX_EXPORT_ROWS) {
+      return NextResponse.json(
+        { success: false, message: `Export obsahuje příliš mnoho záznamů (${total}). Použijte filtr pro zúžení výběru (max ${MAX_EXPORT_ROWS}).` },
+        { status: 400 }
+      );
+    }
 
     const requests = await RentalRequest.find(filter).sort({ createdAt: -1 }).lean();
 

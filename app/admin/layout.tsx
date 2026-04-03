@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAdminAuth } from '@/lib/auth-admin';
 import { useRouter } from 'next/navigation';
+import { ToastProvider } from '@/components/Toast';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const adminPages = [
   { name: 'Přehled', href: '/admin', icon: '📊' },
@@ -56,6 +58,7 @@ export default function AdminLayout({
   }
 
   return (
+    <ToastProvider>
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200">
@@ -124,10 +127,13 @@ export default function AdminLayout({
         {/* Main Content */}
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </div>
         </main>
       </div>
     </div>
+    </ToastProvider>
   );
 }

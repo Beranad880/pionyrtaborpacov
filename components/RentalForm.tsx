@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { IRental } from '@/models/Rental';
+import { FACILITY_OPTIONS } from '@/lib/labels';
 
 interface RentalFormProps {
   rental?: IRental | null;
@@ -10,17 +11,6 @@ interface RentalFormProps {
   isProcessing: boolean;
 }
 
-const facilityOptions = [
-    { id: 'kitchen', label: 'Kuchyně' },
-    { id: 'wifi', label: 'Wi-Fi' },
-    { id: 'fireplace', label: 'Krb' },
-    { id: 'parking', label: 'Parkování' },
-    { id: 'heating', label: 'Topení' },
-    { id: 'electricity', label: 'Elektřina' },
-    { id: 'water', label: 'Voda' },
-    { id: 'outdoor_grill', label: 'Venkovní gril' },
-    { id: 'sports_equipment', label: 'Sportovní vybavení' }
-];
 
 const getInitialData = (rental?: IRental | null): any => {
     if (rental) {
@@ -160,7 +150,7 @@ export default function RentalForm({ rental, onClose, onSave, isProcessing }: Re
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Vybavení</label>
                             <div className="mt-2 grid grid-cols-2 gap-2">
-                                {facilityOptions.map(facility => (
+                                {FACILITY_OPTIONS.map(facility => (
                                     <div key={facility.id} className="flex items-center">
                                     <input
                                         type="checkbox"

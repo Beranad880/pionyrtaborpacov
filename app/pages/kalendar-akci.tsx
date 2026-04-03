@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { DAYS_CS, MONTHS_CS } from '@/lib/labels';
 
 interface Event {
   _id: string;
@@ -40,9 +41,6 @@ const typeLabels: Record<Event['type'], string> = {
   workshop: 'Workshop', competition: 'Soutěž', other: 'Ostatní',
 };
 
-const MONTHS_CS = ['Leden','Únor','Březen','Duben','Květen','Červen',
-                   'Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
-const DAYS_CS = ['Po','Út','St','Čt','Pá','So','Ne'];
 
 export default function KalendarAkciPage() {
   const [events, setEvents]               = useState<Event[]>([]);

@@ -3,7 +3,7 @@ import connectToMongoose from '@/lib/mongoose';
 import Event from '@/models/Event';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { validateDateRange } from '@/lib/validation';
-import { dbError } from '@/lib/api-response';
+import { dbError, isValidationError, validationError } from '@/lib/api-response';
 
 // GET - Načíst konkrétní akci
 export async function GET(
@@ -91,11 +91,8 @@ export async function PUT(
       data: event
     });
 
-  } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
-    }
+  } catch (error: unknown) {
+    if (isValidationError(error)) return validationError(error);
     return dbError(error, 'PUT /api/admin/events/[id] error:');
   }
 }

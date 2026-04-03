@@ -57,7 +57,7 @@ export async function GET() {
         occupiedPeriods
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('GET /api/rental-availability error:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch availability' },
