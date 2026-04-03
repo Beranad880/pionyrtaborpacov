@@ -41,27 +41,11 @@ export default function ArticleDetailPage() {
         if (result.success) {
           setArticle(result.data);
         } else {
-          // Try to get fallback article data
-          const { sampleArticles } = await import('@/data/articles');
-          const fallbackArticle = sampleArticles[params.slug as string];
-
-          if (fallbackArticle) {
-            setArticle(fallbackArticle);
-          } else {
-            setError('Article not found');
-          }
+          setError('Article not found');
         }
       } catch (err) {
-        // Try fallback data on error
         try {
-          const { sampleArticles } = await import('@/data/articles');
-          const fallbackArticle = sampleArticles[params.slug as string];
-
-          if (fallbackArticle) {
-            setArticle(fallbackArticle);
-          } else {
-            setError('Article not found');
-          }
+          setError('Article not found');
         } catch {
           setError('Failed to load article');
         }
