@@ -95,30 +95,37 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Supported by */}
-        <div className="border-t border-slate-300 mt-8 pt-6">
-          <div className="flex flex-col items-center justify-center mb-6">
-            <p className="text-sm text-slate-600 mb-3">Podpořil</p>
-            <a
-              href="https://www.kr-vysocina.cz/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-80 transition-opacity"
-            >
-              <img
-                src="/logovysocina.jpg"
-                alt="Kraj Vysočina"
-                className="h-16 w-auto"
-              />
-            </a>
+        <div className="border-t border-slate-300 mt-8 pt-6 flex flex-col items-center gap-4 text-sm text-slate-600">
+          <div className="flex items-end justify-center gap-8">
+            <div className="flex flex-col items-center w-40">
+              <p className="text-sm text-slate-600 mb-3">Podpořil</p>
+              <a
+                href="https://www.kr-vysocina.cz/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center h-16 w-full hover:opacity-80 transition-opacity"
+              >
+                <img
+                  src="/logovysocina.jpg"
+                  alt="Kraj Vysočina"
+                  className="h-16 w-auto"
+                />
+              </a>
+            </div>
+            <div className="flex flex-col items-center w-40">
+              <p className="text-sm text-slate-600 mb-3">vytvořil s ❤️</p>
+              <a
+                href="https://humbletech.cz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center h-16 w-full bg-black hover:bg-[#22c55e] border border-black hover:border-[#22c55e] text-[#22c55e] hover:text-black transition-all duration-300 rounded-2xl text-base font-bold"
+              >
+                humbletech.cz
+              </a>
+            </div>
           </div>
-        </div>
-
-        <div className="border-t border-slate-300 pt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-600">
-          <div className="mb-2 sm:mb-0">
+          <div className="flex justify-between w-full">
             <p>&copy; 2026 {siteInfo.title}. Všechna práva vyhrazena.</p>
-          </div>
-          <div className="text-center">
             <p>Aktualizace 2026</p>
           </div>
         </div>
