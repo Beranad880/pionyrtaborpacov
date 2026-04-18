@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectToMongoose from '@/lib/mongoose';
 import Article from '@/models/Article';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError, isValidationError, validationError } from '@/lib/api-response';
+
+const isObjectId = (s: string) => mongoose.Types.ObjectId.isValid(s) && /^[0-9a-fA-F]{24}$/.test(s);
+const findArticle = (param: string) =>
+  isObjectId(param) ? Article.findById(param) : Article.findOne({ slug: param });
 
 export async function GET(
   request: NextRequest,
@@ -46,7 +51,7 @@ export async function PUT(
     const body = await request.json();
     const { title, slug, content, excerpt, category, tags, status } = body;
 
-    const article = await Article.findOne({ slug: slugParam });
+    const article = await findArticle(slugParam);
 
     if (!article) {
       return NextResponse.json(
@@ -105,7 +110,7 @@ export async function DELETE(
     await connectToMongoose();
     const { slug } = await params;
 
-    const article = await Article.findOneAndDelete({ slug });
+    const article = await findArticle(slug);
 
     if (!article) {
       return NextResponse.json(
@@ -113,6 +118,8 @@ export async function DELETE(
         { status: 404 }
       );
     }
+
+    await article.deleteOne();
 
     return NextResponse.json({ success: true, message: 'Článek byl úspěšně smazán' });
 
