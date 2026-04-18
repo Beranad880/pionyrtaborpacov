@@ -61,74 +61,103 @@ export default function MestoPacovPage() {
   ];
 
   return (
-    <div className="bg-slate-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-[#0070af] to-[#005a8c] text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Město Pacov</h1>
-            <p className="text-xl text-blue-100">
-              Malebné město v srdci Českomoravské vrchoviny s bohatou historií
-            </p>
+    <div className="min-h-screen bg-white">
+      {/* Page Header */}
+      <div className="relative py-20 bg-slate-50 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_30%_20%,_rgba(0,112,175,0.05)_0%,_transparent_50%)] pointer-events-none"></div>
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <div className="inline-block px-4 py-1.5 mb-6 rounded-full bg-[#0070af]/10 text-[#0070af] font-black text-[10px] tracking-[0.3em] uppercase">
+            Naše domovské město
           </div>
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Město Pacov</h1>
+          <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-medium">
+            Malebné město v srdci Českomoravské vrchoviny s bohatou historií a živou kulturou.
+          </p>
         </div>
-      </section>
+      </div>
 
-      {/* Content Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            {/* Description */}
-            <div className="bg-white rounded-xl p-8 shadow-md mb-12">
-              <h2 className="text-2xl font-bold text-slate-800 mb-4">O městě</h2>
-              <p className="text-slate-700 leading-relaxed mb-4">
-                Pacov je město v okrese Pelhřimov v Kraji Vysočina. Leží v malebné krajině Českomoravské vrchoviny
-                a má bohatou historii sahající až do 13. století. Město je známé svým renesančním zámkem,
-                historickým náměstím a kostelem sv. Michaela archanděla.
-              </p>
-              <p className="text-slate-700 leading-relaxed">
-                V současnosti má Pacov přibližně 5 000 obyvatel a nabízí svým návštěvníkům i obyvatelům
-                řadu kulturních a sportovních aktivit, krásnou přírodu v okolí a příjemnou atmosféru malého města.
-              </p>
+      <div className="container mx-auto px-4 py-24">
+        <div className="max-w-6xl mx-auto">
+          {/* About City Card */}
+          <div className="bg-white rounded-[3rem] p-10 md:p-16 shadow-2xl shadow-slate-200/60 border border-slate-100 mb-20 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-700">
+               <svg className="w-64 h-64 text-slate-900" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
             </div>
-
-            {/* Photo Gallery */}
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Fotogalerie</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {images.map((image, index) => (
-                  <div key={index} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                    <div className="h-64 overflow-hidden">
-                      <img
-                        src={image.src}
-                        alt={image.alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-slate-800">{image.title}</h3>
-                    </div>
-                  </div>
-                ))}
+            <div className="relative z-10">
+              <h2 className="text-3xl font-black text-slate-900 mb-8 tracking-tight flex items-center gap-4">
+                O městě
+                <div className="h-1 w-12 bg-[#0070af] rounded-full"></div>
+              </h2>
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
+                 <div className="space-y-6">
+                    <p className="text-slate-600 text-lg leading-relaxed font-medium">
+                      Pacov je město v okrese Pelhřimov v Kraji Vysočina. Leží v malebné krajině Českomoravské vrchoviny
+                      a má bohatou historii sahající až do 13. století. Město je známé svým renesančním zámkem,
+                      historickým náměstím a kostelem sv. Michaela archanděla.
+                    </p>
+                    <p className="text-slate-600 text-lg leading-relaxed font-medium">
+                      V současnosti má Pacov přibližně 5 000 obyvatel a nabízí svým návštěvníkům i obyvatelům
+                      řadu kulturních a sportovních aktivit, krásnou přírodu v okolí a příjemnou atmosféru malého města.
+                    </p>
+                 </div>
+                 <div className="bg-slate-50 p-4 rounded-[2.5rem] border border-slate-100 shadow-inner">
+                    <img 
+                      src="https://www.mestopacov.cz/assets/Image.ashx?id_org=11721&id_obrazky=13953" 
+                      alt="Náměstí v Pacově" 
+                      className="w-full h-full object-cover rounded-[2rem] shadow-lg"
+                    />
+                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Links Section */}
-            <div className="bg-white rounded-xl p-8 shadow-md">
-              <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Odkazy</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Photo Gallery */}
+          <div className="mb-32">
+            <div className="text-center mb-16 space-y-4">
+               <div className="inline-block px-4 py-1.5 rounded-full bg-[#0070af]/10 text-[#0070af] font-black text-[10px] tracking-[0.3em] uppercase">
+                 Fotogalerie
+               </div>
+               <h2 className="text-4xl font-black text-slate-900 tracking-tight">Pacov objektivem</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {images.map((image, index) => (
+                <div key={index} className="group relative bg-white rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-100 transition-all duration-500 hover:-translate-y-2">
+                  <div className="h-72 overflow-hidden relative">
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
+                  <div className="p-8">
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">{image.title}</h3>
+                    <p className="text-slate-500 font-bold text-sm mt-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">Zobrazit detail města</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Links Section */}
+          <div className="relative bg-slate-900 rounded-[3rem] p-12 md:p-20 overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(0,112,175,0.15)_0%,_transparent_70%)]"></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-5xl font-black text-white mb-16 text-center tracking-tight">Užitečné odkazy</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {links.map((link, index) => (
                   <a
                     key={index}
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg hover:bg-[#0070af]/10 hover:text-[#0070af] transition-colors group"
+                    className="flex flex-col items-center text-center gap-6 p-10 bg-white/5 border border-white/10 rounded-[2.5rem] backdrop-blur-md transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 hover:border-[#0070af]/50 group"
                   >
-                    <span className="text-slate-600 group-hover:text-[#0070af] transition-colors">
+                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl group-hover:bg-[#0070af] group-hover:scale-110 transition-all">
                       {link.icon}
-                    </span>
-                    <span className="font-medium text-slate-700 group-hover:text-[#0070af] transition-colors">
+                    </div>
+                    <span className="text-white font-black text-sm uppercase tracking-widest leading-snug group-hover:text-blue-200 transition-colors">
                       {link.name}
                     </span>
                   </a>
@@ -137,7 +166,7 @@ export default function MestoPacovPage() {
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

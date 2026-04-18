@@ -110,206 +110,285 @@ export default function KalendarAkciPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Kalendář akcí</h1>
-      <p className="text-lg text-gray-700 mb-8">
-        Přehled akcí, táborů a aktivit naší pionýrské skupiny.
-      </p>
-
-      {/* ── Vizuální kalendář ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
-        {/* Navigace */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-b">
-          <button
-            onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-colors text-xl font-bold text-gray-600"
-          >
-            ‹
-          </button>
-          <h2 className="text-xl font-semibold text-gray-900">
-            {MONTHS_CS[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-          </h2>
-          <button
-            onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-colors text-xl font-bold text-gray-600"
-          >
-            ›
-          </button>
+    <div className="min-h-screen bg-white">
+      {/* Page Header */}
+      <div className="relative py-20 bg-slate-50 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_30%_20%,_rgba(0,112,175,0.05)_0%,_transparent_50%)] pointer-events-none"></div>
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <div className="inline-block px-4 py-1.5 mb-6 rounded-full bg-[#0070af]/10 text-[#0070af] font-black text-[10px] tracking-[0.3em] uppercase">
+            Plánované události
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Kalendář akcí</h1>
+          <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-medium">
+            Přehled akcí, táborů a aktivit naší pionýrské skupiny.
+          </p>
         </div>
+      </div>
 
-        {/* Záhlaví dnů */}
-        <div className="grid grid-cols-7 border-b bg-gray-50">
-          {DAYS_CS.map(day => (
-            <div key={day} className="py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Buňky */}
-        <div className="grid grid-cols-7">
-          {calendarDays.map((date, idx) => {
-            const dayEvents  = date ? getEventsForDay(date) : [];
-            const isToday    = date && date.toDateString() === today.toDateString();
-            const isWeekend  = date && (date.getDay() === 0 || date.getDay() === 6);
-            const hasEvents  = dayEvents.length > 0;
-
-            const primaryType = dayEvents[0]?.type;
-
-            return (
-              <div
-                key={idx}
-                className={`min-h-[72px] md:min-h-[90px] border-r border-b p-1 transition-colors ${
-                  !date   ? 'bg-gray-50' :
-                  isToday ? 'ring-2 ring-inset ring-blue-500 ' + (hasEvents ? eventTypeColors[primaryType].cell : 'bg-blue-50') :
-                  hasEvents ? eventTypeColors[primaryType].cell :
-                  isWeekend ? 'bg-gray-50/60' : 'bg-white'
-                }`}
+      <div className="container mx-auto px-4 py-24">
+        <div className="max-w-7xl mx-auto">
+          {/* ── Vizuální kalendář ── */}
+          <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 mb-12 overflow-hidden">
+            {/* Navigace */}
+            <div className="flex items-center justify-between px-10 py-8 bg-slate-50/50 border-b border-slate-100">
+              <button
+                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
+                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-slate-200 shadow-sm hover:bg-[#0070af] hover:text-white transition-all text-2xl font-bold text-slate-600 active:scale-95"
               >
-                {date && (
-                  <>
-                    <div className={`text-xs md:text-sm font-bold mb-0.5 w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full ${
-                      isToday
-                        ? 'bg-blue-600 text-white'
-                        : hasEvents
-                          ? eventTypeColors[primaryType].bg + ' ' + eventTypeColors[primaryType].text
-                          : 'text-gray-500'
-                    }`}>
-                      {date.getDate()}
-                    </div>
-                    <div className="space-y-0.5">
-                      {dayEvents.slice(0, 2).map(event => (
-                        <button
-                          key={event._id}
-                          onClick={() => setSelectedEvent(event)}
-                          title={event.title}
-                          className={`w-full text-left text-[10px] md:text-xs px-1 py-0.5 rounded truncate font-semibold ${eventTypeColors[event.type].bg} ${eventTypeColors[event.type].text} hover:opacity-80 transition-opacity shadow-sm`}
-                        >
-                          {event.title}
-                        </button>
-                      ))}
-                      {dayEvents.length > 2 && (
-                        <p className={`text-[10px] font-medium px-1 ${hasEvents ? eventTypeColors[primaryType].cellText : 'text-gray-400'}`}>
-                          +{dayEvents.length - 2} další
-                        </p>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Legenda ── */}
-      <div className="flex flex-wrap gap-4 mb-8">
-        {(Object.entries(typeLabels) as [Event['type'], string][]).map(([type, label]) => (
-          <div key={type} className="flex items-center gap-1.5 text-sm text-gray-600">
-            <div className={`w-3 h-3 rounded-full flex-shrink-0 ${eventTypeColors[type].dot}`}></div>
-            {label}
-          </div>
-        ))}
-      </div>
-
-      {/* ── Detail vybrané akce ── */}
-      {selectedEvent && (
-        <div className={`bg-white border-l-4 ${eventTypeColors[selectedEvent.type].border} p-6 shadow-sm mb-8 rounded-r-xl`}>
-          <div className="flex justify-between items-start mb-3">
-            <h3 className="text-xl font-semibold text-gray-900">{selectedEvent.title}</h3>
-            <button
-              onClick={() => setSelectedEvent(null)}
-              className="text-gray-400 hover:text-gray-600 text-2xl leading-none ml-4"
-            >
-              ×
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div className="space-y-1 text-gray-600">
-              <p>
-                <strong>Datum:</strong>{' '}
-                {new Date(selectedEvent.startDate).toLocaleDateString('cs-CZ')}
-                {selectedEvent.startDate !== selectedEvent.endDate &&
-                  ` – ${new Date(selectedEvent.endDate).toLocaleDateString('cs-CZ')}`}
-              </p>
-              <p><strong>Místo:</strong> {selectedEvent.location}</p>
-              <p><strong>Typ:</strong> {typeLabels[selectedEvent.type]}</p>
-              {selectedEvent.price && selectedEvent.price > 0 && (
-                <p><strong>Cena:</strong> {selectedEvent.price} Kč</p>
-              )}
-              {selectedEvent.maxParticipants && (
-                <p><strong>Kapacita:</strong> {selectedEvent.currentParticipants || 0}/{selectedEvent.maxParticipants} účastníků</p>
-              )}
-              {selectedEvent.registrationDeadline && (
-                <p><strong>Uzávěrka přihlášek:</strong>{' '}
-                  {new Date(selectedEvent.registrationDeadline).toLocaleDateString('cs-CZ')}
-                </p>
-              )}
+                ‹
+              </button>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                {MONTHS_CS[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+              </h2>
+              <button
+                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
+                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-slate-200 shadow-sm hover:bg-[#0070af] hover:text-white transition-all text-2xl font-bold text-slate-600 active:scale-95"
+              >
+                ›
+              </button>
             </div>
-            <p className="text-gray-700">{selectedEvent.description}</p>
-          </div>
-          <div className="mt-4">
-            <span className={`inline-block px-3 py-1 rounded-full text-sm ${statusLabels[selectedEvent.status].color}`}>
-              {statusLabels[selectedEvent.status].label}
-            </span>
-          </div>
-        </div>
-      )}
 
-      {/* ── Nadcházející akce (seznam) ── */}
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Nadcházející akce</h2>
-      {upcomingEvents.length === 0 ? (
-        <div className="bg-gray-50 p-6 rounded-lg text-center mb-8">
-          <p className="text-gray-600">Momentálně nejsou plánovány žádné veřejné akce.</p>
-        </div>
-      ) : (
-        <div className="space-y-4 mb-8">
-          {upcomingEvents.map(event => (
-            <button
-              key={event._id}
-              onClick={() => setSelectedEvent(event)}
-              className={`w-full text-left bg-white border-l-4 ${eventTypeColors[event.type].border} p-5 shadow-sm rounded-r-lg hover:shadow-md transition-shadow`}
-            >
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{event.title}</h3>
-                  <div className="flex flex-wrap gap-3 text-sm text-gray-600">
-                    <span>
-                      📅 {new Date(event.startDate).toLocaleDateString('cs-CZ')}
-                      {event.startDate !== event.endDate &&
-                        ` – ${new Date(event.endDate).toLocaleDateString('cs-CZ')}`}
-                    </span>
-                    <span>📍 {event.location}</span>
-                    {event.price && event.price > 0 && <span>💰 {event.price} Kč</span>}
-                    {event.maxParticipants && (
-                      <span>👥 {event.currentParticipants || 0}/{event.maxParticipants}</span>
+            {/* Záhlaví dnů */}
+            <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/30">
+              {DAYS_CS.map(day => (
+                <div key={day} className="py-4 text-center text-xs font-black text-[#0070af] uppercase tracking-[0.2em]">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Buňky */}
+            <div className="grid grid-cols-7">
+              {calendarDays.map((date, idx) => {
+                const dayEvents  = date ? getEventsForDay(date) : [];
+                const isToday    = date && date.toDateString() === today.toDateString();
+                const isWeekend  = date && (date.getDay() === 0 || date.getDay() === 6);
+                const hasEvents  = dayEvents.length > 0;
+                const primaryType = dayEvents[0]?.type;
+
+                return (
+                  <div
+                    key={idx}
+                    className={`min-h-[100px] md:min-h-[140px] border-r border-b border-slate-50 p-2 transition-all duration-300 ${
+                      !date   ? 'bg-slate-50/50' :
+                      isToday ? 'bg-blue-50/50' :
+                      isWeekend ? 'bg-slate-50/30' : 'bg-white'
+                    }`}
+                  >
+                    {date && (
+                      <>
+                        <div className={`text-sm font-black mb-2 w-8 h-8 flex items-center justify-center rounded-xl transition-all ${
+                          isToday
+                            ? 'bg-[#0070af] text-white shadow-lg shadow-[#0070af]/20'
+                            : hasEvents
+                              ? 'text-[#0070af] bg-[#0070af]/5'
+                              : 'text-slate-400'
+                        }`}>
+                          {date.getDate()}
+                        </div>
+                        <div className="space-y-1.5">
+                          {dayEvents.slice(0, 3).map(event => (
+                            <button
+                              key={event._id}
+                              onClick={() => setSelectedEvent(event)}
+                              title={event.title}
+                              className={`w-full text-left text-[10px] md:text-xs px-2 py-1.5 rounded-lg truncate font-black uppercase tracking-wider transition-all hover:scale-[1.02] shadow-sm ${eventTypeColors[event.type].bg} ${eventTypeColors[event.type].text}`}
+                            >
+                              {event.title}
+                            </button>
+                          ))}
+                          {dayEvents.length > 3 && (
+                            <p className="text-[10px] font-black text-slate-400 px-2 uppercase tracking-widest">
+                              +{dayEvents.length - 3} další
+                            </p>
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
-                  {event.description && (
-                    <p className="text-gray-600 text-sm mt-1 line-clamp-2">{event.description}</p>
-                  )}
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── Legenda ── */}
+          <div className="flex flex-wrap justify-center gap-6 mb-24">
+            {(Object.entries(typeLabels) as [Event['type'], string][]).map(([type, label]) => (
+              <div key={type} className="flex items-center gap-3 bg-slate-50 px-5 py-2.5 rounded-2xl border border-slate-100 shadow-sm">
+                <div className={`w-3.5 h-3.5 rounded-full flex-shrink-0 shadow-sm ${eventTypeColors[type].dot}`}></div>
+                <span className="text-xs font-black text-slate-600 uppercase tracking-widest">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Detail vybrané akce ── */}
+          {selectedEvent && (
+            <div className={`bg-white rounded-[3rem] p-8 md:p-16 shadow-2xl border-l-[12px] ${eventTypeColors[selectedEvent.type].border} mb-24 transition-all animate-fade-in-up relative overflow-hidden`}>
+              <div className="absolute top-0 right-0 p-10 opacity-5">
+                <svg className="w-48 h-48" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="flex justify-between items-start mb-10">
+                  <div>
+                    <div className={`inline-block px-4 py-1.5 rounded-full ${statusLabels[selectedEvent.status].color} font-black text-[10px] tracking-widest uppercase mb-6`}>
+                      {statusLabels[selectedEvent.status].label}
+                    </div>
+                    <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">{selectedEvent.title}</h3>
+                  </div>
+                  <button
+                    onClick={() => setSelectedEvent(null)}
+                    className="w-12 h-12 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all text-3xl leading-none"
+                  >
+                    ×
+                  </button>
                 </div>
-                <div className="mt-3 md:mt-0 md:ml-4 flex-shrink-0">
-                  <span className={`inline-block px-3 py-1 rounded-full text-sm ${statusLabels[event.status].color}`}>
-                    {statusLabels[event.status].label}
-                  </span>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Datum konání</div>
+                        <p className="text-lg font-bold text-slate-800">
+                          {new Date(selectedEvent.startDate).toLocaleDateString('cs-CZ')}
+                          {selectedEvent.startDate !== selectedEvent.endDate &&
+                            ` – ${new Date(selectedEvent.endDate).toLocaleDateString('cs-CZ')}`}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lokalita</div>
+                        <p className="text-lg font-bold text-slate-800">{selectedEvent.location}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Typ akce</div>
+                        <p className="text-lg font-bold text-slate-800">{typeLabels[selectedEvent.type]}</p>
+                      </div>
+                      {selectedEvent.price && selectedEvent.price > 0 && (
+                        <div className="space-y-1">
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cena</div>
+                          <p className="text-lg font-bold text-[#0070af]">{selectedEvent.price} Kč</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {selectedEvent.maxParticipants && (
+                      <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Obsazenost</span>
+                          <span className="text-xs font-black text-[#0070af] uppercase tracking-widest">
+                            {selectedEvent.currentParticipants || 0} / {selectedEvent.maxParticipants} míst
+                          </span>
+                        </div>
+                        <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-[#0070af] transition-all duration-1000" 
+                            style={{ width: `${((selectedEvent.currentParticipants || 0) / selectedEvent.maxParticipants) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Popis akce</div>
+                    <p className="text-slate-600 text-lg leading-relaxed font-medium">{selectedEvent.description}</p>
+                  </div>
                 </div>
               </div>
-            </button>
-          ))}
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* ── Kontakt ── */}
-      <div className="mt-8 bg-blue-50 p-6 rounded-lg">
-        <h2 className="text-xl font-semibold mb-3">Informace o přihlašování</h2>
-        <p className="text-gray-700 mb-3">
-          Pro přihlášení na naše akce nebo pro získání více informací nás kontaktujte:
-        </p>
-        <div className="space-y-1 text-sm">
-          <p><strong>Email:</strong> mareseznam@seznam.cz</p>
-          <p><strong>Telefon:</strong> +420 607 244 526</p>
-          <p><strong>Vedoucí:</strong> Mgr. Ladislav Mareš</p>
+          {/* ── Nadcházející akce (seznam) ── */}
+          <div className="mb-24">
+            <h2 className="text-3xl font-black text-slate-900 mb-10 tracking-tight flex items-center gap-4">
+              Nadcházející akce
+              <div className="h-1 w-24 bg-[#0070af] rounded-full"></div>
+            </h2>
+            
+            {upcomingEvents.length === 0 ? (
+              <div className="bg-slate-50 p-12 rounded-[2.5rem] text-center border border-dashed border-slate-300">
+                <p className="text-slate-500 font-bold text-xl">Momentálně nejsou plánovány žádné veřejné akce.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {upcomingEvents.map(event => (
+                  <button
+                    key={event._id}
+                    onClick={() => setSelectedEvent(event)}
+                    className={`group w-full text-left bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl border-l-[12px] ${eventTypeColors[event.type].border} hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 border border-slate-100`}
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className={`px-4 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest ${statusLabels[event.status].color}`}>
+                            {statusLabels[event.status].label}
+                          </span>
+                          <span className="text-[#0070af] font-black text-xs uppercase tracking-widest">
+                            {typeLabels[event.type]}
+                          </span>
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-900 group-hover:text-[#0070af] transition-colors mb-4 tracking-tight">{event.title}</h3>
+                        <div className="flex flex-wrap gap-6 text-slate-500 font-bold text-sm">
+                          <span className="flex items-center gap-2">
+                            <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            {new Date(event.startDate).toLocaleDateString('cs-CZ')}
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            {event.location}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0">
+                         <div className="bg-slate-100 group-hover:bg-[#0070af] p-5 rounded-2xl text-slate-400 group-hover:text-white transition-all">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                         </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Kontakt Section ── */}
+          <div className="relative bg-slate-900 rounded-[3rem] p-12 md:p-20 overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(0,112,175,0.15)_0%,_transparent_70%)]"></div>
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight">Máte dotazy k akcím?</h2>
+                <p className="text-slate-400 text-lg font-medium leading-relaxed">
+                  Rádi vám poskytneme podrobnější informace o připravovaných akcích, výletech i táborech.
+                </p>
+              </div>
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-[2.5rem] shadow-2xl">
+                <div className="space-y-8">
+                  <div>
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Hlavní kontakt</div>
+                    <div className="flex items-center gap-6">
+                       <div className="w-16 h-16 bg-[#0070af] rounded-3xl flex items-center justify-center text-white shadow-xl shadow-[#0070af]/20">
+                          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                       </div>
+                       <div>
+                          <div className="text-white font-black text-xl">Mgr. Ladislav Mareš</div>
+                          <div className="text-slate-400 font-bold">Vedoucí PS Pacov</div>
+                       </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-8 border-t border-white/10">
+                    <a href="mailto:mareseznam@seznam.cz" className="flex flex-col gap-2 hover:opacity-80 transition-opacity">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Email</span>
+                      <span className="text-white font-bold">mareseznam@seznam.cz</span>
+                    </a>
+                    <a href="tel:+420607244526" className="flex flex-col gap-2 hover:opacity-80 transition-opacity">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Telefon</span>
+                      <span className="text-white font-bold">+420 607 244 526</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
