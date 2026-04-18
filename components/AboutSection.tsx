@@ -1,4 +1,4 @@
-'use client';
+s'use client';
 
 import { useState, useEffect } from 'react';
 import { pageContent } from '@/data/content';

@@ -230,7 +230,7 @@ export default function CampApplications() {
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Přihláška na tábor</h1>
           <p className="text-xl text-slate-700 max-w-3xl mx-auto leading-relaxed font-medium">
-            Připojte se k nám na nezapomenutelné prázdninové dobrodružství v Hájence Bělá!
+            Připojte se k nám na nezapomenutelné prázdninové dobrodružství v hájenka bělá!
           </p>
         </div>
       </div>

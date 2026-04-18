@@ -18,7 +18,7 @@ export default function CampRegistrationBanner() {
           </div>
 
           <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight leading-tight">
-            Letní tábor <br/><span className="text-yellow-400">Hájence Bělá</span>
+            Letní tábor <br/><span className="text-yellow-400">Hájenka Bělá</span>
           </h2>
 
           <p className="text-white text-lg mb-10 font-bold leading-relaxed max-w-lg mx-auto drop-shadow-sm">
