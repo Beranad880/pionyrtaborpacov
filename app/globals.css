@@ -2,11 +2,11 @@
 
 :root {
   --background: #f8fafc;
-  --foreground: #1e293b;
+  --foreground: #0f172a;
   --primary: #0070af;
   --primary-light: #e6f3fa;
-  --secondary: #475569;
-  --border: #e2e8f0;
+  --secondary: #334155;
+  --border: #cbd5e1;
 }
 
 @theme inline {

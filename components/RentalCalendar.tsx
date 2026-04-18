@@ -92,7 +92,7 @@ export default function RentalCalendar({ className = '' }: RentalCalendarProps) 
       const isPast = isPastDate(date);
 
       let bgClass = 'bg-white hover:bg-slate-50';
-      let textClass = 'text-slate-700';
+      let textClass = 'text-slate-800';
 
       if (isPast) {
         bgClass = 'bg-slate-100';
@@ -146,12 +146,12 @@ export default function RentalCalendar({ className = '' }: RentalCalendarProps) 
           className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
           aria-label="Předchozí měsíc"
         >
-          <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
 
-        <h3 className="text-lg font-semibold text-slate-700">
+        <h3 className="text-lg font-semibold text-slate-800">
           {MONTHS_CS[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h3>
 
@@ -160,7 +160,7 @@ export default function RentalCalendar({ className = '' }: RentalCalendarProps) 
           className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
           aria-label="Následující měsíc"
         >
-          <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
@@ -169,7 +169,7 @@ export default function RentalCalendar({ className = '' }: RentalCalendarProps) 
       {/* Day headers */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {DAYS_CS.map(day => (
-          <div key={day} className="h-8 flex items-center justify-center text-xs font-medium text-slate-500">
+          <div key={day} className="h-8 flex items-center justify-center text-xs font-medium text-slate-700">
             {day}
           </div>
         ))}
@@ -185,15 +185,15 @@ export default function RentalCalendar({ className = '' }: RentalCalendarProps) 
         <div className="flex flex-wrap gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-white border border-slate-200 rounded"></div>
-            <span className="text-slate-600">Volné</span>
+            <span className="text-slate-700">Volné</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-red-500 rounded"></div>
-            <span className="text-slate-600">Obsazeno</span>
+            <span className="text-slate-700">Obsazeno</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-slate-100 rounded"></div>
-            <span className="text-slate-600">Minulé dny</span>
+            <span className="text-slate-700">Minulé dny</span>
           </div>
         </div>
       </div>

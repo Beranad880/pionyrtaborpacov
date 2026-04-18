@@ -22,7 +22,7 @@ interface RentalFormData {
   organization?: string;
   startDate: string;
   endDate: string;
-  guestCount: number;
+  guestCount: number | string;
   purpose: string;
   message?: string;
   agreeTerms: boolean;
@@ -135,7 +135,7 @@ export default function HajenkabelaPage() {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else if (type === 'number') {
-      setFormData(prev => ({ ...prev, [name]: parseInt(value) || 0 }));
+      setFormData(prev => ({ ...prev, [name]: value === '' ? '' : parseInt(value, 10) }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -168,7 +168,7 @@ export default function HajenkabelaPage() {
       return;
     }
 
-    if (formData.guestCount > rentalSettings.capacity) {
+    if (Number(formData.guestCount) > rentalSettings.capacity) {
       setError(`Kapacita hájenky je maximálně ${rentalSettings.capacity} osob`);
       return;
     }
@@ -226,7 +226,7 @@ export default function HajenkabelaPage() {
             Naše základna
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">{content.title}</h1>
-          <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-medium">
+          <p className="text-xl text-slate-700 max-w-3xl mx-auto leading-relaxed font-medium">
             {content.description}
           </p>
         </div>
@@ -239,63 +239,261 @@ export default function HajenkabelaPage() {
              <img
                src="/foto/bela2.jpg"
                alt="Hájenka Bělá - exteriér"
-               className="w-full h-[400px] md:h-[600px] object-cover transition-transform duration-700 group-hover:scale-105"
+               className="w-full h-[400px] md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
              />
              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-12">
                 <div className="text-white">
                    <div className="font-black text-3xl md:text-5xl tracking-tight mb-2">Hájenka Bělá</div>
-                   <p className="text-white/80 font-bold text-lg">Místo pro vaše dobrodružství v přírodě</p>
+                   <p className="text-white font-bold text-lg drop-shadow-sm">Místo pro vaše dobrodružství v přírodě</p>
                 </div>
              </div>
           </div>
         </div>
 
-        {/* Two column layout */}
-        <div className="grid lg:grid-cols-12 gap-12 max-w-7xl mx-auto">
-          {/* Left column - About */}
+        {/* MAIN SECTION: Rental Form & Calendar LEFT, Details RIGHT */}
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-start">
+          
+          {/* LEFT COLUMN: Rental Form & Calendar (The "Action" part) */}
           <div className="lg:col-span-7 space-y-12">
-            <div className="bg-[#0070af] p-10 md:p-16 rounded-[3rem] shadow-2xl relative overflow-hidden group">
+            <div className="text-left mb-8 space-y-4">
+               <div className="inline-block px-4 py-1.5 rounded-full bg-[#0070af]/10 text-[#0070af] font-black text-[10px] tracking-[0.3em] uppercase">
+                 Rezervace pobytu
+               </div>
+               <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">Mám zájem o pronájem</h2>
+            </div>
+
+            {/* Rental Form - NOW AT THE TOP */}
+            <div className="bg-white rounded-[3rem] shadow-2xl border border-slate-100 p-10 md:p-14 overflow-hidden group/form">
+                <div className="mb-12 text-center relative z-10">
+                   <div className="w-20 h-20 bg-[#0070af]/5 rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#0070af] shadow-inner group-hover/form:scale-110 transition-transform">
+                      <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                   </div>
+                   <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-3">Rezervační formulář</h2>
+                   <p className="text-slate-600 font-bold">Vyplňte údaje a zašlete nám nezávaznou poptávku.</p>
+                </div>
+
+                {showSuccess ? (
+                  <div className="text-center py-12 animate-fade-in relative z-10">
+                    <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-green-900/10">
+                      <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                    <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Odesláno!</h3>
+                    <p className="text-slate-700 font-bold mb-10 text-lg">Vaši žádost jsme přijali. Brzy vás budeme kontaktovat.</p>
+                    <button
+                      onClick={() => {
+                        setShowSuccess(false);
+                        setFormData({ name: '', email: '', phone: '', organization: '', startDate: '', endDate: '', guestCount: 1, purpose: '', message: '', agreeTerms: false });
+                      }}
+                      className="bg-[#0070af] text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-[#005a8c] transition-all shadow-xl shadow-[#0070af]/20 active:scale-95"
+                    >
+                      Odeslat další žádost
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+                    <div className="space-y-6">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black text-lg placeholder:text-slate-300"
+                          placeholder="Jan Novák"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Váš email *</label>
+                          <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                            placeholder="jan@email.cz"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Telefon *</label>
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                            placeholder="+420..."
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Příjezd *</label>
+                          <input
+                            type="date"
+                            name="startDate"
+                            value={formData.startDate}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Odjezd *</label>
+                          <input
+                            type="date"
+                            name="endDate"
+                            value={formData.endDate}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Počet osob *</label>
+                            <input
+                              type="number"
+                              name="guestCount"
+                              value={formData.guestCount}
+                              onChange={handleInputChange}
+                              required
+                              min="1"
+                              max={rentalSettings.capacity}
+                              className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black text-2xl text-[#0070af]"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Účel pobytu *</label>
+                            <select
+                              name="purpose"
+                              value={formData.purpose}
+                              onChange={handleInputChange}
+                              required
+                              className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black"
+                            >
+                              <option value="">Vyberte...</option>
+                              {purposeOptions.map(purpose => (
+                                <option key={purpose} value={purpose}>{purpose}</option>
+                              ))}
+                            </select>
+                          </div>
+                      </div>
+                    </div>
+
+                    {days > 0 && (
+                      <div className="bg-[#0070af]/5 border border-[#0070af]/10 p-10 rounded-[2.5rem] animate-fade-in">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{days} {days === 1 ? 'den' : days < 5 ? 'dny' : 'dní'} pobytu</span>
+                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Předběžná cena</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                           <span className="text-slate-700 font-bold">Sazba {(days >= rentalSettings.weekThreshold ? rentalSettings.pricePerDayWeek : rentalSettings.pricePerDayShort).toLocaleString()} Kč/den</span>
+                           <span className="text-4xl font-black text-[#0070af]">{estimatedPrice.toLocaleString()} Kč</span>
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-500 mt-6 italic text-center">* {rentalSettings.note}</p>
+                      </div>
+                    )}
+
+                    <div className="flex items-start gap-4 px-2">
+                      <input
+                        type="checkbox"
+                        name="agreeTerms"
+                        id="agreeTerms"
+                        checked={formData.agreeTerms}
+                        onChange={handleInputChange}
+                        required
+                        className="h-6 w-6 text-[#0070af] focus:ring-[#0070af] border-slate-300 rounded-lg mt-0.5 transition-all cursor-pointer"
+                      />
+                      <label htmlFor="agreeTerms" className="text-[11px] text-slate-700 font-bold leading-relaxed cursor-pointer">
+                        Souhlasím s podmínkami pronájmu a se zpracováním osobních údajů pro účely vyřízení rezervace. *
+                      </label>
+                    </div>
+
+                    {error && (
+                      <div className="bg-red-50 border border-red-200 rounded-2xl p-6 animate-shake">
+                        <p className="text-red-800 text-sm font-bold flex items-center gap-3">
+                           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                           {error}
+                        </p>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || !formData.agreeTerms}
+                      className="w-full bg-[#0070af] text-white px-8 py-6 rounded-[2.5rem] font-black text-base uppercase tracking-[0.2em] hover:bg-[#005a8c] transition-all shadow-2xl shadow-[#0070af]/30 active:scale-95 disabled:bg-slate-400 disabled:shadow-none disabled:scale-100 mt-4"
+                    >
+                      {isSubmitting ? 'ODESÍLÁM...' : 'ODESLAT ŽÁDOST'}
+                    </button>
+                  </form>
+                )}
+            </div>
+
+            {/* Occupancy Calendar - NOW BELOW THE FORM */}
+            <div className="space-y-6">
+                <div className="text-center">
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Aktuální obsazenost</h3>
+                    <p className="text-slate-600 font-bold text-sm mt-2">Zkontrolujte si volné termíny před odesláním poptávky.</p>
+                </div>
+                <div className="bg-white rounded-[3rem] shadow-2xl border border-slate-100 p-6 md:p-10 overflow-hidden">
+                    <RentalCalendar />
+                </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: All details & Info */}
+          <div className="lg:col-span-5 space-y-12">
+            <div className="text-left mb-8 space-y-4">
+               <div className="inline-block px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 font-black text-[10px] tracking-[0.3em] uppercase">
+                 Podrobnosti o hájence
+               </div>
+               <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">O základně</h2>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-100 p-10 rounded-[3rem] shadow-sm space-y-8">
+               <div className="space-y-6">
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">Příběh a prostor</h3>
+                  <p className="text-slate-800 text-lg leading-relaxed font-medium">{content.description}</p>
+                  <p className="text-slate-800 text-lg leading-relaxed font-medium">{content.details}</p>
+               </div>
+            </div>
+
+            <div className="bg-[#0070af] p-10 rounded-[3rem] shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-              
               <div className="relative z-10">
-                <h2 className="text-3xl font-black text-white mb-8 flex items-center gap-4 tracking-tight">
-                  <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <h3 className="text-2xl font-black text-white mb-8 flex items-center gap-4 tracking-tight text-xl">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  Poloha
+                </h3>
+                <div className="space-y-4">
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-2">Adresa základny</p>
+                    <p className="text-white font-black leading-tight">{content.location?.address || 'Červená Řečice 27, 394 46'}</p>
                   </div>
-                  {content.location?.title || 'Poloha a dostupnost'}
-                </h2>
-                <p className="text-blue-50 text-xl mb-10 font-medium leading-relaxed opacity-90">
-                  {content.location?.description || 'Hájenka Bělá se nachází v klidné přírodní lokalitě s dobrou dostupností.'}
-                </p>
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="bg-white/10 backdrop-blur-md rounded-[2rem] p-8 border border-white/10 group-hover:bg-white/15 transition-all">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-200 mb-3">Adresa základny</p>
-                    <p className="text-white font-black text-lg leading-tight">{content.location?.address || 'Červená Řečice 27, Červená Řečice, 394 46, Pelhřimov'}</p>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-md rounded-[2rem] p-8 border border-white/10 group-hover:bg-white/15 transition-all">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-200 mb-3">GPS / Lokalita</p>
-                    <p className="text-white font-black text-lg font-mono mb-2">{content.location?.gps || '49.50436, 15.13751'}</p>
-                    <p className="text-blue-100 font-bold text-sm">Vzdálenost: {content.location?.nearestTown || 'Červená Řečice (1 km)'}</p>
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-100 mb-2">GPS</p>
+                    <p className="text-white font-black font-mono">{content.location?.gps || '49.50436, 15.13751'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-50 border border-slate-100 p-10 md:p-16 rounded-[3rem] shadow-sm group">
-              <h2 className="text-3xl font-black text-slate-900 mb-8 tracking-tight">Příběh a prostor</h2>
-              <div className="space-y-6">
-                <p className="text-slate-600 text-lg leading-relaxed font-medium">{content.description}</p>
-                <p className="text-slate-600 text-lg leading-relaxed font-medium">{content.details}</p>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-white border border-slate-100 p-10 rounded-[3rem] shadow-xl">
-                  <h2 className="text-2xl font-black text-slate-900 mb-8 tracking-tight flex items-center gap-3">
+            <div className="bg-white border border-slate-100 p-10 rounded-[3rem] shadow-xl space-y-10">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
                      <span className="w-2 h-8 bg-green-500 rounded-full"></span>
                      Vybavení
-                  </h2>
-                  <ul className="space-y-4 text-slate-600 font-bold">
+                  </h3>
+                  <ul className="space-y-4 text-slate-700 font-bold">
                     {content.equipment?.map((item: string, index: number) => (
                       <li key={index} className="flex items-start gap-4">
                         <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -307,12 +505,12 @@ export default function HajenkabelaPage() {
                   </ul>
                 </div>
 
-                <div className="bg-white border border-slate-100 p-10 rounded-[3rem] shadow-xl">
-                  <h2 className="text-2xl font-black text-slate-900 mb-8 tracking-tight flex items-center gap-3">
+                <div className="space-y-6 pt-6 border-t border-slate-50">
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
                      <span className="w-2 h-8 bg-[#0070af] rounded-full"></span>
                      Aktivity
-                  </h2>
-                  <ul className="space-y-4 text-slate-600 font-bold">
+                  </h3>
+                  <ul className="space-y-4 text-slate-700 font-bold">
                     {content.activities?.map((activity: string, index: number) => (
                       <li key={index} className="flex items-start gap-4">
                         <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -324,229 +522,43 @@ export default function HajenkabelaPage() {
                   </ul>
                 </div>
             </div>
-
-            <div className="bg-slate-900 p-10 md:p-16 rounded-[3rem] shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-10 opacity-5">
-                 <svg className="w-64 h-64 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-              </div>
-              <h2 className="text-3xl font-black text-white mb-10 tracking-tight relative z-10">Okolní místa</h2>
-              <div className="space-y-6 relative z-10">
-                {[
-                  { name: 'Pacov', distance: '15 km', time: '15 min', icon: '🏘️' },
-                  { name: 'Červená Řečice', distance: '8 km', time: '10 min', icon: '🏡' },
-                  { name: 'Hořepník', distance: '4 km', time: '5 min', icon: '🏡' },
-                  { name: 'Pelhřimov', distance: '15 km', time: '15 min', icon: '🏙️' },
-                ].map(({ name, distance, time, icon }) => (
-                  <div key={name} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl group hover:bg-white/10 transition-all">
-                    <div className="flex items-center gap-4">
-                      <span className="text-2xl">{icon}</span>
-                      <span className="font-black text-white text-lg">{name}</span>
-                    </div>
-                    <div className="flex items-center gap-6 text-sm">
-                      <span className="text-slate-400 flex items-center gap-2 font-bold">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        {distance}
-                      </span>
-                      <span className="text-[#0070af] font-black flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        {time}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-8 text-center">* Orientační vzdálenosti autem</p>
-            </div>
           </div>
+        </div>
 
-          {/* Right column - Rental Form */}
-          <div className="lg:col-span-5 space-y-8">
-            <div className="bg-white rounded-[3rem] shadow-2xl border border-slate-100 p-8 md:p-12 sticky top-24 overflow-hidden group/form">
-              {/* Form header */}
-              <div className="mb-10 text-center relative z-10">
-                 <div className="w-20 h-20 bg-[#0070af]/5 rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#0070af] shadow-inner group-hover/form:scale-110 transition-transform">
-                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                 </div>
-                 <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-3">Chci si pronajmout</h2>
-                 <p className="text-slate-500 font-bold">Vyplňte formulář a my se vám ozveme zpět.</p>
-              </div>
-
-              {showSuccess ? (
-                <div className="text-center py-12 animate-fade-in relative z-10">
-                  <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-green-900/10">
-                    <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>
-                  </div>
-                  <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Odesláno!</h3>
-                  <p className="text-slate-500 font-bold mb-10 text-lg">Vaši žádost jsme přijali. Brzy vás budeme kontaktovat.</p>
-                  <button
-                    onClick={() => {
-                      setShowSuccess(false);
-                      setFormData({ name: '', email: '', phone: '', organization: '', startDate: '', endDate: '', guestCount: 1, purpose: '', message: '', agreeTerms: false });
-                    }}
-                    className="bg-[#0070af] text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-[#005a8c] transition-all shadow-xl shadow-[#0070af]/20 active:scale-95"
-                  >
-                    Odeslat další žádost
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
-                        <input
-                          type="text"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
-                          placeholder="Jan Novák"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Váš email *</label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
-                          placeholder="jan@email.cz"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Telefon *</label>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
-                          placeholder="+420..."
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Příjezd *</label>
-                        <input
-                          type="date"
-                          name="startDate"
-                          value={formData.startDate}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Odjezd *</label>
-                        <input
-                          type="date"
-                          name="endDate"
-                          value={formData.endDate}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Počet osob *</label>
-                          <input
-                            type="number"
-                            name="guestCount"
-                            value={formData.guestCount}
-                            onChange={handleInputChange}
-                            required
-                            min="1"
-                            max={rentalSettings.capacity}
-                            className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black text-lg text-[#0070af]"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Účel pobytu *</label>
-                          <select
-                            name="purpose"
-                            value={formData.purpose}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold"
-                          >
-                            <option value="">Vyberte účel</option>
-                            {purposeOptions.map(purpose => (
-                              <option key={purpose} value={purpose}>{purpose}</option>
-                            ))}
-                          </select>
-                        </div>
-                    </div>
-                  </div>
-
-                  {days > 0 && (
-                    <div className="bg-[#0070af]/5 border border-[#0070af]/10 p-8 rounded-[2rem] animate-fade-in">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{days} {days === 1 ? 'den' : days < 5 ? 'dny' : 'dní'} pobytu</span>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Předběžná cena</span>
-                      </div>
-                      <div className="flex justify-between items-baseline">
-                         <span className="text-slate-500 font-bold text-sm">Sazba {(days >= rentalSettings.weekThreshold ? rentalSettings.pricePerDayWeek : rentalSettings.pricePerDayShort).toLocaleString()} Kč/den</span>
-                         <span className="text-3xl font-black text-[#0070af]">{estimatedPrice.toLocaleString()} Kč</span>
-                      </div>
-                      <p className="text-[10px] font-bold text-slate-400 mt-4 italic">* {rentalSettings.note}</p>
-                    </div>
-                  )}
-
-                  <div className="flex items-start gap-3 px-2">
-                    <input
-                      type="checkbox"
-                      name="agreeTerms"
-                      id="agreeTerms"
-                      checked={formData.agreeTerms}
-                      onChange={handleInputChange}
-                      required
-                      className="h-5 w-5 text-[#0070af] focus:ring-[#0070af] border-slate-300 rounded-lg mt-1 transition-all"
-                    />
-                    <label htmlFor="agreeTerms" className="text-xs text-slate-500 font-bold leading-relaxed">
-                      Souhlasím s podmínkami pronájmu a se zpracováním osobních údajů pro účely vyřízení rezervace. *
-                    </label>
-                  </div>
-
-                  {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-2xl p-5 animate-shake">
-                      <p className="text-red-800 text-sm font-bold flex items-center gap-2">
-                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                         {error}
-                      </p>
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || !formData.agreeTerms}
-                    className="w-full bg-[#0070af] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-[#005a8c] transition-all shadow-xl shadow-[#0070af]/20 active:scale-95 disabled:bg-slate-300 disabled:shadow-none disabled:scale-100 mt-4"
-                  >
-                    {isSubmitting ? 'ODESÍLÁM...' : 'ODESLAT ŽÁDOST'}
-                  </button>
-                </form>
-              )}
+        {/* Info Content - Tips & Trips BELOW */}
+        <div className="max-w-7xl mx-auto mt-24">
+          <div className="bg-slate-900 p-10 md:p-16 rounded-[3rem] shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-10 opacity-5">
+               <svg className="w-64 h-64 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
             </div>
-
-            {/* Calendar Component */}
-            <div className="bg-slate-50 border border-slate-100 rounded-[3rem] p-4 shadow-sm overflow-hidden">
-                <RentalCalendar />
+            <h2 className="text-3xl font-black text-white mb-10 tracking-tight relative z-10 text-center">Tipy na výlety v okolí</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+              {[
+                { name: 'Pacov', distance: '15 km', time: '15 min', icon: '🏘️' },
+                { name: 'Červená Řečice', distance: '8 km', time: '10 min', icon: '🏡' },
+                { name: 'Hořepník', distance: '4 km', time: '5 min', icon: '🏡' },
+                { name: 'Pelhřimov', distance: '15 km', time: '15 min', icon: '🏙️' },
+              ].map(({ name, distance, time, icon }) => (
+                <div key={name} className="flex flex-col p-8 bg-white/5 border border-white/10 rounded-[2rem] group hover:bg-white/10 transition-all items-center text-center">
+                  <span className="text-5xl mb-6">{icon}</span>
+                  <span className="font-black text-white text-xl mb-4">{name}</span>
+                  <div className="space-y-2 w-full">
+                    <span className="text-slate-100 flex items-center justify-center gap-2 font-bold text-sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      {distance}
+                    </span>
+                    <span className="text-white font-black flex items-center justify-center gap-2 text-sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      {time}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Photo Gallery - MODERNIZED */}
+        {/* Photo Gallery */}
         <div className="mt-40 mb-20">
           <div className="text-center mb-16 space-y-4">
              <div className="inline-block px-4 py-1.5 rounded-full bg-[#0070af]/10 text-[#0070af] font-black text-[10px] tracking-[0.3em] uppercase">
@@ -578,7 +590,7 @@ export default function HajenkabelaPage() {
         </div>
       </div>
 
-      {/* Lightbox - MODERNIZED matching other pages */}
+      {/* Lightbox */}
       {lightboxOpen && (
         <div
           className="fixed inset-0 z-[100] bg-slate-900/98 flex flex-col animate-fade-in"

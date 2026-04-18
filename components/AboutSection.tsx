@@ -68,7 +68,7 @@ export default function AboutSection() {
             </h2>
             <div className="relative max-w-4xl mx-auto group">
               <div className="absolute inset-0 bg-gradient-to-r from-[#0070af] to-[#005a8c] rounded-[2rem] rotate-1 opacity-10 group-hover:rotate-0 transition-transform duration-500"></div>
-              <blockquote className="relative text-2xl md:text-3xl text-slate-700 font-medium leading-snug px-8 py-12 md:px-16">
+              <blockquote className="relative text-2xl md:text-3xl text-slate-800 font-medium leading-snug px-8 py-12 md:px-16">
                 <span className="absolute top-4 left-4 text-8xl text-[#0070af]/20 font-serif leading-none">“</span>
                 {content.about?.subtitle || pageContent.about.subtitle}
                 <span className="absolute bottom-0 right-4 text-8xl text-[#0070af]/20 font-serif leading-none rotate-180">“</span>
@@ -87,7 +87,7 @@ export default function AboutSection() {
             </h3>
             <div className="space-y-6">
               {(content.about?.content || pageContent.about.content).map((paragraph, index) => (
-                <p key={index} className="text-slate-600 leading-relaxed text-lg font-medium">
+                <p key={index} className="text-slate-800 leading-relaxed text-lg font-medium">
                   {paragraph}
                 </p>
               ))}
@@ -108,7 +108,7 @@ export default function AboutSection() {
                   <span className="text-[#0070af] text-3xl font-black">P</span>
                 </div>
                 <div className="font-black text-3xl text-white tracking-tight">Pionýr Pacov</div>
-                <div className="text-white/80 font-bold uppercase tracking-widest text-xs mt-2">Tradice od roku 1990</div>
+                <div className="text-white font-black drop-shadow-sm">Tradice od roku 1990</div>
               </div>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function AboutSection() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#0070af]/5 rounded-full blur-[80px] pointer-events-none transition-transform group-hover:scale-150"></div>
             <div className="relative z-10">
               <h3 className="text-3xl font-black mb-8 tracking-tight text-slate-900">Kdo je Pionýr?</h3>
-              <p className="text-slate-600 text-lg mb-8 leading-relaxed font-medium">
+              <p className="text-slate-800 text-lg mb-8 leading-relaxed font-medium">
                 {content.pioneer?.description || pageContent.pioneer.description}
               </p>
               <div className="inline-block p-6 bg-[#0070af]/5 border border-[#0070af]/10 rounded-2xl">
@@ -143,11 +143,11 @@ export default function AboutSection() {
           <div className="lg:col-span-4 bg-[#0070af]/5 border border-[#0070af]/10 rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center relative overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500">
              <div className="relative z-10">
                 <div className="text-7xl font-black mb-4 tracking-tighter text-[#0070af] transition-transform group-hover:scale-110">600+</div>
-                <div className="text-sm font-black uppercase tracking-widest text-slate-500 leading-tight">
+                <div className="text-sm font-black uppercase tracking-widest text-slate-700 leading-tight">
                   míst po celé<br/>republice
                 </div>
                 <div className="mt-8 pt-8 border-t border-[#0070af]/20">
-                  <div className="text-xl font-bold italic text-slate-700">"Jedna velká rodina"</div>
+                  <div className="text-xl font-bold italic text-slate-800">"Jedna velká rodina"</div>
                 </div>
              </div>
           </div>
@@ -163,7 +163,7 @@ export default function AboutSection() {
                 <h3 className="text-4xl font-black text-slate-900 mb-12 tracking-tight">
                    {content.history?.title || pageContent.history.title}
                 </h3>
-                <p className="text-slate-600 text-xl font-medium leading-relaxed mb-12">
+                <p className="text-slate-800 text-xl font-medium leading-relaxed mb-12">
                    {content.history?.content || pageContent.history.content}
                 </p>
 
@@ -174,8 +174,8 @@ export default function AboutSection() {
                     { year: '1961', text: 'Původní založení', active: false }
                   ].map((item, i) => (
                     <div key={i} className={`p-8 rounded-[2rem] transition-all duration-500 hover:-translate-y-2 ${item.active ? 'bg-[#0070af]/10 border-2 border-[#0070af] shadow-xl shadow-[#0070af]/10' : 'bg-white text-slate-900 border border-slate-200 shadow-sm'}`}>
-                      <div className={`text-3xl font-black mb-3 ${item.active ? 'text-[#0070af]' : 'text-slate-400'}`}>{item.year}</div>
-                      <div className={`font-bold ${item.active ? 'text-slate-900' : 'text-slate-500 opacity-80'}`}>{item.text}</div>
+                      <div className={`text-3xl font-black mb-3 ${item.active ? 'text-[#0070af]' : 'text-slate-600'}`}>{item.year}</div>
+                      <div className={`font-bold ${item.active ? 'text-slate-900' : 'text-slate-700 opacity-80'}`}>{item.text}</div>
                     </div>
                   ))}
                 </div>

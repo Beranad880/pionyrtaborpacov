@@ -188,7 +188,7 @@ export default function CampApplications() {
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>
             </div>
             <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">Přihláška odeslána!</h1>
-            <p className="text-slate-500 font-medium text-xl mb-12 leading-relaxed">
+            <p className="text-slate-700 font-medium text-xl mb-12 leading-relaxed">
               Děkujeme za zájem o náš letní tábor. Vaši přihlášku jsme v pořádku přijali a brzy se vám ozveme s dalšími informacemi.
             </p>
             <div className="bg-slate-50 border border-slate-100 rounded-[2rem] p-10 mb-12 text-left">
@@ -200,7 +200,7 @@ export default function CampApplications() {
                   'Zašleme pokyny k platbě zálohy',
                   'Před táborem obdržíte detailní pokyny'
                 ].map((text, i) => (
-                  <li key={i} className="flex items-center gap-4 text-slate-700 font-bold">
+                  <li key={i} className="flex items-center gap-4 text-slate-800 font-bold">
                     <span className="w-2 h-2 rounded-full bg-green-500"></span>
                     {text}
                   </li>
@@ -229,7 +229,7 @@ export default function CampApplications() {
             Letní dobrodružství 2025
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Přihláška na tábor</h1>
-          <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-medium">
+          <p className="text-xl text-slate-700 max-w-3xl mx-auto leading-relaxed font-medium">
             Připojte se k nám na nezapomenutelné prázdninové dobrodružství v Hájence Bělá!
           </p>
         </div>
@@ -253,19 +253,19 @@ export default function CampApplications() {
                   ].map((item, idx) => (
                     <div key={idx} className="flex gap-5">
                       <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                         <svg className="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d={item.i as any}/></svg>
+                         <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d={item.i as any}/></svg>
                       </div>
                       <div>
-                        <div className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-1">{item.l}</div>
+                        <div className="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-1">{item.l}</div>
                         <div className="text-lg font-bold leading-tight">{item.v}</div>
                       </div>
                     </div>
                   ))}
 
                   <div className="pt-8 border-t border-white/10 mt-10">
-                    <div className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-2">Cena tábora</div>
+                    <div className="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-2">Cena tábora</div>
                     <div className="text-4xl font-black text-white tracking-tighter mb-2">{campInfo.price.toLocaleString()} Kč</div>
-                    <p className="text-xs text-blue-100 font-medium opacity-70">Zahrnuje ubytování, 5× denně stravu, pitný režim a program.</p>
+                    <p className="text-xs text-white font-medium opacity-90">Zahrnuje ubytování, 5× denně stravu, pitný režim a program.</p>
                   </div>
                 </div>
               </div>
@@ -283,7 +283,7 @@ export default function CampApplications() {
                     'Osobní hygienické potřeby',
                     'Detailní seznam zašleme emailem'
                   ].map((text, i) => (
-                    <li key={i} className="flex items-start gap-3 text-slate-600 font-bold text-sm leading-snug">
+                    <li key={i} className="flex items-start gap-3 text-slate-700 font-bold text-sm leading-snug">
                       <svg className="w-4 h-4 text-[#0070af] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
                       {text}
                     </li>
@@ -319,19 +319,19 @@ export default function CampApplications() {
                   </div>
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
                       <input
                         type="text"
                         name="participantName"
                         value={formData.participantName}
                         onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
                         required
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Aktuální třída *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Aktuální třída *</label>
                       <select
                         name="grade"
                         value={formData.grade}
@@ -347,33 +347,33 @@ export default function CampApplications() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Datum narození *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Datum narození *</label>
                       <input
                         type="text"
                         name="dateOfBirth"
                         value={formData.dateOfBirth}
                         onChange={handleInputChange}
                         placeholder="DD.MM.YYYY"
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
                         required
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Rodné číslo *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Rodné číslo *</label>
                       <input
                         type="text"
                         name="birthNumber"
                         value={formData.birthNumber}
                         onChange={handleInputChange}
                         placeholder="YYMMDD/XXXX"
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
                         required
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Ulice a č.p. *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Ulice a č.p. *</label>
                       <input
                         type="text"
                         name="address.street"
@@ -385,7 +385,7 @@ export default function CampApplications() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Město a PSČ *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Město a PSČ *</label>
                       <input
                         type="text"
                         name="address.city"
@@ -406,43 +406,43 @@ export default function CampApplications() {
                   </div>
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
                       <input
                         type="text"
                         name="guardianName"
                         value={formData.guardianName}
                         onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
                         required
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Mobilní telefon *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Mobilní telefon *</label>
                       <input
                         type="tel"
                         name="guardianPhone"
                         value={formData.guardianPhone}
                         onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
                         required
                       />
                     </div>
 
                     <div className="md:col-span-2 space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Email pro komunikaci *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Email pro komunikaci *</label>
                       <input
                         type="email"
                         name="guardianEmail"
                         value={formData.guardianEmail}
                         onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
                         required
                       />
                     </div>
 
                     <div className="md:col-span-2 space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Jiná adresa (pokud se liší)</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jiná adresa (pokud se liší)</label>
                       <input
                         type="text"
                         name="guardianAddress"
@@ -462,25 +462,25 @@ export default function CampApplications() {
                   </div>
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
                       <input
                         type="text"
                         name="secondContactName"
                         value={formData.secondContactName}
                         onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
                         required
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Telefon *</label>
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Telefon *</label>
                       <input
                         type="tel"
                         name="secondContactPhone"
                         value={formData.secondContactPhone}
                         onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
                         required
                       />
                     </div>
@@ -494,7 +494,7 @@ export default function CampApplications() {
                   </div>
                   <div>
                     <h3 className="text-xl font-black text-slate-900 mb-2 tracking-tight uppercase tracking-widest">Potřebujete poradit?</h3>
-                    <p className="text-slate-500 font-bold mb-4">Neváhejte se na nás obrátit s jakýmkoliv dotazem ohledně tábora.</p>
+                    <p className="text-slate-700 font-bold mb-4">Neváhejte se na nás obrátit s jakýmkoliv dotazem ohledně tábora.</p>
                     <div className="flex flex-wrap gap-8 text-sm">
                        <a href={`mailto:${siteData.contact.email}`} className="text-[#0070af] font-black uppercase tracking-widest flex items-center gap-2 hover:underline">
                           <span className="opacity-50">@</span> {siteData.contact.email}
@@ -512,11 +512,11 @@ export default function CampApplications() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full md:w-auto px-16 py-8 bg-green-600 hover:bg-green-700 text-white text-xl font-black rounded-[2.5rem] transition-all shadow-2xl shadow-green-900/20 active:scale-95 disabled:bg-slate-300 disabled:shadow-none uppercase tracking-widest"
+                    className="w-full md:w-auto px-16 py-8 bg-green-600 hover:bg-green-700 text-white text-xl font-black rounded-[2.5rem] transition-all shadow-2xl shadow-green-900/20 active:scale-95 disabled:bg-slate-400 disabled:shadow-none uppercase tracking-widest"
                   >
                     {isSubmitting ? 'ODESÍLÁNÍ...' : 'ODESLAT PŘIHLÁŠKU'}
                   </button>
-                  <p className="mt-8 text-xs text-slate-400 font-black uppercase tracking-widest">
+                  <p className="mt-8 text-xs text-slate-600 font-black uppercase tracking-widest">
                     Pole označená hvězdičkou (*) jsou povinná pro úspěšné odeslání
                   </p>
                 </div>

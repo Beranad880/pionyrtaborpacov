@@ -112,7 +112,7 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
           <h3 className="text-xl font-semibold">Nový článek</h3>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-slate-700 hover:text-slate-900"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -128,7 +128,7 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
           )}
 
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-slate-900 mb-2">
               Nadpis článku *
             </label>
             <input
@@ -142,13 +142,13 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="Zadejte nadpis článku..."
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-700 mt-1">
               Slug: {generateSlug(formData.title) || 'automaticky-vygenerovan-slug'}
             </p>
           </div>
 
           <div>
-            <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="excerpt" className="block text-sm font-medium text-slate-900 mb-2">
               Výtah článku *
             </label>
             <textarea
@@ -162,13 +162,13 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="Stručný popis článku pro náhled..."
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-700 mt-1">
               {formData.excerpt.length}/300 znaků
             </p>
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="content" className="block text-sm font-medium text-slate-900 mb-2">
               Obsah článku *
             </label>
             <textarea
@@ -181,14 +181,14 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent font-mono text-sm"
               placeholder="Zde napište obsah článku. Můžete používat HTML tagy pro formátování..."
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-700 mt-1">
               Podporuje základní HTML tagy: &lt;p&gt;, &lt;h2&gt;, &lt;h3&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;li&gt;, atd.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="category" className="block text-sm font-medium text-slate-900 mb-2">
                 Kategorie *
               </label>
               <select
@@ -208,7 +208,7 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
             </div>
 
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="status" className="block text-sm font-medium text-slate-900 mb-2">
                 Status *
               </label>
               <select
@@ -225,7 +225,7 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
             </div>
 
             <div>
-              <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="tags" className="block text-sm font-medium text-slate-900 mb-2">
                 Tagy
               </label>
               <input
@@ -237,7 +237,7 @@ export default function ArticleForm({ onClose, onSubmit }: ArticleFormProps) {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 placeholder="tag1, tag2, tag3"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-700 mt-1">
                 Oddělte čárkami
               </p>
             </div>

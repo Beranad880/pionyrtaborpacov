@@ -68,10 +68,19 @@ export default function FotkyZAkciPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Fotky z akci</h1>
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+      <div className="min-h-screen bg-white">
+        <div className="relative py-20 bg-slate-50 animate-pulse">
+          <div className="container mx-auto px-4 text-center">
+            <div className="w-32 h-6 bg-slate-200 rounded-full mx-auto mb-6"></div>
+            <div className="w-64 h-12 bg-slate-200 rounded-2xl mx-auto mb-6"></div>
+            <div className="w-96 h-6 bg-slate-200 rounded-xl mx-auto"></div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-24 text-center">
+           <div className="flex justify-center mb-12">
+             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#0070af]"></div>
+           </div>
+           <p className="text-slate-700 font-black uppercase tracking-widest animate-pulse">Načítáme vzpomínky...</p>
         </div>
       </div>
     );
@@ -87,7 +96,7 @@ export default function FotkyZAkciPage() {
             Vizuální vzpomínky
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Fotky z akcí</h1>
-          <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-medium">
+          <p className="text-xl text-slate-800 max-w-3xl mx-auto leading-relaxed font-medium">
             Podívejte se na fotky z našich táborů, výletů a dalších akcí. Prožijte naše dobrodružství s námi.
           </p>
         </div>
@@ -97,7 +106,7 @@ export default function FotkyZAkciPage() {
         <div className="max-w-7xl mx-auto">
           {galleries.length === 0 ? (
             <div className="bg-slate-50 p-12 rounded-[2.5rem] text-center border border-dashed border-slate-300">
-              <p className="text-slate-500 font-bold text-xl">Zatím zde nejsou žádné fotogalerie.</p>
+              <p className="text-slate-700 font-bold text-xl">Zatím zde nejsou žádné fotogalerie.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-16">
@@ -115,7 +124,7 @@ export default function FotkyZAkciPage() {
                       </div>
                       <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{gallery.title}</h2>
                       {gallery.description && (
-                        <p className="text-slate-500 mt-4 text-lg font-medium max-w-2xl">{gallery.description}</p>
+                        <p className="text-slate-800 mt-4 text-lg font-medium max-w-2xl">{gallery.description}</p>
                       )}
                     </div>
                     <div className="flex-shrink-0">
@@ -162,7 +171,7 @@ export default function FotkyZAkciPage() {
                       )}
                     </div>
                   ) : (
-                    <div className="p-20 text-center text-slate-300 font-bold italic">
+                    <div className="p-20 text-center text-slate-500 font-bold italic">
                       Galerie zatím neobsahuje žádné fotky
                     </div>
                   )}

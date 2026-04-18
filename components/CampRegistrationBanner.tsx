@@ -21,7 +21,7 @@ export default function CampRegistrationBanner() {
             Letní tábor <br/><span className="text-yellow-400">Hájence Bělá</span>
           </h2>
 
-          <p className="text-white/80 text-lg mb-10 font-medium leading-relaxed max-w-lg mx-auto">
+          <p className="text-white text-lg mb-10 font-bold leading-relaxed max-w-lg mx-auto drop-shadow-sm">
             Nezapomenutelné dobrodružství čeká! Přihlaste své děti na léto plné her, přátelství a nových zážitků.
           </p>
         </div>
@@ -38,7 +38,7 @@ export default function CampRegistrationBanner() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </a>
-          <div className="mt-6 flex items-center justify-center gap-2 text-white/50 text-sm font-bold uppercase tracking-widest">
+          <div className="mt-6 flex items-center justify-center gap-2 text-white/90 text-sm font-black uppercase tracking-widest drop-shadow-sm">
             <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping"></span>
             Registrace otevřena na ldtbela.cz
           </div>

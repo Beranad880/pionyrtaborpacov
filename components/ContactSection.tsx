@@ -107,7 +107,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <h3 className="text-slate-900 font-black text-lg mb-2">{item.title}</h3>
-                    <p className="text-slate-500 font-bold leading-relaxed whitespace-pre-line">{item.content}</p>
+                    <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-line">{item.content}</p>
                   </div>
                 </div>
               ))}
@@ -130,7 +130,7 @@ export default function ContactSection() {
                   { label: 'Revizor PS', name: data.leadership.auditor }
                 ].map((person, i) => (
                   <div key={i} className="bg-slate-50 p-6 rounded-2xl border border-slate-100 group hover:bg-[#0070af] transition-colors duration-500">
-                    <div className="text-[#0070af] group-hover:text-white/70 text-xs font-black uppercase tracking-widest mb-2 transition-colors">{person.label}</div>
+                    <div className="text-[#0070af] group-hover:text-white font-black drop-shadow-sm transition-colors">{person.label}</div>
                     <div className="text-slate-900 group-hover:text-white font-black text-lg transition-colors">{person.name}</div>
                   </div>
                 ))}
@@ -160,7 +160,7 @@ export default function ContactSection() {
                       {data.statistics.ageGroups.map((group, index) => (
                         <div key={index} className="bg-white border border-[#0070af]/10 rounded-2xl p-6 hover:shadow-xl hover:shadow-[#0070af]/10 transition-all duration-300 group">
                           <div className="text-3xl font-black text-[#0070af] mb-1 group-hover:scale-110 transition-transform origin-left">{group.count}</div>
-                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Věk {group.range}</div>
+                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-700">Věk {group.range}</div>
                         </div>
                       ))}
                    </div>

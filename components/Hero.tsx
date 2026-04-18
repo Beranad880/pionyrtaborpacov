@@ -51,7 +51,7 @@ export default function Hero() {
               </span>
             ))}
           </h1>
-          <p className="text-xl md:text-3xl text-slate-100 mb-12 max-w-3xl mx-auto leading-tight font-medium opacity-90 animate-fade-in-delayed">
+          <p className="text-xl md:text-3xl text-white mb-12 max-w-3xl mx-auto leading-tight font-bold drop-shadow-lg animate-fade-in-delayed">
             {(heroData as any).subtitle || 'Demokratický, dobrovolný spolek dětí, mládeže a dospělých'}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-delayed-more">
@@ -64,7 +64,7 @@ export default function Hero() {
             </button>
             <button
               onClick={() => window.location.href = '/pages?page=kalendar-akci'}
-              className="w-full sm:w-auto bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 px-10 py-5 rounded-2xl font-black text-lg transition-all hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/40 px-10 py-5 rounded-2xl font-black text-lg transition-all hover:scale-105 active:scale-95"
             >
               Kalendář akcí
             </button>
@@ -72,16 +72,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div
-        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer transition-all hover:translate-y-2"
-        onClick={scrollToAbout}
-      >
-        <span className="text-white/60 text-[10px] font-black uppercase tracking-[0.3em]">Scrolujte dolů</span>
-        <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1">
-          <div className="w-1 h-2 bg-white rounded-full animate-scroll-dot"></div>
-        </div>
-      </div>
     </section>
   );
 }

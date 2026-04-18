@@ -30,7 +30,7 @@ export default function EvidencniListy() {
             <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight">
               Evidenční Listy
             </h2>
-            <p className="text-slate-500 text-lg font-medium max-w-2xl mx-auto leading-relaxed">
+            <p className="text-slate-800 text-lg font-medium max-w-2xl mx-auto leading-relaxed">
               Všechny potřebné formuláře pro vaše děti přehledně na jednom místě. Stačí kliknout a stáhnout.
             </p>
           </div>
@@ -57,7 +57,7 @@ export default function EvidencniListy() {
                     {file.name}
                   </h3>
                   
-                  <p className="text-slate-500 font-bold mb-8 opacity-80">
+                  <p className="text-slate-800 font-bold mb-8 opacity-80">
                     {file.description}
                   </p>
 

@@ -60,22 +60,18 @@ export default function ClankyPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Články</h1>
-        <div className="prose max-w-none">
-          <p className="text-lg text-gray-700 mb-8">
-            Zde najdete nejnovější články, reportáže a novinky z činnosti naší pionýrské skupiny.
-          </p>
-          <div className="space-y-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white border rounded-lg shadow-sm overflow-hidden animate-pulse">
-                <div className="p-6">
-                  <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-1/4 mb-4"></div>
-                  <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-                </div>
-              </div>
+      <div className="min-h-screen bg-white">
+        <div className="relative py-20 bg-slate-50 animate-pulse">
+          <div className="container mx-auto px-4 text-center">
+            <div className="w-32 h-6 bg-slate-200 rounded-full mx-auto mb-6"></div>
+            <div className="w-64 h-12 bg-slate-200 rounded-2xl mx-auto mb-6"></div>
+            <div className="w-96 h-6 bg-slate-200 rounded-xl mx-auto"></div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-24">
+          <div className="max-w-5xl mx-auto space-y-12">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-slate-50 rounded-[2.5rem] h-64 animate-pulse"></div>
             ))}
           </div>
         </div>
@@ -93,7 +89,7 @@ export default function ClankyPage() {
             Aktuality & Činnost
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Články</h1>
-          <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-medium">
+          <p className="text-xl text-slate-800 max-w-3xl mx-auto leading-relaxed font-medium">
             Zde najdete nejnovější články, reportáže a novinky z činnosti naší pionýrské skupiny.
           </p>
         </div>
@@ -103,7 +99,7 @@ export default function ClankyPage() {
         <div className="max-w-5xl mx-auto">
           {articles.length === 0 ? (
             <div className="bg-slate-50 p-12 rounded-[2.5rem] text-center border border-dashed border-slate-300">
-              <p className="text-slate-500 font-bold text-xl">Zatím zde nejsou žádné články.</p>
+              <p className="text-slate-700 font-bold text-xl">Zatím zde nejsou žádné články.</p>
             </div>
           ) : (
             <div className="space-y-12">
@@ -122,7 +118,7 @@ export default function ClankyPage() {
                             <span className={`px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest ${categoryInfo.color}`}>
                               {categoryInfo.label}
                             </span>
-                            <span className="text-slate-400 font-bold text-sm">
+                            <span className="text-slate-700 font-bold text-sm">
                               {new Date(article.publishedAt).toLocaleDateString('cs-CZ')}
                             </span>
                           </div>
@@ -132,7 +128,7 @@ export default function ClankyPage() {
                         </div>
                       </div>
                       
-                      <p className="text-slate-600 text-lg mb-8 leading-relaxed font-medium line-clamp-3">
+                      <p className="text-slate-800 text-lg mb-8 leading-relaxed font-medium line-clamp-3">
                         {article.excerpt}
                       </p>
 
@@ -165,7 +161,7 @@ export default function ClankyPage() {
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(0,112,175,0.15)_0%,_transparent_70%)]"></div>
             <div className="relative z-10">
               <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight">Chcete být informováni?</h2>
-              <p className="text-slate-400 text-lg mb-12 font-medium max-w-2xl mx-auto">
+              <p className="text-white text-lg mb-12 font-medium max-w-2xl mx-auto">
                 Sledujte naše aktivity na sociálních sítích nebo nás kontaktujte přímo.
               </p>
               <div className="flex flex-wrap justify-center gap-6">

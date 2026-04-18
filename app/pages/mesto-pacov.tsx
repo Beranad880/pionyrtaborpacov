@@ -70,7 +70,7 @@ export default function MestoPacovPage() {
             Naše domovské město
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Město Pacov</h1>
-          <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-medium">
+          <p className="text-xl text-slate-700 max-w-3xl mx-auto leading-relaxed font-medium">
             Malebné město v srdci Českomoravské vrchoviny s bohatou historií a živou kulturou.
           </p>
         </div>
@@ -90,12 +90,12 @@ export default function MestoPacovPage() {
               </h2>
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                  <div className="space-y-6">
-                    <p className="text-slate-600 text-lg leading-relaxed font-medium">
+                    <p className="text-slate-800 text-lg leading-relaxed font-medium">
                       Pacov je město v okrese Pelhřimov v Kraji Vysočina. Leží v malebné krajině Českomoravské vrchoviny
                       a má bohatou historii sahající až do 13. století. Město je známé svým renesančním zámkem,
                       historickým náměstím a kostelem sv. Michaela archanděla.
                     </p>
-                    <p className="text-slate-600 text-lg leading-relaxed font-medium">
+                    <p className="text-slate-800 text-lg leading-relaxed font-medium">
                       V současnosti má Pacov přibližně 5 000 obyvatel a nabízí svým návštěvníkům i obyvatelům
                       řadu kulturních a sportovních aktivit, krásnou přírodu v okolí a příjemnou atmosféru malého města.
                     </p>

@@ -52,7 +52,7 @@ export default function PionyrseOddilyPage() {
             Naše komunity
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">{content.title}</h1>
-          <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-medium">
+          <p className="text-xl text-slate-800 max-w-3xl mx-auto leading-relaxed font-medium">
             {content.description}
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function PionyrseOddilyPage() {
                 </div>
               </div>
 
-              <p className="text-slate-600 text-lg mb-10 leading-relaxed font-medium flex-grow">
+              <p className="text-slate-800 text-lg mb-10 leading-relaxed font-medium flex-grow">
                 {group.description}
               </p>
 
@@ -85,7 +85,7 @@ export default function PionyrseOddilyPage() {
                   <h3 className="font-black text-xs uppercase tracking-[0.2em] text-[#0070af] mb-4">Co nás čeká:</h3>
                   <ul className="space-y-3">
                     {group.activities.map((activity: string, actIndex: number) => (
-                      <li key={actIndex} className="text-slate-700 font-bold flex items-center gap-3">
+                      <li key={actIndex} className="text-slate-800 font-bold flex items-center gap-3">
                         <span className="w-2 h-2 rounded-full bg-[#0070af]"></span>
                         {activity}
                       </li>
@@ -109,7 +109,7 @@ export default function PionyrseOddilyPage() {
                   <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight leading-tight">
                     {content.joinInfo.title}
                   </h2>
-                  <p className="text-slate-400 text-lg leading-relaxed font-medium">
+                  <p className="text-white text-lg leading-relaxed font-medium">
                     {content.joinInfo.description}
                   </p>
                 </div>
