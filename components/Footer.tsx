@@ -113,7 +113,7 @@ export default function Footer() {
               </a>
             </div>
             <div className="flex flex-col items-center w-40">
-              <p className="text-sm text-slate-600 mb-3">vytvořil s ❤️</p>
+              <p className="text-sm text-slate-600 mb-3">Vytvořil s ❤️</p>
               <a
                 href="https://humbletech.cz"
                 target="_blank"
