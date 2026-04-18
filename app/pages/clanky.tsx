@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Metadata } from 'next';
 import Link from 'next/link';
 
 interface Article {
@@ -14,48 +13,29 @@ interface Article {
   tags: string[];
   publishedAt: string;
   views: number;
-  likes: number;
-}
-
-interface ArticlesResponse {
-  articles: Article[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
 }
 
 const categoryLabels: { [key: string]: { label: string; color: string } } = {
   'news': { label: 'Novinky', color: 'bg-purple-100 text-purple-800' },
   'event-report': { label: 'Reportáž', color: 'bg-green-100 text-green-800' },
-  'general': { label: 'Obecné', color: 'bg-gray-100 text-gray-800' },
+  'general': { label: 'Obecné', color: 'bg-slate-100 text-slate-700' },
   'announcement': { label: 'Oznámení', color: 'bg-blue-100 text-blue-800' },
 };
 
 export default function ClankyPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const response = await fetch('/api/articles');
-        const result = await response.json();
-
+    fetch('/api/articles')
+      .then(r => r.json())
+      .then(result => {
         if (result.success && result.data.articles) {
           setArticles(result.data.articles);
         }
-      } catch (err) {
-        console.log('Error fetching articles:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -69,7 +49,7 @@ export default function ClankyPage() {
           </div>
         </div>
         <div className="container mx-auto px-4 py-24">
-          <div className="max-w-5xl mx-auto space-y-12">
+          <div className="max-w-5xl mx-auto space-y-8">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-slate-50 rounded-[2.5rem] h-64 animate-pulse"></div>
             ))}
@@ -90,7 +70,7 @@ export default function ClankyPage() {
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Články</h1>
           <p className="text-xl text-slate-800 max-w-3xl mx-auto leading-relaxed font-medium">
-            Zde najdete nejnovější články, reportáže a novinky z činnosti naší pionýrské skupiny.
+            Nejnovější články, reportáže a novinky z činnosti naší pionýrské skupiny.
           </p>
         </div>
       </div>
@@ -98,55 +78,72 @@ export default function ClankyPage() {
       <div className="container mx-auto px-4 py-24">
         <div className="max-w-5xl mx-auto">
           {articles.length === 0 ? (
-            <div className="bg-slate-50 p-12 rounded-[2.5rem] text-center border border-dashed border-slate-300">
+            <div className="bg-slate-50 p-16 rounded-[2.5rem] text-center border border-dashed border-slate-300">
+              <div className="w-16 h-16 bg-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
               <p className="text-slate-700 font-bold text-xl">Zatím zde nejsou žádné články.</p>
             </div>
           ) : (
-            <div className="space-y-12">
+            <div className="space-y-8">
               {articles.map((article) => {
                 const categoryInfo = categoryLabels[article.category] || {
                   label: article.category,
-                  color: 'bg-gray-100 text-gray-800'
+                  color: 'bg-slate-100 text-slate-700'
                 };
 
                 return (
-                  <article key={article._id} className="group bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden transition-all duration-500 hover:-translate-y-1">
+                  <article
+                    key={article._id}
+                    className="group bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-slate-300/60"
+                  >
                     <div className="p-8 md:p-12">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-4">
-                            <span className={`px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest ${categoryInfo.color}`}>
-                              {categoryInfo.label}
-                            </span>
-                            <span className="text-slate-700 font-bold text-sm">
-                              {new Date(article.publishedAt).toLocaleDateString('cs-CZ')}
-                            </span>
-                          </div>
-                          <h2 className="text-3xl font-black text-slate-900 group-hover:text-[#0070af] transition-colors leading-tight tracking-tight">
-                            {article.title}
-                          </h2>
-                        </div>
+                      <div className="flex items-center gap-3 mb-5">
+                        <span className={`px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest ${categoryInfo.color}`}>
+                          {categoryInfo.label}
+                        </span>
+                        <span className="text-slate-500 font-bold text-sm">
+                          {new Date(article.publishedAt).toLocaleDateString('cs-CZ', {
+                            year: 'numeric', month: 'long', day: 'numeric'
+                          })}
+                        </span>
+                        {article.author?.name && (
+                          <>
+                            <span className="text-slate-300">·</span>
+                            <span className="text-slate-500 font-bold text-sm">{article.author.name}</span>
+                          </>
+                        )}
                       </div>
-                      
-                      <p className="text-slate-800 text-lg mb-8 leading-relaxed font-medium line-clamp-3">
+
+                      <h2 className="text-2xl md:text-3xl font-black text-slate-900 group-hover:text-[#0070af] transition-colors leading-tight tracking-tight mb-4">
+                        {article.title}
+                      </h2>
+
+                      <p className="text-slate-600 text-lg mb-8 leading-relaxed font-medium line-clamp-3">
                         {article.excerpt}
                       </p>
 
-                      <div className="flex flex-wrap items-center justify-between gap-6">
-                        <div className="flex flex-wrap gap-2">
-                          {article.tags?.map((tag, index) => (
-                            <span key={index} className="text-[#0070af] font-black text-xs uppercase tracking-wider">
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                        
+                      <div className="flex items-center justify-between gap-4">
+                        {article.tags?.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {article.tags.map((tag, i) => (
+                              <span key={i} className="text-[#0070af]/70 font-black text-xs uppercase tracking-wider">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
                         <Link
                           href={`/pages/clanky/${article.slug}`}
-                          className="inline-flex items-center gap-2 bg-[#0070af] text-white px-8 py-4 rounded-2xl font-black text-sm transition-all hover:bg-[#005a8c] shadow-lg shadow-[#0070af]/20 group/btn"
+                          className="ml-auto inline-flex items-center gap-2 bg-[#0070af] text-white px-8 py-4 rounded-2xl font-black text-sm transition-all hover:bg-[#005a8c] shadow-lg shadow-[#0070af]/20 group/btn flex-shrink-0"
                         >
                           ČÍST VÍCE
-                          <svg className="w-5 h-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                          <svg className="w-5 h-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
                         </Link>
                       </div>
                     </div>
@@ -155,41 +152,6 @@ export default function ClankyPage() {
               })}
             </div>
           )}
-
-          {/* Social CTAs */}
-          <div className="mt-32 relative bg-slate-900 rounded-[3rem] p-12 md:p-20 overflow-hidden text-center">
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(0,112,175,0.15)_0%,_transparent_70%)]"></div>
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight">Chcete být informováni?</h2>
-              <p className="text-white text-lg mb-12 font-medium max-w-2xl mx-auto">
-                Sledujte naše aktivity na sociálních sítích nebo nás kontaktujte přímo.
-              </p>
-              <div className="flex flex-wrap justify-center gap-6">
-                <a
-                  href="https://www.facebook.com/profile.php?id=61573658450126"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[#1877F2] text-white px-10 py-5 rounded-2xl font-black transition-all hover:scale-105 flex items-center gap-3 shadow-xl shadow-blue-900/20"
-                >
-                  FACEBOOK
-                </a>
-                <a
-                  href="https://www.instagram.com/ldtbela"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white px-10 py-5 rounded-2xl font-black transition-all hover:scale-105 flex items-center gap-3 shadow-xl shadow-pink-900/20"
-                >
-                  INSTAGRAM
-                </a>
-                <a
-                  href="mailto:mareseznam@seznam.cz"
-                  className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-10 py-5 rounded-2xl font-black transition-all hover:bg-white/20 flex items-center gap-3"
-                >
-                  EMAIL
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

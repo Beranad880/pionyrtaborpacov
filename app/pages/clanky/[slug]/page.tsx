@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface Article {
@@ -15,62 +15,53 @@ interface Article {
   tags: string[];
   publishedAt: string;
   views: number;
-  likes: number;
   featuredImage?: string;
 }
 
 const categoryLabels: { [key: string]: { label: string; color: string } } = {
   'news': { label: 'Novinky', color: 'bg-purple-100 text-purple-800' },
   'event-report': { label: 'Reportáž', color: 'bg-green-100 text-green-800' },
-  'general': { label: 'Obecné', color: 'bg-gray-100 text-gray-800' },
+  'general': { label: 'Obecné', color: 'bg-slate-100 text-slate-700' },
   'announcement': { label: 'Oznámení', color: 'bg-blue-100 text-blue-800' },
 };
 
 export default function ArticleDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchArticle = async () => {
-      try {
-        const response = await fetch(`/api/articles/${params.slug}`);
-        const result = await response.json();
-
+    if (!params.slug) return;
+    fetch(`/api/articles/${params.slug}`)
+      .then(r => r.json())
+      .then(result => {
         if (result.success) {
           setArticle(result.data);
         } else {
-          setError('Article not found');
+          setError('not-found');
         }
-      } catch (err) {
-        try {
-          setError('Article not found');
-        } catch {
-          setError('Failed to load article');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (params.slug) {
-      fetchArticle();
-    }
+      })
+      .catch(() => setError('error'))
+      .finally(() => setLoading(false));
   }, [params.slug]);
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded w-3/4 mb-4"></div>
-            <div className="h-4 bg-gray-300 rounded w-1/4 mb-8"></div>
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-300 rounded"></div>
-              <div className="h-4 bg-gray-300 rounded"></div>
-              <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-            </div>
+      <div className="min-h-screen bg-white">
+        <div className="relative py-20 bg-slate-50 animate-pulse">
+          <div className="container mx-auto px-4">
+            <div className="w-24 h-5 bg-slate-200 rounded-full mb-8"></div>
+            <div className="w-3/4 h-14 bg-slate-200 rounded-2xl mb-6"></div>
+            <div className="w-1/3 h-5 bg-slate-200 rounded-xl"></div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-3xl mx-auto space-y-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-5 bg-slate-100 rounded-xl animate-pulse" style={{ width: `${90 - i * 5}%` }}></div>
+            ))}
           </div>
         </div>
       </div>
@@ -79,153 +70,127 @@ export default function ArticleDetailPage() {
 
   if (error || !article) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            {error === 'Article not found' ? 'Článek nenalezen' : 'Chyba při načítání'}
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="w-20 h-20 bg-slate-100 rounded-[2rem] flex items-center justify-center mx-auto mb-8">
+            <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">
+            {error === 'not-found' ? 'Článek nenalezen' : 'Chyba při načítání'}
           </h1>
-          <p className="text-gray-600 mb-8">
-            {error === 'Article not found'
+          <p className="text-slate-600 font-medium mb-10">
+            {error === 'not-found'
               ? 'Požadovaný článek neexistuje nebo byl smazán.'
-              : 'Při načítání článku došlo k chybě.'}
+              : 'Při načítání článku došlo k chybě. Zkuste to prosím znovu.'}
           </p>
-          <Link
-            href="/pages/clanky"
-            className="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition-colors"
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 bg-[#0070af] text-white px-8 py-4 rounded-2xl font-black text-sm hover:bg-[#005a8c] transition-all shadow-lg shadow-[#0070af]/20"
           >
-            Zpět na články
-          </Link>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+            </svg>
+            Zpět
+          </button>
         </div>
       </div>
     );
   }
 
-  const categoryInfo = categoryLabels[article.category] || { label: article.category, color: 'bg-gray-100 text-gray-800' };
+  const categoryInfo = categoryLabels[article.category] || { label: article.category, color: 'bg-slate-100 text-slate-700' };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Breadcrumb */}
-        <nav className="mb-6">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <Link href="/pages/clanky" className="hover:text-red-600">
-              Články
-            </Link>
-            <span>›</span>
-            <span className="text-gray-900">{article.title}</span>
-          </div>
-        </nav>
+    <div className="min-h-screen bg-white">
+      {/* Page Header */}
+      <div className="relative py-20 bg-slate-50 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_30%_20%,_rgba(0,112,175,0.05)_0%,_transparent_50%)] pointer-events-none"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Back button */}
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 text-slate-600 hover:text-[#0070af] font-black text-sm uppercase tracking-widest transition-colors mb-10 group"
+          >
+            <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+            </svg>
+            Zpět na články
+          </button>
 
-        {/* Article Header */}
-        <header className="mb-8">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
-                {article.title}
-              </h1>
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                <span>
-                  Publikováno {new Date(article.publishedAt).toLocaleDateString('cs-CZ', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </span>
-                {article.author && (
-                  <span>• Autor: {article.author.name}</span>
-                )}
-                <span>• {article.views} zobrazení</span>
-              </div>
-            </div>
-            <span className={`px-3 py-1 rounded-full text-sm ${categoryInfo.color} flex-shrink-0 ml-4`}>
+          <div className="flex items-center gap-3 mb-6">
+            <span className={`px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest ${categoryInfo.color}`}>
               {categoryInfo.label}
             </span>
+            <span className="text-slate-500 font-bold text-sm">
+              {new Date(article.publishedAt).toLocaleDateString('cs-CZ', {
+                year: 'numeric', month: 'long', day: 'numeric'
+              })}
+            </span>
+            {article.author?.name && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="text-slate-500 font-bold text-sm">{article.author.name}</span>
+              </>
+            )}
           </div>
 
-          {/* Tags */}
-          {article.tags && article.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {article.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm"
-                >
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight max-w-4xl">
+            {article.title}
+          </h1>
+
+          {article.tags?.length > 0 && (
+            <div className="flex flex-wrap gap-3 mt-6">
+              {article.tags.map((tag, i) => (
+                <span key={i} className="text-[#0070af]/70 font-black text-xs uppercase tracking-wider">
                   #{tag}
                 </span>
               ))}
             </div>
           )}
+        </div>
+      </div>
 
-          {/* Featured Image */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-3xl mx-auto">
+          {/* Featured image */}
           {article.featuredImage && (
-            <div className="mb-8">
+            <div className="mb-12 overflow-hidden rounded-[2.5rem] shadow-2xl shadow-slate-200/60">
               <img
                 src={article.featuredImage}
                 alt={article.title}
-                className="w-full h-64 object-cover rounded-lg shadow-sm"
+                className="w-full h-72 md:h-96 object-cover"
               />
             </div>
           )}
-        </header>
 
-        {/* Article Content */}
-        <article className="prose max-w-none">
+          {/* Excerpt */}
+          {article.excerpt && (
+            <p className="text-xl text-slate-600 leading-relaxed font-medium mb-10 pb-10 border-b border-slate-100">
+              {article.excerpt}
+            </p>
+          )}
+
+          {/* Content */}
           <div
-            className="text-lg leading-relaxed text-gray-800"
+            className="article-content"
             dangerouslySetInnerHTML={{ __html: article.content.replace(/\n/g, '<br>') }}
           />
-        </article>
 
-        {/* Article Footer */}
-        <footer className="mt-12 pt-8 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button className="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                </svg>
-                <span>{article.likes} líbí se</span>
-              </button>
+          {/* Footer */}
+          <div className="mt-16 pt-10 border-t border-slate-100 flex items-center justify-between gap-4">
+            <div className="text-slate-500 font-bold text-sm">
+              {article.views} zobrazení
             </div>
-
-            <Link
-              href="/pages/clanky"
-              className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition-colors"
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-sm hover:bg-slate-700 transition-all shadow-lg group"
             >
+              <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+              </svg>
               Zpět na články
-            </Link>
-          </div>
-        </footer>
-
-        {/* Contact Information */}
-        <div className="mt-12 bg-gray-50 p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-3">Chcete být informováni?</h3>
-          <p className="text-gray-700 mb-4">
-            Sledujte naše aktivity na sociálních sítích nebo nás kontaktujte přímo:
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <a
-              href="https://www.facebook.com/profile.php?id=61573658450126"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-center"
-            >
-              Facebook
-            </a>
-            <a
-              href="https://www.instagram.com/ldtbela"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition-colors text-center"
-            >
-              Instagram
-            </a>
-            <a
-              href="mailto:mareseznam@seznam.cz"
-              className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors text-center"
-            >
-              Email
-            </a>
+            </button>
           </div>
         </div>
       </div>
