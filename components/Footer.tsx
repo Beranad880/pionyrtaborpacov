@@ -95,7 +95,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-slate-300 mt-8 pt-6 flex flex-col items-center gap-4 text-sm text-slate-600">
+        <div className="mt-8 pt-6 flex flex-col items-center gap-4 text-sm text-slate-600">
           <div className="flex items-end justify-center gap-8">
             <div className="flex flex-col items-center w-40">
               <p className="text-sm text-slate-600 mb-3">Podpořil</p>
@@ -124,6 +124,7 @@ export default function Footer() {
               </a>
             </div>
           </div>
+          <div className="border-t border-slate-300 w-full" />
           <div className="flex justify-between w-full">
             <p>&copy; 2026 {siteInfo.title}. Všechna práva vyhrazena.</p>
             <p>Aktualizace 2026</p>
