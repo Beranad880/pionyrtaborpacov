@@ -43,10 +43,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="cs">
-      <body className={`${inter.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col bg-white`} suppressHydrationWarning>
         <Header />
-        {children}
+        <main className="flex-grow">
+          {children}
+        </main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );

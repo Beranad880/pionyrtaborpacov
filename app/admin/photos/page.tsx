@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useToast } from '@/components/Toast';
 
 interface PhotoGallery {
   _id: string;
@@ -33,19 +34,9 @@ interface GalleryFormData {
   isPublic: boolean;
 }
 
-const facilityNames: Record<string, string> = {
-  kitchen: 'Kuchyně',
-  wifi: 'Wi-Fi',
-  fireplace: 'Krb',
-  parking: 'Parkování',
-  heating: 'Topení',
-  electricity: 'Elektřina',
-  water: 'Voda',
-  outdoor_grill: 'Venkovní gril',
-  sports_equipment: 'Sportovní vybavení'
-};
 
 export default function PhotosAdminPage() {
+  const { toast } = useToast();
   const [galleries, setGalleries] = useState<PhotoGallery[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGallery, setSelectedGallery] = useState<PhotoGallery | null>(null);
@@ -158,7 +149,7 @@ export default function PhotosAdminPage() {
     e.preventDefault();
 
     if (!formData.title || !formData.description || !formData.event || !formData.date) {
-      alert('Vyplňte všechna povinná pole');
+      toast('Vyplňte všechna povinná pole', 'error');
       return;
     }
 
@@ -183,12 +174,13 @@ export default function PhotosAdminPage() {
         setShowAddForm(false);
         setFormData({ title: '', description: '', event: '', date: '', isPublic: true });
         setPendingPhotos([]);
+        toast('Galerie byla úspěšně vytvořena', 'success');
       } else {
-        alert(`Chyba: ${result.message}`);
+        toast(result.message || 'Chyba při vytváření galerie', 'error');
       }
     } catch (error) {
       console.error('Error creating gallery:', error);
-      alert('Chyba při vytváření galerie');
+      toast('Chyba při vytváření galerie', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -234,12 +226,13 @@ export default function PhotosAdminPage() {
       if (result.success) {
         setSelectedGallery({ ...selectedGallery, photos: newPhotos });
         fetchGalleries();
+        toast('Fotky byly přidány', 'success');
       } else {
-        alert(`Chyba: ${result.message}`);
+        toast(result.message || 'Chyba při přidávání fotek', 'error');
       }
     } catch (error) {
       console.error('Error adding photos:', error);
-      alert('Chyba při přidávání fotek');
+      toast('Chyba při přidávání fotek', 'error');
     } finally {
       setUploadingPhotos(false);
       if (addPhotosInputRef.current) {
@@ -269,11 +262,11 @@ export default function PhotosAdminPage() {
           setSelectedGallery({ ...selectedGallery, isPublic: !selectedGallery.isPublic });
         }
       } else {
-        alert(`Chyba: ${result.message}`);
+        toast(result.message || 'Chyba při aktualizaci galerie', 'error');
       }
     } catch (error) {
       console.error('Error updating gallery:', error);
-      alert('Chyba při aktualizaci galerie');
+      toast('Chyba při aktualizaci galerie', 'error');
     }
   };
 
@@ -290,12 +283,13 @@ export default function PhotosAdminPage() {
       if (result.success) {
         setGalleries(prev => prev.filter(g => g._id !== id));
         setSelectedGallery(null);
+        toast('Galerie byla smazána', 'success');
       } else {
-        alert(`Chyba: ${result.message}`);
+        toast(result.message || 'Chyba při mazání galerie', 'error');
       }
     } catch (error) {
       console.error('Error deleting gallery:', error);
-      alert('Chyba při mazání galerie');
+      toast('Chyba při mazání galerie', 'error');
     }
   };
 
@@ -323,12 +317,13 @@ export default function PhotosAdminPage() {
         if (selectedGallery?._id === galleryId) {
           setSelectedGallery({ ...selectedGallery, photos: updatedPhotos });
         }
+        toast('Fotka byla smazána', 'success');
       } else {
-        alert(`Chyba: ${result.message}`);
+        toast(result.message || 'Chyba při mazání fotky', 'error');
       }
     } catch (error) {
       console.error('Error deleting photo:', error);
-      alert('Chyba při mazání fotky');
+      toast('Chyba při mazání fotky', 'error');
     }
   };
 

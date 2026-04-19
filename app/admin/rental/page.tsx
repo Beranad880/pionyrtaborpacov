@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
 import { IRental } from '@/models/Rental';
 import RentalForm from '@/components/RentalForm';
 
@@ -29,6 +30,7 @@ export default function RentalsAdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchRentals();
@@ -73,13 +75,14 @@ export default function RentalsAdminPage() {
         fetchRentals();
         setShowForm(false);
         setSelectedRental(null);
+        toast('Pronájem byl úspěšně uložen', 'success');
       } else {
         const res = await response.json();
-        alert(res.message || 'Chyba při ukládání pronájmu');
+        toast(res.message || 'Chyba při ukládání pronájmu', 'error');
       }
     } catch (error) {
       console.error('Error saving rental:', error);
-      alert('Chyba při ukládání pronájmu');
+      toast('Chyba při ukládání pronájmu', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -96,12 +99,13 @@ export default function RentalsAdminPage() {
     
           if (response.ok) {
             fetchRentals();
+            toast('Pronájem byl smazán', 'success');
           } else {
-            alert('Chyba při mazání pronájmu');
+            toast('Chyba při mazání pronájmu', 'error');
           }
         } catch (error) {
           console.error('Error deleting rental:', error);
-          alert('Chyba při mazání pronájmu');
+          toast('Chyba při mazání pronájmu', 'error');
         } finally {
           setIsProcessing(false);
         }

@@ -11,6 +11,36 @@ export function dbError(error: unknown, context?: string): NextResponse {
   );
 }
 
-export function validationErrors(errors: string[]): NextResponse {
-  return NextResponse.json({ success: false, message: errors.join(', ') }, { status: 400 });
+interface MongooseValidationError {
+  name: 'ValidationError';
+  errors: Record<string, { message: string }>;
+}
+
+/** Type guard pro Mongoose ValidationError */
+export function isValidationError(error: unknown): error is MongooseValidationError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as MongooseValidationError).name === 'ValidationError' &&
+    typeof (error as MongooseValidationError).errors === 'object'
+  );
+}
+
+/** Standardní response pro Mongoose validační chyby */
+export function validationError(error: MongooseValidationError): NextResponse {
+  const errors = Object.values(error.errors).map(e => e.message);
+  return NextResponse.json(
+    { success: false, message: 'Validace selhala', errors },
+    { status: 400 }
+  );
+}
+
+/** Type guard pro MongoDB duplicate key error (kód 11000) */
+export function isDuplicateKeyError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code: unknown }).code === 11000
+  );
 }

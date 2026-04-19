@@ -4,7 +4,7 @@ import Rental, { IRental } from '@/models/Rental';
 import RentalRequest from '@/models/RentalRequest';
 import { requireAuth } from '@/lib/auth-middleware';
 import { validateDateRange } from '@/lib/validation';
-import { dbError } from '@/lib/api-response';
+import { dbError, isValidationError, validationError } from '@/lib/api-response';
 
 // GET - Načíst konkrétní pronájem
 export async function GET(
@@ -104,11 +104,8 @@ export async function PUT(
       data: rental
     });
 
-  } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json({ success: false, message: 'Validace selhala', errors }, { status: 400 });
-    }
+  } catch (error: unknown) {
+    if (isValidationError(error)) return validationError(error);
     return dbError(error, 'PUT /api/admin/rental/[id] error:');
   }
 }

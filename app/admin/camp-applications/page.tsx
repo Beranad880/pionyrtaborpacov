@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
+import { STATUS_LABELS, STATUS_COLORS, GRADE_LABELS } from '@/lib/labels';
 
 interface CampApplication {
   _id: string;
@@ -41,47 +43,6 @@ interface Stats {
   total: number;
 }
 
-interface CampInfoSettings {
-  theme: string;
-  dates: string;
-  price: number;
-  location: string;
-  capacity: number;
-  ageRange: string;
-}
-
-const statusNames: Record<string, string> = {
-  pending: 'Čekající',
-  approved: 'Schváleno',
-  rejected: 'Odmítnuto'
-};
-
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  approved: 'bg-green-100 text-green-800 border-green-200',
-  rejected: 'bg-red-100 text-red-800 border-red-200'
-};
-
-const gradeNames: Record<string, string> = {
-  '0': '1. třída',
-  '1': '2. třída',
-  '2': '3. třída',
-  '3': '4. třída',
-  '4': '5. třída',
-  '5': '6. třída',
-  '6': '7. třída',
-  '7': '8. třída',
-  '8': '9. třída'
-};
-
-const defaultCampInfo: CampInfoSettings = {
-  theme: "Dobrodružství v přírodě",
-  dates: "15. - 25. července 2025",
-  price: 8500,
-  location: "Hájenka Bělá",
-  capacity: 30,
-  ageRange: "6-15 let",
-};
 
 export default function CampApplicationsAdmin() {
   const [applications, setApplications] = useState<CampApplication[]>([]);
@@ -97,39 +58,11 @@ export default function CampApplicationsAdmin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
-
-  // Camp info settings
-  const [campInfo, setCampInfo] = useState<CampInfoSettings>(defaultCampInfo);
-  const [showSettings, setShowSettings] = useState(false);
-  const [isSavingSettings, setIsSavingSettings] = useState(false);
-  const [settingsSaved, setSettingsSaved] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchApplications();
   }, [filter, searchTerm, currentPage]);
-
-  useEffect(() => {
-    fetch('/api/content?page=campInfo')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.success && data.data) setCampInfo({ ...defaultCampInfo, ...data.data }); })
-      .catch(() => {});
-  }, []);
-
-  const saveCampInfo = async () => {
-    setIsSavingSettings(true);
-    try {
-      const response = await fetch('/api/content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page: 'campInfo', data: campInfo }),
-      });
-      if (response.ok) {
-        setSettingsSaved(true);
-        setTimeout(() => setSettingsSaved(false), 3000);
-      }
-    } catch {}
-    finally { setIsSavingSettings(false); }
-  };
 
   const fetchApplications = async () => {
     try {
@@ -179,12 +112,13 @@ export default function CampApplicationsAdmin() {
         setShowModal(false);
         setSelectedApplication(null);
         setAdminNotes('');
+        toast('Přihláška byla úspěšně aktualizována', 'success');
       } else {
-        alert('Chyba při aktualizaci přihlášky');
+        toast('Chyba při aktualizaci přihlášky', 'error');
       }
     } catch (error) {
       console.error('Error updating camp application:', error);
-      alert('Chyba při aktualizaci přihlášky');
+      toast('Chyba při aktualizaci přihlášky', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -202,12 +136,13 @@ export default function CampApplicationsAdmin() {
         fetchApplications();
         setShowDetailModal(false);
         setSelectedApplication(null);
+        toast('Přihláška byla smazána', 'success');
       } else {
-        alert('Chyba při mazání přihlášky');
+        toast('Chyba při mazání přihlášky', 'error');
       }
     } catch (error) {
       console.error('Error deleting camp application:', error);
-      alert('Chyba při mazání přihlášky');
+      toast('Chyba při mazání přihlášky', 'error');
     }
   };
 
@@ -262,96 +197,6 @@ export default function CampApplicationsAdmin() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Camp Info Settings */}
-        <div className="bg-white rounded-lg shadow mb-6">
-          <button
-            onClick={() => setShowSettings(v => !v)}
-            className="w-full flex items-center justify-between p-4 text-left"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-lg">⚙️</span>
-              <span className="font-semibold text-gray-900">Nastavení tábora</span>
-              <span className="text-sm text-gray-500">(zobrazuje se na veřejné stránce přihlášek)</span>
-            </div>
-            <svg className={`w-5 h-5 text-gray-500 transition-transform ${showSettings ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          {showSettings && (
-            <div className="px-4 pb-4 border-t border-gray-100 pt-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Téma tábora</label>
-                  <input
-                    type="text"
-                    value={campInfo.theme}
-                    onChange={e => setCampInfo(p => ({ ...p, theme: e.target.value }))}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Termín</label>
-                  <input
-                    type="text"
-                    value={campInfo.dates}
-                    onChange={e => setCampInfo(p => ({ ...p, dates: e.target.value }))}
-                    placeholder="např. 15. - 25. července 2025"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Místo konání</label>
-                  <input
-                    type="text"
-                    value={campInfo.location}
-                    onChange={e => setCampInfo(p => ({ ...p, location: e.target.value }))}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Věkové rozmezí</label>
-                  <input
-                    type="text"
-                    value={campInfo.ageRange}
-                    onChange={e => setCampInfo(p => ({ ...p, ageRange: e.target.value }))}
-                    placeholder="např. 6-15 let"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Kapacita (počet dětí)</label>
-                  <input
-                    type="number"
-                    value={campInfo.capacity}
-                    onChange={e => setCampInfo(p => ({ ...p, capacity: parseInt(e.target.value) || 0 }))}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Cena (Kč)</label>
-                  <input
-                    type="number"
-                    value={campInfo.price}
-                    onChange={e => setCampInfo(p => ({ ...p, price: parseInt(e.target.value) || 0 }))}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-3 mt-4">
-                <button
-                  onClick={saveCampInfo}
-                  disabled={isSavingSettings}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {isSavingSettings ? 'Ukládám...' : 'Uložit'}
-                </button>
-                {settingsSaved && <span className="text-green-600 text-sm font-medium">✓ Uloženo</span>}
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -384,7 +229,7 @@ export default function CampApplicationsAdmin() {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => (
                 <button
                   key={status}
@@ -395,9 +240,15 @@ export default function CampApplicationsAdmin() {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  {status === 'all' ? 'Všechny' : statusNames[status]}
+                  {status === 'all' ? 'Všechny' : STATUS_LABELS[status]}
                 </button>
               ))}
+              <a
+                href={`/api/admin/camp-applications/export?status=${filter}${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ''}`}
+                className="px-4 py-2 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition-colors"
+              >
+                ↓ Exportovat CSV
+              </a>
             </div>
           </div>
         </div>
@@ -421,14 +272,14 @@ export default function CampApplicationsAdmin() {
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">{application.participantName}</h3>
                       <p className="text-gray-600">
-                        {gradeNames[application.grade]} • Věk: {calculateAge(application.dateOfBirth)} let
+                        {GRADE_LABELS[application.grade]} • Věk: {calculateAge(application.dateOfBirth)} let
                       </p>
                       <p className="text-gray-600">{application.guardianName}</p>
                       <p className="text-gray-600">{application.guardianEmail} • {application.guardianPhone}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${statusColors[application.status]}`}>
-                        {statusNames[application.status]}
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${STATUS_COLORS[application.status]}`}>
+                        {STATUS_LABELS[application.status]}
                       </span>
                     </div>
                   </div>
@@ -531,7 +382,7 @@ export default function CampApplicationsAdmin() {
 
               <div className="mb-4">
                 <h4 className="font-medium text-gray-900 mb-2">{selectedApplication.participantName}</h4>
-                <p className="text-sm text-gray-600">{gradeNames[selectedApplication.grade]}</p>
+                <p className="text-sm text-gray-600">{GRADE_LABELS[selectedApplication.grade]}</p>
                 <p className="text-sm text-gray-600">Rodič: {selectedApplication.guardianName}</p>
                 <p className="text-sm text-gray-600">Email: {selectedApplication.guardianEmail}</p>
               </div>
@@ -590,7 +441,7 @@ export default function CampApplicationsAdmin() {
                   <h4 className="font-medium text-gray-900 mb-2">Údaje o účastníkovi</h4>
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                     <p><span className="font-medium">Jméno:</span> {selectedApplication.participantName}</p>
-                    <p><span className="font-medium">Třída:</span> {gradeNames[selectedApplication.grade]}</p>
+                    <p><span className="font-medium">Třída:</span> {GRADE_LABELS[selectedApplication.grade]}</p>
                     <p><span className="font-medium">Datum narození:</span> {selectedApplication.dateOfBirth} (Věk: {calculateAge(selectedApplication.dateOfBirth)} let)</p>
                     <p><span className="font-medium">Rodné číslo:</span> {selectedApplication.birthNumber}</p>
                     <p><span className="font-medium">Adresa:</span> {selectedApplication.address.street}, {selectedApplication.address.city}</p>
@@ -639,8 +490,8 @@ export default function CampApplicationsAdmin() {
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                     <p>
                       <span className="font-medium">Status:</span>
-                      <span className={`ml-2 px-2 py-1 rounded text-sm ${statusColors[selectedApplication.status]}`}>
-                        {statusNames[selectedApplication.status]}
+                      <span className={`ml-2 px-2 py-1 rounded text-sm ${STATUS_COLORS[selectedApplication.status]}`}>
+                        {STATUS_LABELS[selectedApplication.status]}
                       </span>
                     </p>
                     <p><span className="font-medium">Vytvořeno:</span> {formatDateTime(selectedApplication.createdAt)}</p>

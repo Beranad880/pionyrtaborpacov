@@ -1,4 +1,9 @@
-/** Jednoduchý in-memory rate limiter. V multi-instance prostředí použijte Redis. */
+/**
+ * In-memory rate limiter. Na Vercel serverless nefunguje across instances —
+ * každá funkce má vlastní paměť. Pro produkci s vyšší zátěží přejděte na
+ * Upstash Redis: npm i @upstash/ratelimit @upstash/redis
+ * (https://vercel.com/guides/rate-limiting-edge-middleware-vercel-kv)
+ */
 
 interface Entry {
   count: number;

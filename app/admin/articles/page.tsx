@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ArticleForm from '@/components/ArticleForm';
+import { useToast } from '@/components/Toast';
 
 interface Article {
   _id: string;
@@ -246,6 +247,7 @@ function EditArticleForm({ article, onSave, onCancel }: {
 }
 
 export default function ArticlesAdminPage() {
+  const { toast } = useToast();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
@@ -253,73 +255,6 @@ export default function ArticlesAdminPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
-
-  // Sample articles for demonstration
-  const sampleArticles: Article[] = [
-    {
-      _id: '1',
-      title: 'Přípravy na zimní tábor 2024',
-      slug: 'pripravy-na-zimni-tabor-2024',
-      excerpt: 'Blíží se termín našeho tradičního zimního tábora. Letos se koná od 27. prosince 2024 do 2. ledna 2025 na Hájence Bělá.',
-      content: '<p>Blíží se termín našeho tradičního zimního tábora a přípravy jsou v plném proudu! Letos se zimní tábor koná od <strong>27. prosince 2024 do 2. ledna 2025</strong> na naší oblíbené Hájence Bělá.</p><h2>Program tábora</h2><p>Připravili jsme pro vás bohatý program plný her, sportovních aktivit a táborového dobrodružství...</p>',
-      author: 'Vedení skupiny',
-      category: 'announcement',
-      tags: ['tábor', 'zima', '2024'],
-      status: 'published',
-      publishedAt: '2024-11-15',
-      views: 124,
-      likes: 8,
-      createdAt: '2024-11-15',
-      updatedAt: '2024-11-15'
-    },
-    {
-      _id: '2',
-      title: 'Úspěšný letní tábor 2024',
-      slug: 'uspesny-letni-tabor-2024',
-      excerpt: 'Letní tábor 2024 na Hájence Bělá se vydařil na výbornou. Účastnilo se ho 28 dětí a měli jsme krásné počasí po celou dobu.',
-      content: '<p>Letní tábor 2024 na Hájence Bělá se vydařil na výbornou! Od 15. do 29. července se ho účastnilo <strong>28 dětí</strong> ve věku 7-15 let...</p>',
-      author: 'Vedení skupiny',
-      category: 'event-report',
-      tags: ['tábor', 'léto', '2024', 'reportáž'],
-      status: 'published',
-      publishedAt: '2024-08-15',
-      views: 256,
-      likes: 15,
-      createdAt: '2024-08-15',
-      updatedAt: '2024-08-15'
-    },
-    {
-      _id: '3',
-      title: 'Nový článek (koncept)',
-      slug: 'novy-clanek-koncept',
-      excerpt: 'Toto je koncept nového článku, který ještě není publikován.',
-      content: '<p>Obsah článku v konceptu...</p>',
-      author: 'Jan Novák',
-      category: 'news',
-      tags: ['koncept'],
-      status: 'draft',
-      views: 0,
-      likes: 0,
-      createdAt: '2024-12-05',
-      updatedAt: '2024-12-05'
-    },
-    {
-      _id: '4',
-      title: 'Starý archivovaný článek',
-      slug: 'stary-archivovany-clanek',
-      excerpt: 'Tento článek byl archivován a není již viditelný na webu.',
-      content: '<p>Archivovaný obsah...</p>',
-      author: 'Marie Svobodová',
-      category: 'general',
-      tags: ['archiv'],
-      status: 'archived',
-      publishedAt: '2023-01-01',
-      views: 89,
-      likes: 3,
-      createdAt: '2023-01-01',
-      updatedAt: '2024-01-01'
-    }
-  ];
 
   useEffect(() => {
     fetchArticles();
@@ -337,13 +272,11 @@ export default function ArticlesAdminPage() {
         setArticles(result.data.articles);
       } else {
         console.error('Failed to fetch articles:', result.message);
-        // Fallback to sample data
-        setArticles(sampleArticles);
+        toast('Nepodařilo se načíst články', 'error');
       }
     } catch (error) {
       console.error('Error fetching articles:', error);
-      // Fallback to sample data
-      setArticles(sampleArticles);
+      toast('Chyba při načítání článků', 'error');
     } finally {
       setLoading(false);
     }
@@ -382,11 +315,11 @@ export default function ArticlesAdminPage() {
           )
         );
       } else {
-        alert(`Chyba: ${result.message}`);
+        toast(result.message || 'Chyba při aktualizaci článku', 'error');
       }
     } catch (error) {
       console.error('Error updating article:', error);
-      alert('Chyba při aktualizaci článku');
+      toast('Chyba při aktualizaci článku', 'error');
     }
   };
 
@@ -403,12 +336,13 @@ export default function ArticlesAdminPage() {
         if (result.success) {
           setArticles(prev => prev.filter(article => article._id !== id));
           setSelectedArticle(null);
+          toast('Článek byl smazán', 'success');
         } else {
-          alert(`Chyba: ${result.message}`);
+          toast(result.message || 'Chyba při mazání článku', 'error');
         }
       } catch (error) {
         console.error('Error deleting article:', error);
-        alert('Chyba při mazání článku');
+        toast('Chyba při mazání článku', 'error');
       }
     }
   };

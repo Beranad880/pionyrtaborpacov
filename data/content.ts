@@ -97,11 +97,11 @@ export const pageContent = {
   about: {
     title: "Kdo jsme?",
     subtitle: "Pionýr je demokratický, dobrovolný, samostatný a nezávislý spolek dětí, mládeže a dospělých. Předmětem hlavní činnosti Pionýra je veřejně prospěšná činnost.",
-    content: [
-      "Být pionýrem může zkusit každý… Znamená to hlavně setkávání s kamarády a společné hledání, poznávání, objevování nových světů i vlastně úplně obyčejných věcí.",
-      "Pionýři chodí na výpravy, sportují, hrají deskovky, jezdí na kolech, soutěží, zpívají a hrají na kytaru, malují, natáčejí videa… – poznávají život ze všech možných stránek, spolupracují, nebojí se těžkostí a problémů, snaží se s nimi vyrovnávat čestně, hlásí se ke svým úkolům i průšvihům, nemají své slovo za cár papíru, překonávají bariéry nabídkou příležitostí…",
-      "Být pionýrem přináší přátele, zážitky, romantiku a dobrodružství i v tzv. všedním životě. Ideály Pionýra nejsou příkazy, ale mety. K jejich dosahování je potřebná chuť i vůle, rozvoj sebe sama i týmového ducha."
-    ]
+   content: [
+  "Být pionýrem může zkusit každý. A co to vlastně znamená? Hlavně setkávání s kamarády, společné hledání, poznávání a objevování – nových světů i těch úplně obyčejných věcí.",
+  "Pionýři chodí na výpravy, sportují, hrají deskovky, jezdí na kolech, soutěží, zpívají a hrají na kytaru, malují, natáčejí videa. Poznávají život ze všech možných stran, učí se spolupracovat, nebojí se překážek a snaží se s nimi vyrovnávat čestně. Hlásí se ke svým úkolům i průšvihům, drží slovo a překonávají hranice tím, že otevírají příležitosti tam, kde by jinak chyběly.",
+  "Být pionýrem přináší přátele, zážitky, romantiku i dobrodružství – a to i v tom takzvaném všedním životě. Pionýrské ideály nejsou příkazy, ale mety. Dosáhnout jich vyžaduje chuť a vůli, rozvoj sebe sama i týmového ducha."
+]
   },
 
   pioneer: {
@@ -198,9 +198,10 @@ export const allPagesContent: PageContent = {
     ],
     location: {
       title: "Poloha a dostupnost",
-      description: "Hájenka Bělá se nachází v klidné přírodní lokalitě s dobrou dostupností jak automobilem, tak veřejnou dopravou. Okolí nabízí mnoho možností pro turistiku a poznávání přírody.",
-      gps: "49.4835, 15.2611",
-      nearestTown: "Pacov (5 km)"
+      description: "Hájenka Bělá se nachází v klidné přírodní lokalitě. Okolí nabízí mnoho možností pro turistiku a poznávání přírody.",
+      address: "Červená Řečice 27, Červená Řečice, 394 46, Pelhřimov",
+      gps: "49.5045563N, 15.1379789E",
+      nearestTown: "Červená Řečice (1 km)"
     },
     images: {
       exterior: "/images/hajenka-exterior.jpg"

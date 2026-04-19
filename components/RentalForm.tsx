@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { IRental } from '@/models/Rental';
+import { FACILITY_OPTIONS } from '@/lib/labels';
 
 interface RentalFormProps {
   rental?: IRental | null;
@@ -10,17 +11,6 @@ interface RentalFormProps {
   isProcessing: boolean;
 }
 
-const facilityOptions = [
-    { id: 'kitchen', label: 'Kuchyně' },
-    { id: 'wifi', label: 'Wi-Fi' },
-    { id: 'fireplace', label: 'Krb' },
-    { id: 'parking', label: 'Parkování' },
-    { id: 'heating', label: 'Topení' },
-    { id: 'electricity', label: 'Elektřina' },
-    { id: 'water', label: 'Voda' },
-    { id: 'outdoor_grill', label: 'Venkovní gril' },
-    { id: 'sports_equipment', label: 'Sportovní vybavení' }
-];
 
 const getInitialData = (rental?: IRental | null): any => {
     if (rental) {
@@ -86,7 +76,7 @@ export default function RentalForm({ rental, onClose, onSave, isProcessing }: Re
                     <button
                     onClick={onClose}
                     type="button"
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-slate-800"
                     >
                     ✕
                     </button>
@@ -96,31 +86,31 @@ export default function RentalForm({ rental, onClose, onSave, isProcessing }: Re
                     {/* Column 1 */}
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Jméno a příjmení</label>
+                            <label className="block text-sm font-medium text-slate-900">Jméno a příjmení</label>
                             <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Email</label>
+                            <label className="block text-sm font-medium text-slate-900">Email</label>
                             <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Telefon</label>
+                            <label className="block text-sm font-medium text-slate-900">Telefon</label>
                             <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Organizace</label>
+                            <label className="block text-sm font-medium text-slate-900">Organizace</label>
                             <input type="text" name="organization" value={formData.organization} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Účel pobytu</label>
+                            <label className="block text-sm font-medium text-slate-900">Účel pobytu</label>
                             <input type="text" name="purpose" value={formData.purpose} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Zpráva od klienta</label>
+                            <label className="block text-sm font-medium text-slate-900">Zpráva od klienta</label>
                             <textarea name="message" value={formData.message} onChange={handleInputChange} rows={3} className="w-full mt-1 p-2 border rounded" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Poznámky administrátora</label>
+                            <label className="block text-sm font-medium text-slate-900">Poznámky administrátora</label>
                             <textarea name="adminNotes" value={formData.adminNotes} onChange={handleInputChange} rows={3} className="w-full mt-1 p-2 border rounded" />
                         </div>
                     </div>
@@ -129,26 +119,26 @@ export default function RentalForm({ rental, onClose, onSave, isProcessing }: Re
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Datum příjezdu</label>
+                                <label className="block text-sm font-medium text-slate-900">Datum příjezdu</label>
                                 <input type="date" name="startDate" value={formData.startDate as unknown as string} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Datum odjezdu</label>
+                                <label className="block text-sm font-medium text-slate-900">Datum odjezdu</label>
                                 <input type="date" name="endDate" value={formData.endDate as unknown as string} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required />
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Počet hostů</label>
+                                <label className="block text-sm font-medium text-slate-900">Počet hostů</label>
                                 <input type="number" name="guestCount" value={formData.guestCount} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" required min="1"/>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Cena (Kč)</label>
+                                <label className="block text-sm font-medium text-slate-900">Cena (Kč)</label>
                                 <input type="number" name="price" value={formData.price} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded" min="0" />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Status</label>
+                            <label className="block text-sm font-medium text-slate-900">Status</label>
                             <select name="status" value={formData.status} onChange={handleInputChange} className="w-full mt-1 p-2 border rounded">
                                 <option value="confirmed">Potvrzeno</option>
                                 <option value="paid">Zaplaceno</option>
@@ -158,9 +148,9 @@ export default function RentalForm({ rental, onClose, onSave, isProcessing }: Re
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Vybavení</label>
+                            <label className="block text-sm font-medium text-slate-900">Vybavení</label>
                             <div className="mt-2 grid grid-cols-2 gap-2">
-                                {facilityOptions.map(facility => (
+                                {FACILITY_OPTIONS.map(facility => (
                                     <div key={facility.id} className="flex items-center">
                                     <input
                                         type="checkbox"
@@ -169,7 +159,7 @@ export default function RentalForm({ rental, onClose, onSave, isProcessing }: Re
                                         onChange={() => handleFacilityChange(facility.id)}
                                         className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
                                     />
-                                    <label htmlFor={`facility-${facility.id}`} className="ml-2 text-sm text-gray-600">
+                                    <label htmlFor={`facility-${facility.id}`} className="ml-2 text-sm text-slate-800">
                                         {facility.label}
                                     </label>
                                     </div>

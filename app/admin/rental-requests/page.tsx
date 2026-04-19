@@ -2,9 +2,9 @@
 
 import { useState, useEffect, type JSX } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
+import { STATUS_LABELS, STATUS_COLORS, FACILITY_LABELS, DAYS_CS, MONTHS_CS } from '@/lib/labels';
 
-const DAYS_CS = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
-const MONTHS_CS = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
 
 interface BlockedPeriod {
   _id: string;
@@ -33,29 +33,24 @@ interface RentalRequest {
   updatedAt: string;
 }
 
-const facilityNames: Record<string, string> = {
-  kitchen: 'Kuchyně',
-  wifi: 'Wi-Fi',
-  fireplace: 'Krb',
-  parking: 'Parkování',
-  heating: 'Topení',
-  electricity: 'Elektřina',
-  water: 'Voda',
-  outdoor_grill: 'Venkovní gril',
-  sports_equipment: 'Sportovní vybavení'
+interface RentalSettings {
+  pricePerDayShort: number;
+  pricePerDayWeek: number;
+  weekThreshold: number;
+  capacity: number;
+  minDays: number;
+  note: string;
+}
+
+const defaultRentalSettings: RentalSettings = {
+  pricePerDayShort: 1500,
+  pricePerDayWeek: 1200,
+  weekThreshold: 7,
+  capacity: 35,
+  minDays: 1,
+  note: 'Cena nezahrnuje energie',
 };
 
-const statusNames: Record<string, string> = {
-  pending: 'Čekající',
-  approved: 'Schváleno',
-  rejected: 'Odmítnuto'
-};
-
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  approved: 'bg-green-100 text-green-800 border-green-200',
-  rejected: 'bg-red-100 text-red-800 border-red-200'
-};
 
 export default function RentalRequestsAdmin() {
   const [requests, setRequests] = useState<RentalRequest[]>([]);
@@ -68,6 +63,13 @@ export default function RentalRequestsAdmin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
+  const { toast } = useToast();
+
+  // Nastavení pronájmu
+  const [rentalSettings, setRentalSettings] = useState<RentalSettings>(defaultRentalSettings);
+  const [showRentalSettings, setShowRentalSettings] = useState(false);
+  const [isSavingRental, setIsSavingRental] = useState(false);
+  const [rentalSaved, setRentalSaved] = useState(false);
 
   // Kalendář blokovaných termínů
   const [calendarDate, setCalendarDate] = useState(new Date());
@@ -78,7 +80,25 @@ export default function RentalRequestsAdmin() {
   const [blockLabel, setBlockLabel] = useState('');
   const [isSavingBlock, setIsSavingBlock] = useState(false);
 
-  useEffect(() => { fetchBlockedPeriods(); }, []);
+  useEffect(() => {
+    fetchBlockedPeriods();
+    fetch('/api/content?page=rentalSettings')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.success && data.data) setRentalSettings({ ...defaultRentalSettings, ...data.data }); })
+      .catch(() => {});
+  }, []);
+
+  const saveRentalSettings = async () => {
+    setIsSavingRental(true);
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: 'rentalSettings', data: rentalSettings }),
+      });
+      if (res.ok) { setRentalSaved(true); setTimeout(() => setRentalSaved(false), 3000); }
+    } finally { setIsSavingRental(false); }
+  };
 
   const fetchBlockedPeriods = async () => {
     try {
@@ -242,12 +262,13 @@ export default function RentalRequestsAdmin() {
         setShowModal(false);
         setSelectedRequest(null);
         setAdminNotes('');
+        toast('Žádost byla úspěšně aktualizována', 'success');
       } else {
-        alert('Chyba při aktualizaci žádosti');
+        toast('Chyba při aktualizaci žádosti', 'error');
       }
     } catch (error) {
       console.error('Error updating rental request:', error);
-      alert('Chyba při aktualizaci žádosti');
+      toast('Chyba při aktualizaci žádosti', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -266,12 +287,13 @@ export default function RentalRequestsAdmin() {
           setShowModal(false);
           setSelectedRequest(null);
         }
+        toast('Žádost byla smazána', 'success');
       } else {
-        alert('Chyba při mazání žádosti');
+        toast('Chyba při mazání žádosti', 'error');
       }
     } catch (error) {
       console.error('Error deleting rental request:', error);
-      alert('Chyba při mazání žádosti');
+      toast('Chyba při mazání žádosti', 'error');
     }
   };
 
@@ -315,6 +337,112 @@ export default function RentalRequestsAdmin() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+
+        {/* Nastavení pronájmu */}
+        <div className="bg-white rounded-xl shadow mb-6">
+          <button
+            onClick={() => setShowRentalSettings(v => !v)}
+            className="w-full flex items-center justify-between p-4 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg">💰</span>
+              <span className="font-semibold text-gray-900">Nastavení pronájmu</span>
+              <span className="text-sm text-gray-500">(ceny a podmínky zobrazené na stránce hájenky)</span>
+            </div>
+            <svg className={`w-5 h-5 text-gray-500 transition-transform ${showRentalSettings ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showRentalSettings && (
+            <div className="px-4 pb-4 border-t border-gray-100 pt-4">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cena za den — krátký pobyt (Kč)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.pricePerDayShort}
+                    onChange={e => setRentalSettings(p => ({ ...p, pricePerDayShort: parseInt(e.target.value) || 0 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cena za den — týden a déle (Kč)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.pricePerDayWeek}
+                    onChange={e => setRentalSettings(p => ({ ...p, pricePerDayWeek: parseInt(e.target.value) || 0 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Práh pro týdenní sazbu (dní)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.weekThreshold}
+                    onChange={e => setRentalSettings(p => ({ ...p, weekThreshold: parseInt(e.target.value) || 1 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Maximální kapacita (osob)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.capacity}
+                    onChange={e => setRentalSettings(p => ({ ...p, capacity: parseInt(e.target.value) || 1 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Minimální délka pobytu (dní)
+                  </label>
+                  <input
+                    type="number"
+                    value={rentalSettings.minDays}
+                    onChange={e => setRentalSettings(p => ({ ...p, minDays: parseInt(e.target.value) || 1 }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Poznámka k ceně
+                  </label>
+                  <input
+                    type="text"
+                    value={rentalSettings.note}
+                    onChange={e => setRentalSettings(p => ({ ...p, note: e.target.value }))}
+                    placeholder="např. Cena nezahrnuje energie"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                Orientační výpočet: pobyt do {rentalSettings.weekThreshold - 1} dní = <strong>{rentalSettings.pricePerDayShort.toLocaleString()} Kč/den</strong>,
+                od {rentalSettings.weekThreshold} dní = <strong>{rentalSettings.pricePerDayWeek.toLocaleString()} Kč/den</strong>.
+                Kapacita: <strong>{rentalSettings.capacity} osob</strong>.
+              </div>
+              <div className="flex items-center gap-3 mt-4">
+                <button
+                  onClick={saveRentalSettings}
+                  disabled={isSavingRental}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {isSavingRental ? 'Ukládám...' : 'Uložit'}
+                </button>
+                {rentalSaved && <span className="text-green-600 text-sm font-medium">✓ Uloženo</span>}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Kalendář blokovaných termínů */}
         <div className="bg-white rounded-xl shadow mb-8 p-6">
@@ -413,21 +541,29 @@ export default function RentalRequestsAdmin() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === status
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-              }`}
-            >
-              {status === 'all' ? 'Všechny' : statusNames[status]}
-            </button>
-          ))}
+        {/* Filters + Export */}
+        <div className="mb-6 flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex flex-wrap gap-2">
+            {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilter(status)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  filter === status
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                }`}
+              >
+                {status === 'all' ? 'Všechny' : STATUS_LABELS[status]}
+              </button>
+            ))}
+          </div>
+          <a
+            href={`/api/admin/rental-requests/export?status=${filter}`}
+            className="px-4 py-2 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition-colors"
+          >
+            ↓ Exportovat CSV
+          </a>
         </div>
 
         {/* Requests List */}
@@ -453,8 +589,8 @@ export default function RentalRequestsAdmin() {
                         <p className="text-gray-600">{request.organization}</p>
                       )}
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${statusColors[request.status]}`}>
-                      {statusNames[request.status]}
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${STATUS_COLORS[request.status]}`}>
+                      {STATUS_LABELS[request.status]}
                     </span>
                   </div>
 
@@ -478,7 +614,7 @@ export default function RentalRequestsAdmin() {
                               key={index}
                               className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
                             >
-                              {facilityNames[facility] || facility}
+                              {FACILITY_LABELS[facility] || facility}
                             </span>
                           ))}
                         </div>

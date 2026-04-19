@@ -30,6 +30,9 @@ yarn-error.log*
 # admin credentials (security)
 admin_credentials.json
 
+# datové zálohy
+data/content-backup-*.json
+
 
 
 # vercel
