@@ -1,46 +1,7 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import { allPagesContent } from '@/data/content';
 
 export default function PionyrseOddilyPage() {
-  const [content, setContent] = useState<typeof allPagesContent.pioneerGroups | null>(null);
-
-  useEffect(() => {
-    const fetchContent = async () => {
-      try {
-        const response = await fetch('/api/content?page=pioneerGroups');
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            setContent(result.data);
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('Failed to fetch content, using static data');
-      }
-      setContent(allPagesContent.pioneerGroups);
-    };
-
-    fetchContent();
-  }, []);
-
-  if (!content) {
-    return (
-      <div className="container mx-auto px-4 py-8 animate-pulse">
-        <div className="h-9 bg-slate-200 rounded w-64 mb-6"></div>
-        <div className="h-5 bg-slate-200 rounded w-full mb-2"></div>
-        <div className="h-5 bg-slate-200 rounded w-4/5 mb-8"></div>
-        {/* Skeleton grid - 2 sloupce */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-slate-100 p-6 rounded-lg h-64"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const content = allPagesContent.pioneerGroups;
 
   return (
     <div className="min-h-screen bg-white">
@@ -65,7 +26,7 @@ export default function PionyrseOddilyPage() {
             <div key={index} className="group relative bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-slate-200/60 border border-slate-100 flex flex-col transition-all duration-500 hover:-translate-y-2">
               {/* Top Accent Line */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1.5 bg-[#0070af] rounded-b-full opacity-20 group-hover:w-3/4 transition-all duration-500"></div>
-              
+
               <div className="flex justify-between items-start mb-8">
                 <h2 className="text-3xl font-black text-slate-900 tracking-tight group-hover:text-[#0070af] transition-colors">{group.name}</h2>
                 <div className="bg-[#0070af] text-white text-[10px] font-black px-4 py-2 rounded-2xl shadow-lg shadow-[#0070af]/20 uppercase tracking-widest">
@@ -103,7 +64,7 @@ export default function PionyrseOddilyPage() {
             <div className="relative bg-slate-900 rounded-[3rem] p-10 md:p-20 overflow-hidden">
               {/* Glow effect */}
               <div className="absolute top-0 right-0 w-96 h-96 bg-[#0070af] opacity-20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
                 <div>
                   <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight leading-tight">
@@ -113,7 +74,7 @@ export default function PionyrseOddilyPage() {
                     {content.joinInfo.description}
                   </p>
                 </div>
-                
+
                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-[2.5rem] shadow-2xl">
                   <h3 className="text-xl font-black text-white mb-8 flex items-center gap-3">
                     Kontakt na vedoucí

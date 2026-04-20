@@ -10,8 +10,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const adminPages = [
   { name: 'Přehled', href: '/admin', icon: '📊' },
-  { name: 'Úvodní stránka', href: '/admin/home', icon: '🏠' },
-  { name: 'Pionýrské oddíly', href: '/admin/pioneer-groups', icon: '👥' },
   { name: 'Žádosti o pronájem', href: '/admin/rental-requests', icon: '🏗️' },
   { name: 'Táborové přihlášky', href: '/admin/camp-applications', icon: '🏕️' },
   { name: 'Kalendář akcí', href: '/admin/calendar', icon: '📅' },

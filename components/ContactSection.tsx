@@ -1,52 +1,7 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import { siteData } from '@/data/content';
 
 export default function ContactSection() {
-  const [data, setData] = useState<typeof siteData | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/content?page=siteData');
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            setData(result.data);
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('Failed to fetch site data, using static data');
-      }
-      setData(siteData);
-    };
-
-    fetchData();
-  }, []);
-
-  if (!data) {
-    return (
-      <section className="py-16 bg-slate-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto animate-pulse">
-            <div className="text-center mb-12">
-              <div className="h-10 bg-slate-200 rounded-lg max-w-md mx-auto"></div>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div className="w-full h-96 bg-slate-200 rounded-xl"></div>
-              <div className="space-y-6">
-                <div className="h-16 bg-slate-200 rounded-lg"></div>
-                <div className="h-16 bg-slate-200 rounded-lg"></div>
-                <div className="h-16 bg-slate-200 rounded-lg"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const data = siteData;
 
   return (
     <section className="relative py-24 overflow-hidden">
@@ -117,7 +72,7 @@ export default function ContactSection() {
           {/* Dashboard Section */}
           <div className="bg-white rounded-[3rem] p-8 md:p-16 shadow-2xl shadow-slate-200/60 border border-slate-50 relative overflow-hidden">
              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-[#0070af] to-indigo-600"></div>
-             
+
              <div className="text-center mb-16">
                 <h3 className="text-3xl font-black text-slate-900 tracking-tight">Vedení & Statistiky</h3>
              </div>
@@ -139,7 +94,7 @@ export default function ContactSection() {
              {/* Age Stats Dashboard - LIGHT VERSION */}
              <div className="bg-[#0070af]/5 border border-[#0070af]/10 rounded-[2.5rem] p-8 md:p-12 text-slate-900 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#0070af]/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
-                
+
                 <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12">
                    {/* Total Circle */}
                    <div className="flex-shrink-0">

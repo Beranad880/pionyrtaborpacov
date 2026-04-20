@@ -1,57 +1,7 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import { pageContent } from '@/data/content';
 
 export default function AboutSection() {
-  const [content, setContent] = useState<typeof pageContent | null>(null);
-
-  useEffect(() => {
-    const fetchContent = async () => {
-      try {
-        const response = await fetch('/api/content?page=home');
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            setContent(result.data);
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('Failed to fetch content, using static data');
-      }
-      setContent(pageContent);
-    };
-
-    fetchContent();
-  }, []);
-
-  if (!content) {
-    return (
-      <section id="about-section" className="py-16 bg-gradient-to-b from-white to-slate-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto animate-pulse">
-            <div className="text-center mb-12">
-              <div className="h-10 bg-slate-200 rounded-lg max-w-sm mx-auto mb-6"></div>
-              <div className="h-6 bg-slate-200 rounded-lg max-w-2xl mx-auto mb-2"></div>
-              <div className="h-6 bg-slate-200 rounded-lg max-w-xl mx-auto"></div>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div className="space-y-4">
-                <div className="h-4 bg-slate-200 rounded w-full"></div>
-                <div className="h-4 bg-slate-200 rounded w-5/6"></div>
-                <div className="h-4 bg-slate-200 rounded w-full"></div>
-                <div className="h-4 bg-slate-200 rounded w-4/5"></div>
-              </div>
-              <div className="flex justify-center">
-                <div className="w-80 h-80 bg-slate-200 rounded-xl"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const content = pageContent;
 
   return (
     <section id="about-section" className="relative py-24 overflow-hidden">
@@ -64,14 +14,14 @@ export default function AboutSection() {
               KDO JSME
             </div>
             <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-none">
-              {content.about?.title || pageContent.about.title}
+              {content.about.title}
             </h2>
             <div className="relative max-w-4xl mx-auto group">
               <div className="absolute inset-0 bg-gradient-to-r from-[#0070af] to-[#005a8c] rounded-[2rem] rotate-1 opacity-10 group-hover:rotate-0 transition-transform duration-500"></div>
               <blockquote className="relative text-2xl md:text-3xl text-slate-800 font-medium leading-snug px-8 py-12 md:px-16">
-                <span className="absolute top-4 left-4 text-8xl text-[#0070af]/20 font-serif leading-none">“</span>
-                {content.about?.subtitle || pageContent.about.subtitle}
-                <span className="absolute bottom-0 right-4 text-8xl text-[#0070af]/20 font-serif leading-none rotate-180">“</span>
+                <span className="absolute top-4 left-4 text-8xl text-[#0070af]/20 font-serif leading-none">"</span>
+                {content.about.subtitle}
+                <span className="absolute bottom-0 right-4 text-8xl text-[#0070af]/20 font-serif leading-none rotate-180">"</span>
               </blockquote>
             </div>
           </div>
@@ -86,7 +36,7 @@ export default function AboutSection() {
               <div className="h-1 w-12 bg-[#0070af] rounded-full group-hover:w-24 transition-all duration-500"></div>
             </h3>
             <div className="space-y-6">
-              {(content.about?.content || pageContent.about.content).map((paragraph, index) => (
+              {content.about.content.map((paragraph, index) => (
                 <p key={index} className="text-slate-800 leading-relaxed text-lg font-medium">
                   {paragraph}
                 </p>
@@ -119,7 +69,7 @@ export default function AboutSection() {
             <div className="relative z-10">
               <h3 className="text-3xl font-black mb-8 tracking-tight text-slate-900">Kdo je Pionýr?</h3>
               <p className="text-slate-800 text-lg mb-8 leading-relaxed font-medium">
-                {content.pioneer?.description || pageContent.pioneer.description}
+                {content.pioneer.description}
               </p>
               <div className="inline-block p-6 bg-[#0070af]/5 border border-[#0070af]/10 rounded-2xl">
                 <div className="text-[#0070af] text-xs font-black uppercase tracking-[0.2em] mb-2">Příslušnost</div>
@@ -161,10 +111,10 @@ export default function AboutSection() {
              </div>
              <div className="relative z-10">
                 <h3 className="text-4xl font-black text-slate-900 mb-12 tracking-tight">
-                   {content.history?.title || pageContent.history.title}
+                   {content.history.title}
                 </h3>
                 <p className="text-slate-800 text-xl font-medium leading-relaxed mb-12">
-                   {content.history?.content || pageContent.history.content}
+                   {content.history.content}
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

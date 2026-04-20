@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { allPagesContent } from '@/data/content';
 import RentalCalendar from '@/components/RentalCalendar';
 
+const content = allPagesContent.hajenkaBela;
+
 const galleryPhotos = [
   { src: '/foto/bela2003.jpg', alt: 'Hájenka Bělá 2003' },
   { src: '/foto/bela2012.jpg', alt: 'Hájenka Bělá 2012' },
@@ -49,10 +51,9 @@ const defaultRentalSettings = {
 };
 
 export default function HajenkabelaPage() {
-  const [content, setContent] = useState<typeof allPagesContent.hajenkaBela | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [rentalSettings, setRentalSettings] = useState(defaultRentalSettings);
+  const rentalSettings = defaultRentalSettings;
 
   // Rental form state
   const [formData, setFormData] = useState<RentalFormData>({
@@ -70,33 +71,6 @@ export default function HajenkabelaPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch('/api/content?page=rentalSettings')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.success && data.data) setRentalSettings({ ...defaultRentalSettings, ...data.data }); })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    const fetchContent = async () => {
-      try {
-        const response = await fetch('/api/content?page=hajenkaBela');
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            setContent(result.data);
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('Failed to fetch content, using static data');
-      }
-      setContent(allPagesContent.hajenkaBela);
-    };
-
-    fetchContent();
-  }, []);
 
   // Lightbox functions
   const openLightbox = (index: number) => {
@@ -201,20 +175,6 @@ export default function HajenkabelaPage() {
   const estimatedPrice = calculateEstimatedPrice();
   const days = formData.startDate && formData.endDate ?
     Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
-
-  if (!content) {
-    return (
-      <div className="container mx-auto px-4 py-8 animate-pulse">
-        <div className="h-9 bg-slate-200 rounded w-80 mb-4"></div>
-        <div className="h-5 bg-slate-200 rounded w-full mb-2"></div>
-        <div className="h-5 bg-slate-200 rounded w-3/4 mb-8"></div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-slate-200 rounded-lg"></div>)}
-        </div>
-        <div className="h-96 bg-slate-200 rounded-xl"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white">
