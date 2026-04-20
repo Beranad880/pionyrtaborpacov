@@ -54,13 +54,6 @@ const adminCards = [
     color: 'bg-teal-50 border-teal-200 text-teal-700'
   },
   {
-    title: 'Kontakty a statistiky',
-    description: 'Kontaktní údaje a členské statistiky',
-    href: '/admin/contacts',
-    icon: '📞',
-    color: 'bg-yellow-50 border-yellow-200 text-yellow-700'
-  },
-  {
     title: 'Žádosti o pronájem',
     description: 'Správa žádostí o pronájem Hájenky Bělá',
     href: '/admin/rental-requests',
