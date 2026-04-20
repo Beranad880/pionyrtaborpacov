@@ -3,7 +3,6 @@ import connectToMongoose from '@/lib/mongoose';
 import AdminUser from '@/models/AdminUser';
 import Article from '@/models/Article';
 import Content from '@/models/Content';
-import PioneerGroup from '@/models/PioneerGroup';
 import { requireAuth } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 
@@ -15,14 +14,13 @@ export async function GET(request: NextRequest) {
   try {
     await connectToMongoose();
 
-    const [contentPages, pioneerGroups, articles, adminUsers] = await Promise.all([
+    const [contentPages, articles, adminUsers] = await Promise.all([
       Content.countDocuments(),
-      PioneerGroup.countDocuments(),
       Article.countDocuments(),
       AdminUser.countDocuments(),
     ]);
 
-    const totalCollections = contentPages + pioneerGroups + articles + adminUsers;
+    const totalCollections = contentPages + articles + adminUsers;
 
     return NextResponse.json({
       success: true,
@@ -31,7 +29,7 @@ export async function GET(request: NextRequest) {
         isInitialized: adminUsers > 0,
         totalCollections,
         contentPages,
-        pioneerGroups,
+        pioneerGroups: 0,
         statistics: 0,
         contacts: 0,
         articles,
@@ -77,7 +75,6 @@ export async function POST(request: NextRequest) {
     if (action === 'reset') {
       await Promise.all([
         Content.deleteMany({}),
-        PioneerGroup.deleteMany({}),
         Article.deleteMany({}),
       ]);
     }
