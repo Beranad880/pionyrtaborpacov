@@ -118,7 +118,7 @@ export default function Footer() {
                 href="https://humbletech.cz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center h-16 w-full bg-black hover:bg-[#22c55e] border border-black hover:border-[#22c55e] text-[#22c55e] hover:text-black transition-all duration-300 rounded-2xl text-base font-bold"
+                className="flex items-center justify-center h-16 w-full bg-black hover:bg-white border border-black text-white hover:text-black transition-all duration-300 rounded-2xl text-base font-bold"
               >
                 humbletech.cz
               </a>
