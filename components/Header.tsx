@@ -111,8 +111,8 @@ export default function Header() {
                 </div>
               </Link>
 
-              {/* Desktop Menu - Positioned to the left near the logo */}
-              <div className="hidden lg:flex items-center gap-1 ml-8">
+              {/* Desktop Menu - Centered between logo and action button */}
+              <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">
                 {siteInfo.menu.slice(0, -1).map((item, index) => (
                   <div key={index} className="relative group/menu">
                     <Link
@@ -141,9 +141,6 @@ export default function Header() {
                   </div>
                 ))}
               </div>
-
-              {/* Spacer to push buttons to the right */}
-              <div className="flex-1"></div>
 
               {/* Action Buttons (Right) */}
               <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
