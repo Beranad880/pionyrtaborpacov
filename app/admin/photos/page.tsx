@@ -55,6 +55,8 @@ export default function PhotosAdminPage() {
     isPublic: true
   });
 
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
+
   useEffect(() => {
     fetchGalleries();
   }, []);
@@ -156,13 +158,13 @@ export default function PhotosAdminPage() {
     setIsSubmitting(true);
 
     try {
+      // 1. Vytvořit galerii bez fotek (aby se vyhnul payload limitu)
       const response = await fetch('/api/admin/photo-galleries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          photos: pendingPhotos,
-          coverPhoto: pendingPhotos.length > 0 ? pendingPhotos[0].url : undefined,
+          photos: [], // Prázdné pole pro začátek
           createdBy: 'admin'
         })
       });
@@ -170,10 +172,32 @@ export default function PhotosAdminPage() {
       const result = await response.json();
 
       if (result.success) {
+        const galleryId = result.data._id;
+        
+        // 2. Nahrát fotky jednu po druhé
+        if (pendingPhotos.length > 0) {
+          setUploadProgress({ current: 0, total: pendingPhotos.length });
+          
+          for (let i = 0; i < pendingPhotos.length; i++) {
+            setUploadProgress({ current: i + 1, total: pendingPhotos.length });
+            
+            const photoRes = await fetch(`/api/admin/photo-galleries/${galleryId}/photos`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(pendingPhotos[i])
+            });
+            
+            if (!photoRes.ok) {
+              console.error(`Failed to upload photo ${i + 1}`);
+            }
+          }
+        }
+
         fetchGalleries();
         setShowAddForm(false);
         setFormData({ title: '', description: '', event: '', date: '', isPublic: true });
         setPendingPhotos([]);
+        setUploadProgress(null);
         toast('Galerie byla úspěšně vytvořena', 'success');
       } else {
         toast(result.message || 'Chyba při vytváření galerie', 'error');
@@ -183,6 +207,7 @@ export default function PhotosAdminPage() {
       toast('Chyba při vytváření galerie', 'error');
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(null);
     }
   };
 
@@ -193,48 +218,58 @@ export default function PhotosAdminPage() {
     if (!files || files.length === 0) return;
 
     setUploadingPhotos(true);
-    const newPhotos: Photo[] = [...selectedGallery.photos];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (!file.type.startsWith('image/')) continue;
-
-      try {
-        const base64 = await fileToBase64(file);
-        newPhotos.push({
-          filename: file.name,
-          url: base64,
-          caption: '',
-          tags: [],
-          uploadedBy: 'admin',
-          uploadedAt: new Date().toISOString()
-        });
-      } catch (error) {
-        console.error('Error converting file:', error);
-      }
-    }
+    setUploadProgress({ current: 0, total: files.length });
 
     try {
-      const response = await fetch(`/api/admin/photo-galleries/${selectedGallery._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photos: newPhotos })
-      });
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) continue;
 
-      const result = await response.json();
+        setUploadProgress({ current: i + 1, total: files.length });
 
-      if (result.success) {
-        setSelectedGallery({ ...selectedGallery, photos: newPhotos });
-        fetchGalleries();
-        toast('Fotky byly přidány', 'success');
-      } else {
-        toast(result.message || 'Chyba při přidávání fotek', 'error');
+        try {
+          const base64 = await fileToBase64(file);
+          const photoData = {
+            filename: file.name,
+            url: base64,
+            caption: '',
+            tags: [],
+            uploadedBy: 'admin',
+            uploadedAt: new Date().toISOString()
+          };
+
+          const response = await fetch(`/api/admin/photo-galleries/${selectedGallery._id}/photos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(photoData)
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            // Průběžně aktualizovat UI by bylo fajn, ale stačí na konci
+          } else {
+            console.error('Failed to upload photo:', result.message);
+          }
+        } catch (error) {
+          console.error('Error converting/uploading file:', error);
+        }
       }
+
+      // Refresh data
+      const response = await fetch(`/api/admin/photo-galleries/${selectedGallery._id}`);
+      const result = await response.json();
+      if (result.success) {
+        setSelectedGallery(result.data);
+      }
+      
+      fetchGalleries();
+      toast('Fotky byly přidány', 'success');
     } catch (error) {
       console.error('Error adding photos:', error);
       toast('Chyba při přidávání fotek', 'error');
     } finally {
       setUploadingPhotos(false);
+      setUploadProgress(null);
       if (addPhotosInputRef.current) {
         addPhotosInputRef.current.value = '';
       }
@@ -586,9 +621,16 @@ export default function PhotosAdminPage() {
                   className="hidden"
                   disabled={uploadingPhotos}
                 />
-                <div className="text-center">
+                <div className="text-center p-4">
                   {uploadingPhotos ? (
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto"></div>
+                    <div className="space-y-2">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto"></div>
+                      {uploadProgress && (
+                        <p className="text-[10px] font-bold text-gray-600 uppercase tracking-tighter">
+                          Nahrávání {uploadProgress.current} z {uploadProgress.total}
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <>
                       <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -599,12 +641,13 @@ export default function PhotosAdminPage() {
                   )}
                 </div>
               </label>
-            </div>
-          </div>
-        </div>
-      )}
+              </div>
+              </div>
+              </div>
+              )}
 
-      {/* Add Gallery Form Modal */}
+              {/* Add Gallery Form Modal */}
+
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[95vh] overflow-y-auto">
@@ -784,9 +827,18 @@ export default function PhotosAdminPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 min-w-[140px]"
                 >
-                  {isSubmitting ? 'Ukladam...' : 'Vytvorit galerii'}
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      {uploadProgress ? (
+                        <span>{uploadProgress.current}/{uploadProgress.total}</span>
+                      ) : (
+                        <span>Ukládám...</span>
+                      )}
+                    </div>
+                  ) : 'Vytvořit galerii'}
                 </button>
               </div>
             </form>

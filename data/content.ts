@@ -97,9 +97,9 @@ export const pageContent = {
     title: "Kdo jsme?",
     subtitle: "Pionýr je demokratický, dobrovolný, samostatný a nezávislý spolek dětí, mládeže a dospělých. Předmětem hlavní činnosti Pionýra je veřejně prospěšná činnost.",
    content: [
-  "Být pionýrem může zkusit každý. A co to vlastně znamená? Hlavně setkávání s kamarády, společné hledání, poznávání a objevování – nových světů i těch úplně obyčejných věcí.",
-  "Pionýři chodí na výpravy, sportují, hrají deskovky, jezdí na kolech, soutěží, zpívají a hrají na kytaru, malují, natáčejí videa. Poznávají život ze všech možných stran, učí se spolupracovat, nebojí se překážek a snaží se s nimi vyrovnávat čestně. Hlásí se ke svým úkolům i průšvihům, drží slovo a překonávají hranice tím, že otevírají příležitosti tam, kde by jinak chyběly.",
-  "Být pionýrem přináší přátele, zážitky, romantiku i dobrodružství – a to i v tom takzvaném všedním životě. Pionýrské ideály nejsou příkazy, ale mety. Dosáhnout jich vyžaduje chuť a vůli, rozvoj sebe sama i týmového ducha."
+  "Být pionýrem může zkusit každý. Jde především o setkávání s kamarády, společné hledání a objevování – ať už nových světů, nebo těch úplně obyčejných věcí.",
+  "Pionýři chodí na výpravy, sportují, hrají deskové hry, jezdí na kolech, soutěží, zpívají a hrají na kytaru, malují nebo natáčejí videa. Poznávají svět ze všech stran, učí se spolupracovat a překonávat překážky – čestně a s otevřenou hlavou. Hlásí se ke svým úkolům i průšvihům, drží slovo a otevírají příležitosti tam, kde by jinak chyběly.",
+  "Pionýrství přináší přátele, zážitky a dobrodružství – a to i v tom zdánlivě všedním životě. Pionýrské ideály nejsou příkazy, ale mety. Dosáhnout jich vyžaduje chuť a vůli, rozvoj sebe sama i ducha týmu.",
 ]
   },
 

@@ -95,9 +95,9 @@ export default function Header() {
         {/* Main Navigation */}
         <nav className="bg-transparent">
           <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center py-5">
+            <div className="flex items-center py-5">
               {/* Logo */}
-              <Link href="/" className="flex items-center gap-4 group" onClick={closeMobileMenu}>
+              <Link href="/" className="flex items-center gap-4 group flex-shrink-0" onClick={closeMobileMenu}>
                 <div className="transition-all duration-500 bg-white p-1.5 rounded-2xl shadow-xl shadow-black/5 group-hover:scale-110 h-16">
                   <img
                     src="/logoVertikal1pionir.gif"
@@ -105,58 +105,62 @@ export default function Header() {
                     className="h-full w-auto object-contain"
                   />
                 </div>
-                <div>
-                  <div className="font-black tracking-tighter text-slate-900 text-xl">{siteInfo.title}</div>
+                <div className="hidden sm:block">
+                  <div className="font-black tracking-tighter text-slate-900 text-xl leading-tight">{siteInfo.title}</div>
                   <div className="text-[10px] font-black text-[#0070af] uppercase tracking-[0.3em] opacity-80">Pacovští pionýři</div>
                 </div>
               </Link>
 
-              {/* Desktop Menu */}
-              <div className="hidden lg:flex items-center gap-1">
-                {siteInfo.menu.map((item, index) => {
-                  const isExternal = item.href.startsWith('http');
-                  return (
-                    <div key={index} className="relative group/menu">
-                      {isExternal ? (
-                        <a
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-[#0070af] text-white hover:bg-[#005a8c] transition-all px-4 py-2 rounded-xl font-black text-[13px] uppercase tracking-widest inline-flex items-center gap-2 shadow-lg shadow-[#0070af]/10 hover:shadow-[#0070af]/30 hover:-translate-y-0.5"
-                        >
-                          {item.title}
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
-                      ) : (
-                        <Link
-                          href={item.href}
-                          className="text-slate-800 hover:text-[#0070af] px-2.5 py-2 rounded-xl transition-all font-black text-[13px] uppercase tracking-[0.1em] relative after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:w-0 after:h-0.5 after:bg-[#0070af] after:transition-all hover:after:w-1/2 hover:after:left-1/4 whitespace-nowrap"
-                        >
-                          {item.title}
-                        </Link>
-                      )}
+              {/* Desktop Menu - Positioned to the left near the logo */}
+              <div className="hidden lg:flex items-center gap-1 ml-8">
+                {siteInfo.menu.slice(0, -1).map((item, index) => (
+                  <div key={index} className="relative group/menu">
+                    <Link
+                      href={item.href}
+                      className="text-slate-800 hover:text-[#0070af] px-2.5 py-2 rounded-xl transition-all font-black text-[13px] uppercase tracking-[0.1em] relative after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:w-0 after:h-0.5 after:bg-[#0070af] after:transition-all hover:after:w-1/2 hover:after:left-1/4 whitespace-nowrap"
+                    >
+                      {item.title}
+                    </Link>
 
-                      {item.submenu && (
-                        <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all duration-300 translate-y-2 group-hover/menu:translate-y-0">
-                          <div className="bg-white/95 backdrop-blur-xl shadow-2xl border border-slate-100 rounded-3xl py-4 min-w-[240px] overflow-hidden">
-                            {item.submenu.map((subitem, subindex) => (
-                              <Link
-                                key={subindex}
-                                href={subitem.href}
-                                className="flex items-center gap-3 px-6 py-3.5 text-slate-800 hover:bg-[#0070af] hover:text-white transition-all font-bold text-sm"
-                              >
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#0070af] group-hover:bg-white transition-colors"></span>
-                                {subitem.title}
-                              </Link>
-                            ))}
-                          </div>
+                    {item.submenu && (
+                      <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all duration-300 translate-y-2 group-hover/menu:translate-y-0">
+                        <div className="bg-white/95 backdrop-blur-xl shadow-2xl border border-slate-100 rounded-3xl py-4 min-w-[240px] overflow-hidden">
+                          {item.submenu.map((subitem, subindex) => (
+                            <Link
+                              key={subindex}
+                              href={subitem.href}
+                              className="flex items-center gap-3 px-6 py-3.5 text-slate-800 hover:bg-[#0070af] hover:text-white transition-all font-bold text-sm"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#0070af] group-hover:bg-white transition-colors"></span>
+                              {subitem.title}
+                            </Link>
+                          ))}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Spacer to push buttons to the right */}
+              <div className="flex-1"></div>
+
+              {/* Action Buttons (Right) */}
+              <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
+                {siteInfo.menu.slice(-1).map((item, index) => (
+                  <a
+                    key={index}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#0070af] text-white hover:bg-[#005a8c] transition-all px-4 py-2 rounded-xl font-black text-[13px] uppercase tracking-widest inline-flex items-center gap-2 shadow-lg shadow-[#0070af]/10 hover:shadow-[#0070af]/30 hover:-translate-y-0.5"
+                  >
+                    {item.title}
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                ))}
 
                 {isAdminLoggedIn && (
                   <div className="flex items-center gap-4 ml-6 pl-6 border-l border-slate-200">
