@@ -1,73 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 
-const adminCards = [
-  {
-    title: 'Úvodní stránka',
-    description: 'Editace hero sekce, o nás a historie',
-    href: '/admin/home',
-    icon: '🏠',
-    color: 'bg-blue-50 border-blue-200 text-blue-700'
-  },
-  {
-    title: 'Pionýrské oddíly',
-    description: 'Správa oddílů a jejich popisů',
-    href: '/admin/pioneer-groups',
-    icon: '👥',
-    color: 'bg-green-50 border-green-200 text-green-700'
-  },
-  {
-    title: 'Hájenka Bělá',
-    description: 'Informace o táborové základně',
-    href: '/admin/hajenka-bela',
-    icon: '🏕️',
-    color: 'bg-orange-50 border-orange-200 text-orange-700'
-  },
-  {
-    title: 'Pronájem Hájenky',
-    description: 'Ceník a podmínky pronájmu',
-    href: '/admin/rental',
-    icon: '🏗️',
-    color: 'bg-purple-50 border-purple-200 text-purple-700'
-  },
-  {
-    title: 'Kalendář akcí',
-    description: 'Správa nadcházejících akcí',
-    href: '/admin/calendar',
-    icon: '📅',
-    color: 'bg-pink-50 border-pink-200 text-pink-700'
-  },
-  {
-    title: 'Články',
-    description: 'Správa článků a novinek',
-    href: '/admin/articles',
-    icon: '📝',
-    color: 'bg-indigo-50 border-indigo-200 text-indigo-700'
-  },
-  {
-    title: 'Fotky z akcí',
-    description: 'Galerie fotografií',
-    href: '/admin/photos',
-    icon: '📸',
-    color: 'bg-teal-50 border-teal-200 text-teal-700'
-  },
-  {
-    title: 'Žádosti o pronájem',
-    description: 'Správa žádostí o pronájem Hájenky Bělá',
-    href: '/admin/rental-requests',
-    icon: '🏡',
-    color: 'bg-red-50 border-red-200 text-red-700'
-  },
-  {
-    title: 'Táborové přihlášky',
-    description: 'Správa přihlášek na letní dětský tábor',
-    href: '/admin/camp-applications',
-    icon: '🏕️',
-    color: 'bg-emerald-50 border-emerald-200 text-emerald-700'
-  },
-];
 
 function formatRelativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -178,36 +112,6 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Admin Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {adminCards.map((card) => (
-          <Link
-            key={card.href}
-            href={card.href}
-            className="group"
-          >
-            <div className={`border rounded-xl p-6 transition-all hover:shadow-md hover:scale-105 ${card.color}`}>
-              <div className="flex items-start space-x-4">
-                <div className="text-2xl">{card.icon}</div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-2 group-hover:underline">
-                    {card.title}
-                  </h3>
-                  <p className="text-sm opacity-80">
-                    {card.description}
-                  </p>
-                </div>
-                <div className="opacity-60 group-hover:opacity-100 transition-opacity">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </Link>
-        ))}
       </div>
 
       {/* Recent Activity */}
