@@ -32,8 +32,9 @@ async function connectToMongoose(): Promise<typeof mongoose> {
   if (!cached!.promise) {
     const opts = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 3000,
-      maxPoolSize: 1, // Jedna instance = jeden connection (serverless)
+      serverSelectionTimeoutMS: 5000,
+      maxPoolSize: 10, // Zvýšeno pro lepší propustnost při souběžných požadavcích
+      socketTimeoutMS: 30000,
     };
 
     cached!.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToMongoose from '@/lib/mongoose';
 import Content from '@/models/Content';
 import { allPagesContent, siteData, pageContent } from '@/data/content';
-import { requireAuth } from '@/lib/auth-middleware';
+import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError, isValidationError, validationError } from '@/lib/api-response';
+import { logAction } from '@/lib/audit';
 
 // GET - Načíst obsah stránky (pro frontend)
 export async function GET(request: NextRequest) {
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
     try {
       await connectToMongoose();
 
-      const content = await Content.findOne({ page });
+      const content = await Content.findOne({ page }).lean();
 
       if (content) {
         let data = content.content;
@@ -29,12 +30,17 @@ export async function GET(request: NextRequest) {
           const removed = ['aktuality-2026', 'rok-2026'];
           data = { ...data, menu: data.menu.filter((item: any) => !removed.some(r => item.href?.includes(r))) };
         }
+        
         return NextResponse.json({
           success: true,
           data,
           source: 'database',
           lastModified: content.lastModified,
           version: content.version,
+        }, {
+          headers: {
+            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=3600',
+          }
         });
       }
     } catch {
@@ -81,6 +87,8 @@ export async function POST(request: NextRequest) {
   const authError = await requireAuth(request);
   if (authError) return authError;
 
+  const user = await getUserFromToken(request);
+
   try {
     const body = await request.json();
     const { page, data } = body;
@@ -99,7 +107,7 @@ export async function POST(request: NextRequest) {
       {
         page,
         content: data,
-        modifiedBy: 'admin',
+        modifiedBy: user?.username || 'admin',
         lastModified: new Date(),
         $inc: { version: 1 }
       },
@@ -109,6 +117,21 @@ export async function POST(request: NextRequest) {
         runValidators: true
       }
     );
+
+    const pageLabels: Record<string, string> = {
+      home: 'Úvodní stránka',
+      siteData: 'Kontaktní údaje a nastavení webu',
+      rentalSettings: 'Ceník a nastavení pronájmu',
+      pioneerGroups: 'Pionýrské oddíly',
+    };
+
+    logAction({
+      action: 'Úprava obsahu stránky',
+      entity: 'content',
+      entityId: savedContent._id?.toString(),
+      entityTitle: pageLabels[page] || page,
+      user: user?.username || 'admin',
+    }).catch(() => {});
 
     return NextResponse.json({
       success: true,

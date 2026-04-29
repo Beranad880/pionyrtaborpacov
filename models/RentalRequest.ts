@@ -131,6 +131,7 @@ RentalRequestSchema.index({ status: 1 });
 RentalRequestSchema.index({ startDate: 1 });
 RentalRequestSchema.index({ email: 1 });
 RentalRequestSchema.index({ createdAt: -1 });
+RentalRequestSchema.index({ isDeleted: 1 });
 
 // Pre-save middleware
 RentalRequestSchema.pre('save', function() {

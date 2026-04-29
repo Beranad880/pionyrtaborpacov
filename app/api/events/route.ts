@@ -24,7 +24,11 @@ export async function GET(request: NextRequest) {
       .sort({ startDate: 1 })
       .lean();
 
-    return NextResponse.json({ success: true, data: { events } });
+    return NextResponse.json({ success: true, data: { events } }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=3600',
+      }
+    });
   } catch (error) {
     return dbError(error, 'GET /api/events error:');
   }

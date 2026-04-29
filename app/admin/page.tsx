@@ -18,97 +18,105 @@ function formatRelativeTime(iso: string): string {
 
 export default function AdminDashboard() {
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [stats, setStats] = useState({ pages: 0, members: 0, upcomingEvents: 0, articles: 0 });
+  const [stats, setStats] = useState({ 
+    pages: 0, 
+    members: 0, 
+    upcomingEvents: 0, 
+    articles: 0,
+    pendingCampApplications: 0,
+    pendingRentalRequests: 0 
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/admin/activity')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.success) setRecentActivity(data.data); })
-      .catch(() => {});
-
-    // Celkem stránek
-    fetch('/api/admin/content', { method: 'PUT' })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.success) setStats(s => ({ ...s, pages: data.data.length })); })
-      .catch(() => {});
-
-    // Celkem členů
-    fetch('/api/content?page=siteData')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.success && data.data?.statistics?.total) setStats(s => ({ ...s, members: data.data.statistics.total })); })
-      .catch(() => {});
-
-    // Nadcházející akce
-    fetch('/api/events?upcoming=true')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.success) setStats(s => ({ ...s, upcomingEvents: data.data.events?.length ?? 0 })); })
-      .catch(() => {});
-
-    // Články
-    fetch('/api/articles?limit=1')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.success) setStats(s => ({ ...s, articles: data.data.pagination?.total ?? 0 })); })
-      .catch(() => {});
+    setLoading(true);
+    Promise.all([
+      fetch('/api/admin/activity').then(r => r.ok ? r.json() : null),
+      fetch('/api/admin/stats').then(r => r.ok ? r.json() : null)
+    ]).then(([activityData, statsData]) => {
+      if (activityData?.success) setRecentActivity(activityData.data);
+      if (statsData?.success) setStats(statsData.data);
+    }).catch(err => {
+      console.error('Error loading dashboard data:', err);
+    }).finally(() => {
+      setLoading(false);
+    });
   }, []);
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">
-          Vítejte v admin panelu
-        </h1>
-        <p className="text-slate-600">
-          Spravujte obsah webových stránek Pionýrské skupiny Pacov
-        </p>
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">
+            Vítejte v admin panelu
+          </h1>
+          <p className="text-slate-600">
+            Spravujte obsah webových stránek Pionýrské skupiny Pacov
+          </p>
+        </div>
+        {(stats.pendingCampApplications > 0 || stats.pendingRentalRequests > 0) && (
+          <div className="flex gap-3">
+            {stats.pendingCampApplications > 0 && (
+              <div className="bg-red-50 border border-red-100 px-4 py-2 rounded-xl text-red-600 animate-pulse">
+                <span className="font-bold">{stats.pendingCampApplications}</span> nové přihlášky
+              </div>
+            )}
+            {stats.pendingRentalRequests > 0 && (
+              <div className="bg-orange-50 border border-orange-100 px-4 py-2 rounded-xl text-orange-600 animate-pulse">
+                <span className="font-bold">{stats.pendingRentalRequests}</span> nové žádosti o pronájem
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-default">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-3 bg-blue-100 rounded-xl">
               <span className="text-xl">📄</span>
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-slate-600">Celkem stránek</p>
-              <p className="text-xl font-semibold text-slate-800">{stats.pages}</p>
+            <div className="ml-4">
+              <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Stránky</p>
+              <p className="text-2xl font-black text-slate-800">{stats.pages}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-default">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
+            <div className="p-3 bg-green-100 rounded-xl">
               <span className="text-xl">👥</span>
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-slate-600">Celkem členů</p>
-              <p className="text-xl font-semibold text-slate-800">{stats.members}</p>
+            <div className="ml-4">
+              <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Členové</p>
+              <p className="text-2xl font-black text-slate-800">{stats.members}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-default">
           <div className="flex items-center">
-            <div className="p-2 bg-orange-100 rounded-lg">
+            <div className="p-3 bg-orange-100 rounded-xl">
               <span className="text-xl">📅</span>
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-slate-600">Nadcházející akce</p>
-              <p className="text-xl font-semibold text-slate-800">{stats.upcomingEvents}</p>
+            <div className="ml-4">
+              <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Akce</p>
+              <p className="text-2xl font-black text-slate-800">{stats.upcomingEvents}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-default">
           <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
+            <div className="p-3 bg-purple-100 rounded-xl">
               <span className="text-xl">📝</span>
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-slate-600">Články</p>
-              <p className="text-xl font-semibold text-slate-800">{stats.articles}</p>
+            <div className="ml-4">
+              <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Články</p>
+              <p className="text-2xl font-black text-slate-800">{stats.articles}</p>
             </div>
           </div>
         </div>

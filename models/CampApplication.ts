@@ -179,6 +179,7 @@ CampApplicationSchema.index({ status: 1 });
 CampApplicationSchema.index({ guardianEmail: 1 });
 CampApplicationSchema.index({ createdAt: -1 });
 CampApplicationSchema.index({ participantName: 1 });
+CampApplicationSchema.index({ isDeleted: 1 });
 
 // Pre-save middleware
 CampApplicationSchema.pre('save', function() {

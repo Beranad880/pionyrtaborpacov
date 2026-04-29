@@ -24,9 +24,14 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      await Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } });
+      // Increment views asynchronously - don't wait for it for response
+      Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } }).catch(console.error);
 
-      return NextResponse.json({ success: true, data: article });
+      return NextResponse.json({ success: true, data: article }, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=3600',
+        }
+      });
     }
 
     // Ověřit auth cookie pro admin přístup
@@ -54,13 +59,19 @@ export async function GET(request: NextRequest) {
 
     const total = await Article.countDocuments(filter);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
         articles,
         pagination: paginationMeta(page, limit, total),
       }
     });
+
+    if (!isAdmin) {
+      response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=3600');
+    }
+
+    return response;
   } catch (error) {
     return dbError(error, 'GET /api/articles error:');
   }
