@@ -4,6 +4,8 @@ import PhotoGallery from '@/models/PhotoGallery';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError } from '@/lib/api-response';
 
+export const maxDuration = 30;
+
 // POST - Přidat jednu fotku do galerie
 export async function POST(
   request: NextRequest,
