@@ -1,7 +1,6 @@
 import Hero from '@/components/Hero';
 import AboutSection from '@/components/AboutSection';
 import CampRegistrationBanner from '@/components/CampRegistrationBanner';
-import EvidencniListy from '@/components/EvidencniListy';
 import ContactSection from '@/components/ContactSection';
 import { Analytics } from '@vercel/analytics/next';
 
@@ -17,7 +16,6 @@ export default function HomePage() {
         </div>
       </section>
       <AboutSection />
-      <EvidencniListy />
       <ContactSection />
     </>
   );
