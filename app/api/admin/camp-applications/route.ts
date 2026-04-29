@@ -7,6 +7,7 @@ import { escapeRegex, isValidEmail, isValidPhone, parseStatusFilter } from '@/li
 import { checkRateLimit, FORM_MAX } from '@/lib/rate-limit';
 import { dbError, isValidationError, validationError } from '@/lib/api-response';
 import { sendCampApplicationNotification } from '@/lib/mailer';
+import { logAction } from '@/lib/audit';
 // GET - Načíst táborové přihlášky (pouze pro adminy)
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const search = searchParams.get('search');
 
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = { isDeleted: { $ne: true } };
 
     const validStatus = parseStatusFilter(status);
     if (validStatus) {
@@ -44,8 +45,9 @@ export async function GET(request: NextRequest) {
 
     const total = await CampApplication.countDocuments(filter);
 
-    // Statistiky podle statusu
+    // Statistiky podle statusu (bez smazaných)
     const statusStats = await CampApplication.aggregate([
+      { $match: { isDeleted: { $ne: true } } },
       { $group: { _id: '$status', count: { $sum: 1 } } }
     ]);
 
@@ -73,7 +75,7 @@ export async function GET(request: NextRequest) {
 // POST - Vytvořit novou táborovou přihlášku (veřejné API)
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
-  const rateCheck = checkRateLimit(`camp-application:${ip}`, FORM_MAX);
+  const rateCheck = await checkRateLimit(`camp-application:${ip}`, FORM_MAX);
   if (!rateCheck.allowed) {
     return NextResponse.json(
       { success: false, message: `Příliš mnoho požadavků. Zkuste to znovu za ${rateCheck.retryAfter} sekund.` },
@@ -165,6 +167,14 @@ export async function POST(request: NextRequest) {
     });
 
     await campApplication.save();
+
+    logAction({
+      action: 'Nová přihláška na tábor',
+      entity: 'camp-application',
+      entityId: campApplication._id?.toString(),
+      entityTitle: body.participantName,
+      user: 'veřejný web',
+    }).catch(() => {});
 
     sendCampApplicationNotification({
       participantName: body.participantName,

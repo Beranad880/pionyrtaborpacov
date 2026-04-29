@@ -1,6 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IRentalRequest extends Document {
+  isDeleted: boolean;
+  deletedAt?: Date;
   name: string;
   email: string;
   phone: string;
@@ -21,6 +23,9 @@ export interface IRentalRequest extends Document {
 
 const RentalRequestSchema = new Schema<IRentalRequest>(
   {
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
+
     name: {
       type: String,
       required: [true, 'Jméno je povinné'],

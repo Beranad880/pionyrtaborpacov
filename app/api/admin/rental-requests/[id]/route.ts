@@ -3,8 +3,8 @@ import connectToMongoose from '@/lib/mongoose';
 import RentalRequest from '@/models/RentalRequest';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError, isValidationError, validationError } from '@/lib/api-response';
+import { logAction } from '@/lib/audit';
 
-// GET - Načíst konkrétní žádost
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,14 +15,10 @@ export async function GET(
   try {
     await connectToMongoose();
     const { id } = await params;
-
-    const rentalRequest = await RentalRequest.findById(id);
+    const rentalRequest = await RentalRequest.findOne({ _id: id, isDeleted: { $ne: true } });
 
     if (!rentalRequest) {
-      return NextResponse.json(
-        { success: false, message: 'Žádost nebyla nalezena' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: 'Žádost nebyla nalezena' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, data: rentalRequest });
@@ -31,7 +27,6 @@ export async function GET(
   }
 }
 
-// PUT/PATCH - Aktualizovat žádost (změna statusu, poznámky)
 async function updateRentalRequest(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -46,13 +41,10 @@ async function updateRentalRequest(
     const { id } = await params;
 
     const body = await request.json();
-    const rentalRequest = await RentalRequest.findById(id);
+    const rentalRequest = await RentalRequest.findOne({ _id: id, isDeleted: { $ne: true } });
 
     if (!rentalRequest) {
-      return NextResponse.json(
-        { success: false, message: 'Žádost nebyla nalezena' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: 'Žádost nebyla nalezena' }, { status: 404 });
     }
 
     if (body.status && ['pending', 'approved', 'rejected'].includes(body.status)) {
@@ -63,15 +55,12 @@ async function updateRentalRequest(
         rentalRequest.processedBy = tokenUser?.username ?? 'admin';
       }
 
-      // Kontrola konfliktů při schválení
       if (body.status === 'approved') {
         const conflictingRequests = await RentalRequest.find({
           _id: { $ne: id },
+          isDeleted: { $ne: true },
           status: 'approved',
-          $or: [{
-            startDate: { $lte: rentalRequest.endDate },
-            endDate: { $gte: rentalRequest.startDate }
-          }]
+          $or: [{ startDate: { $lte: rentalRequest.endDate }, endDate: { $gte: rentalRequest.startDate } }]
         });
 
         if (conflictingRequests.length > 0) {
@@ -81,20 +70,22 @@ async function updateRentalRequest(
           );
         }
       }
+
+      const actionLabel = body.status === 'approved' ? 'schválena' : body.status === 'rejected' ? 'zamítnuta' : 'aktualizována';
+      logAction({
+        action: `Žádost o pronájem ${actionLabel}`,
+        entity: 'rental-request',
+        entityId: id,
+        entityTitle: rentalRequest.name,
+        user: tokenUser?.username || 'admin',
+      }).catch(() => {});
     }
 
-    if (body.adminNotes !== undefined) {
-      rentalRequest.adminNotes = body.adminNotes;
-    }
+    if (body.adminNotes !== undefined) rentalRequest.adminNotes = body.adminNotes;
 
     await rentalRequest.save();
 
-    return NextResponse.json({
-      success: true,
-      message: 'Žádost byla úspěšně aktualizována',
-      data: rentalRequest
-    });
-
+    return NextResponse.json({ success: true, message: 'Žádost byla úspěšně aktualizována', data: rentalRequest });
   } catch (error: unknown) {
     if (isValidationError(error)) return validationError(error);
     return dbError(error, 'PUT /api/admin/rental-requests/[id] error:');
@@ -104,7 +95,6 @@ async function updateRentalRequest(
 export const PUT = updateRentalRequest;
 export const PATCH = updateRentalRequest;
 
-// DELETE - Smazat žádost
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -114,19 +104,28 @@ export async function DELETE(
 
   try {
     await connectToMongoose();
+    const user = await getUserFromToken(request);
     const { id } = await params;
 
-    const rentalRequest = await RentalRequest.findByIdAndDelete(id);
+    const rentalRequest = await RentalRequest.findOne({ _id: id, isDeleted: { $ne: true } });
 
     if (!rentalRequest) {
-      return NextResponse.json(
-        { success: false, message: 'Žádost nebyla nalezena' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: 'Žádost nebyla nalezena' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, message: 'Žádost byla úspěšně smazána' });
+    rentalRequest.isDeleted = true;
+    rentalRequest.deletedAt = new Date();
+    await rentalRequest.save();
 
+    logAction({
+      action: 'Žádost o pronájem smazána',
+      entity: 'rental-request',
+      entityId: id,
+      entityTitle: rentalRequest.name,
+      user: user?.username || 'admin',
+    }).catch(() => {});
+
+    return NextResponse.json({ success: true, message: 'Žádost byla archivována' });
   } catch (error) {
     return dbError(error, 'DELETE /api/admin/rental-requests/[id] error:');
   }

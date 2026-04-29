@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     || request.headers.get('x-real-ip')
     || 'unknown';
 
-  const rateCheck = checkRateLimit(`login:${ip}`);
+  const rateCheck = await checkRateLimit(`login:${ip}`);
   if (!rateCheck.allowed) {
     return NextResponse.json(
       { success: false, message: `Příliš mnoho pokusů o přihlášení. Zkuste to znovu za ${rateCheck.retryAfter} sekund.` },
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    resetRateLimit(`login:${ip}`);
+    await resetRateLimit(`login:${ip}`);
     await AdminUser.findByIdAndUpdate(userDoc._id, { lastLogin: new Date() });
 
     const token = await signToken({

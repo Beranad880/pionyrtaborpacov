@@ -1,6 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ICampApplication extends Document {
+  isDeleted: boolean;
+  deletedAt?: Date;
   // Údaje o účastníkovi
   participantName: string;
   grade: string;
@@ -130,6 +132,9 @@ const CampApplicationSchema = new Schema<ICampApplication>(
       trim: true,
       maxlength: [150, 'Adresa nemůže být delší než 150 znaků'],
     },
+
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
 
     // Systémové údaje
     status: {

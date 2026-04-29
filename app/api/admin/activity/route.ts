@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
 
     const [articles, campApplications, rentalRequests, rentals, events, contents, galleries] = await Promise.all([
       Article.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`title status processedBy ${select}`).lean(),
-      CampApplication.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`participantName status processedBy ${select}`).lean(),
-      RentalRequest.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`name status processedBy ${select}`).lean(),
+      CampApplication.find({ isDeleted: { $ne: true } }).sort({ updatedAt: -1 }).limit(LIMIT).select(`participantName status processedBy ${select}`).lean(),
+      RentalRequest.find({ isDeleted: { $ne: true } }).sort({ updatedAt: -1 }).limit(LIMIT).select(`name status processedBy ${select}`).lean(),
       Rental.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`name status createdBy ${select}`).lean(),
       Event.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`title modifiedBy ${select}`).lean(),
       Content.find().sort({ updatedAt: -1 }).limit(LIMIT).select(`page modifiedBy ${select}`).lean(),

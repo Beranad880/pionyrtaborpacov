@@ -18,6 +18,8 @@
     "db:cleanup": "node scripts/cleanup-database.js"
   },
   "dependencies": {
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0",
     "@vercel/analytics": "^1.6.1",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",

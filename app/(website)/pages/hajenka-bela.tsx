@@ -71,6 +71,27 @@ export default function HajenkabelaPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateRentalField = (name: string, value: string): string => {
+    if (name === 'name') return value.trim().length < 2 ? 'Vyplňte jméno a příjmení' : '';
+    if (name === 'email') return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Neplatný formát emailu' : '';
+    if (name === 'phone') return !/^(\+420)?\s?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$/.test(value.replace(/\s/g, '')) ? 'Formát: 603 123 456 nebo +420603123456' : '';
+    if (name === 'purpose') return value.trim().length < 3 ? 'Vyplňte účel pobytu' : '';
+    if (name === 'guestCount') {
+      const n = parseInt(value);
+      if (isNaN(n) || n < 1) return 'Zadejte počet hostů (min. 1)';
+      if (n > rentalSettings.capacity) return `Maximum je ${rentalSettings.capacity} osob`;
+      return '';
+    }
+    return '';
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    const err = validateRentalField(name, value);
+    setFieldErrors(prev => ({ ...prev, [name]: err }));
+  };
 
   // Lightbox functions
   const openLightbox = (index: number) => {
@@ -132,18 +153,24 @@ export default function HajenkabelaPage() {
     e.preventDefault();
     setError(null);
 
-    if (!formData.agreeTerms) {
-      setError('Musíte souhlasit s podmínkami pronájmu');
-      return;
+    // Validace všech polí před odesláním
+    const errors: Record<string, string> = {};
+    (['name', 'email', 'phone', 'purpose'] as const).forEach(f => {
+      const err = validateRentalField(f, String(formData[f] || ''));
+      if (err) errors[f] = err;
+    });
+    const guestErr = validateRentalField('guestCount', String(formData.guestCount));
+    if (guestErr) errors['guestCount'] = guestErr;
+    if (!formData.startDate) errors['startDate'] = 'Vyberte datum příjezdu';
+    if (!formData.endDate) errors['endDate'] = 'Vyberte datum odjezdu';
+    if (formData.startDate && formData.endDate && new Date(formData.startDate) >= new Date(formData.endDate)) {
+      errors['endDate'] = 'Datum odjezdu musí být po datu příjezdu';
     }
+    if (!formData.agreeTerms) errors['agreeTerms'] = 'Musíte souhlasit s podmínkami';
 
-    if (new Date(formData.startDate) >= new Date(formData.endDate)) {
-      setError('Datum konce musí být po datu začátku');
-      return;
-    }
-
-    if (Number(formData.guestCount) > rentalSettings.capacity) {
-      setError(`Kapacita hájenky je maximálně ${rentalSettings.capacity} osob`);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError('Opravte chyby ve formuláři a zkuste to znovu.');
       return;
     }
 
@@ -254,98 +281,59 @@ export default function HajenkabelaPage() {
                     <div className="space-y-6">
                       <div className="space-y-1.5">
                         <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
-                        <input
-                          type="text"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black text-lg placeholder:text-slate-300"
-                          placeholder="Jan Novák"
-                        />
+                        <input type="text" name="name" value={formData.name} onChange={handleInputChange} onBlur={handleBlur} required placeholder="Jan Novák"
+                          className={`w-full px-8 py-5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black text-lg placeholder:text-slate-300 ${fieldErrors.name ? 'border-red-400' : 'border-slate-200'}`} />
+                        {fieldErrors.name && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.name}</p>}
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div className="space-y-1.5">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Váš email *</label>
-                          <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
-                            placeholder="jan@email.cz"
-                          />
+                          <input type="email" name="email" value={formData.email} onChange={handleInputChange} onBlur={handleBlur} required placeholder="jan@email.cz"
+                            className={`w-full px-8 py-5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300 ${fieldErrors.email ? 'border-red-400' : 'border-slate-200'}`} />
+                          {fieldErrors.email && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.email}</p>}
                         </div>
                         <div className="space-y-1.5">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Telefon *</label>
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300"
-                            placeholder="+420..."
-                          />
+                          <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} onBlur={handleBlur} required placeholder="+420..."
+                            className={`w-full px-8 py-5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-300 ${fieldErrors.phone ? 'border-red-400' : 'border-slate-200'}`} />
+                          {fieldErrors.phone && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.phone}</p>}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-1.5">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Příjezd *</label>
-                          <input
-                            type="date"
-                            name="startDate"
-                            value={formData.startDate}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black"
-                          />
+                          <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} onBlur={handleBlur} required
+                            className={`w-full px-8 py-5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black ${fieldErrors.startDate ? 'border-red-400' : 'border-slate-200'}`} />
+                          {fieldErrors.startDate && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.startDate}</p>}
                         </div>
                         <div className="space-y-1.5">
                           <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Odjezd *</label>
-                          <input
-                            type="date"
-                            name="endDate"
-                            value={formData.endDate}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black"
-                          />
+                          <input type="date" name="endDate" value={formData.endDate} onChange={handleInputChange} onBlur={handleBlur} required
+                            className={`w-full px-8 py-5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black ${fieldErrors.endDate ? 'border-red-400' : 'border-slate-200'}`} />
+                          {fieldErrors.endDate && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.endDate}</p>}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Počet osob *</label>
-                            <input
-                              type="number"
-                              name="guestCount"
-                              value={formData.guestCount}
-                              onChange={handleInputChange}
-                              required
-                              min="1"
-                              max={rentalSettings.capacity}
-                              className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black text-2xl text-[#0070af]"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Účel pobytu *</label>
-                            <select
-                              name="purpose"
-                              value={formData.purpose}
-                              onChange={handleInputChange}
-                              required
-                              className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black"
-                            >
-                              <option value="">Vyberte...</option>
-                              {purposeOptions.map(purpose => (
-                                <option key={purpose} value={purpose}>{purpose}</option>
-                              ))}
-                            </select>
-                          </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Počet osob *</label>
+                          <input type="number" name="guestCount" value={formData.guestCount} onChange={handleInputChange} onBlur={handleBlur} required min="1" max={rentalSettings.capacity}
+                            className={`w-full px-8 py-5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black text-2xl text-[#0070af] ${fieldErrors.guestCount ? 'border-red-400' : 'border-slate-200'}`} />
+                          {fieldErrors.guestCount && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.guestCount}</p>}
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Účel pobytu *</label>
+                          <select name="purpose" value={formData.purpose} onChange={handleInputChange} onBlur={handleBlur} required
+                            className={`w-full px-8 py-5 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-black ${fieldErrors.purpose ? 'border-red-400' : 'border-slate-200'}`}>
+                            <option value="">Vyberte...</option>
+                            {purposeOptions.map(purpose => (
+                              <option key={purpose} value={purpose}>{purpose}</option>
+                            ))}
+                          </select>
+                          {fieldErrors.purpose && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.purpose}</p>}
+                        </div>
                       </div>
                     </div>
 
@@ -363,19 +351,15 @@ export default function HajenkabelaPage() {
                       </div>
                     )}
 
-                    <div className="flex items-start gap-4 px-2">
-                      <input
-                        type="checkbox"
-                        name="agreeTerms"
-                        id="agreeTerms"
-                        checked={formData.agreeTerms}
-                        onChange={handleInputChange}
-                        required
-                        className="h-6 w-6 text-[#0070af] focus:ring-[#0070af] border-slate-300 rounded-lg mt-0.5 transition-all cursor-pointer"
-                      />
-                      <label htmlFor="agreeTerms" className="text-[11px] text-slate-700 font-bold leading-relaxed cursor-pointer">
-                        Souhlasím s podmínkami pronájmu a se zpracováním osobních údajů pro účely vyřízení rezervace. *
-                      </label>
+                    <div className="space-y-1">
+                      <div className="flex items-start gap-4 px-2">
+                        <input type="checkbox" name="agreeTerms" id="agreeTerms" checked={formData.agreeTerms} onChange={handleInputChange} required
+                          className={`h-6 w-6 text-[#0070af] focus:ring-[#0070af] border-slate-300 rounded-lg mt-0.5 transition-all cursor-pointer ${fieldErrors.agreeTerms ? 'ring-2 ring-red-400' : ''}`} />
+                        <label htmlFor="agreeTerms" className="text-[11px] text-slate-700 font-bold leading-relaxed cursor-pointer">
+                          Souhlasím s podmínkami pronájmu a se zpracováním osobních údajů pro účely vyřízení rezervace. *
+                        </label>
+                      </div>
+                      {fieldErrors.agreeTerms && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.agreeTerms}</p>}
                     </div>
 
                     {error && (

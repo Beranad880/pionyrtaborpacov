@@ -66,6 +66,35 @@ export default function CampApplications() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateField = (name: string, value: string): string => {
+    if (['participantName', 'guardianName', 'secondContactName'].includes(name)) {
+      return value.trim().length < 2 ? 'Vyplňte jméno a příjmení' : '';
+    }
+    if (['guardianEmail'].includes(name)) {
+      return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Neplatný formát emailu' : '';
+    }
+    if (name === 'secondContactEmail' && value) {
+      return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Neplatný formát emailu' : '';
+    }
+    if (['guardianPhone', 'secondContactPhone'].includes(name)) {
+      return !/^[\+]?[0-9\s\-]{9,15}$/.test(value) ? 'Telefonní číslo: 9–15 číslic (případně +)' : '';
+    }
+    if (name === 'birthNumber') {
+      return !/^\d{6}\/?\d{4}$/.test(value) ? 'Formát: RRMMDD/XXXX' : '';
+    }
+    if (name === 'dateOfBirth') {
+      return !/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(value) ? 'Formát: DD.MM.YYYY' : '';
+    }
+    return '';
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    const err = validateField(name, value);
+    setFieldErrors(prev => ({ ...prev, [name]: err }));
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -87,44 +116,39 @@ export default function CampApplications() {
     }
   };
 
-  const validateForm = () => {
-    const requiredFields = [
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    const simpleRequired: Array<keyof CampApplicationForm> = [
       'participantName', 'grade', 'dateOfBirth', 'birthNumber',
-      'address.street', 'address.city', 'guardianName', 'guardianPhone',
-      'guardianEmail', 'secondContactName', 'secondContactPhone'
+      'guardianName', 'guardianPhone', 'guardianEmail',
+      'secondContactName', 'secondContactPhone'
     ];
 
-    for (const field of requiredFields) {
-      if (field.includes('.')) {
-        const [parent, child] = field.split('.');
-        if (!(formData[parent as keyof CampApplicationForm] as any)?.[child]) {
-          return false;
-        }
-      } else {
-        if (!formData[field as keyof CampApplicationForm]) {
-          return false;
-        }
-      }
+    for (const f of simpleRequired) {
+      const val = formData[f] as string;
+      if (!val?.trim()) { errors[f] = 'Toto pole je povinné'; continue; }
+      const err = validateField(f, val);
+      if (err) errors[f] = err;
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.guardianEmail)) {
-      return false;
+    if (!formData.address.street?.trim()) errors['address.street'] = 'Toto pole je povinné';
+    if (!formData.address.city?.trim())   errors['address.city']   = 'Toto pole je povinné';
+    if (!formData.grade) errors['grade'] = 'Vyberte třídu';
+
+    if (formData.secondContactEmail) {
+      const err = validateField('secondContactEmail', formData.secondContactEmail);
+      if (err) errors['secondContactEmail'] = err;
     }
 
-    if (formData.secondContactEmail && !emailRegex.test(formData.secondContactEmail)) {
-      return false;
-    }
-
-    return true;
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
-      setErrorMessage('Prosím vyplňte všechna povinná pole správně.');
+      setErrorMessage('Opravte chyby ve formuláři a zkuste to znovu.');
       setSubmitStatus('error');
       return;
     }
@@ -320,80 +344,49 @@ export default function CampApplications() {
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
-                      <input
-                        type="text"
-                        name="participantName"
-                        value={formData.participantName}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
-                        required
-                      />
+                      <input type="text" name="participantName" value={formData.participantName} onChange={handleInputChange} onBlur={handleBlur}
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400 ${fieldErrors.participantName ? 'border-red-400' : 'border-slate-200'}`} required />
+                      {fieldErrors.participantName && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.participantName}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Aktuální třída *</label>
-                      <select
-                        name="grade"
-                        value={formData.grade}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold"
-                        required
-                      >
+                      <select name="grade" value={formData.grade} onChange={handleInputChange} onBlur={handleBlur}
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold ${fieldErrors.grade ? 'border-red-400' : 'border-slate-200'}`} required>
                         <option value="">Vyberte třídu</option>
                         {gradeOptions.map(option => (
                           <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
                       </select>
+                      {fieldErrors.grade && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.grade}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Datum narození *</label>
-                      <input
-                        type="text"
-                        name="dateOfBirth"
-                        value={formData.dateOfBirth}
-                        onChange={handleInputChange}
-                        placeholder="DD.MM.YYYY"
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
-                        required
-                      />
+                      <input type="text" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} onBlur={handleBlur} placeholder="DD.MM.YYYY"
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400 ${fieldErrors.dateOfBirth ? 'border-red-400' : 'border-slate-200'}`} required />
+                      {fieldErrors.dateOfBirth && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.dateOfBirth}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Rodné číslo *</label>
-                      <input
-                        type="text"
-                        name="birthNumber"
-                        value={formData.birthNumber}
-                        onChange={handleInputChange}
-                        placeholder="YYMMDD/XXXX"
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
-                        required
-                      />
+                      <input type="text" name="birthNumber" value={formData.birthNumber} onChange={handleInputChange} onBlur={handleBlur} placeholder="YYMMDD/XXXX"
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400 ${fieldErrors.birthNumber ? 'border-red-400' : 'border-slate-200'}`} required />
+                      {fieldErrors.birthNumber && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.birthNumber}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Ulice a č.p. *</label>
-                      <input
-                        type="text"
-                        name="address.street"
-                        value={formData.address.street}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold"
-                        required
-                      />
+                      <input type="text" name="address.street" value={formData.address.street} onChange={handleInputChange} onBlur={handleBlur}
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold ${fieldErrors['address.street'] ? 'border-red-400' : 'border-slate-200'}`} required />
+                      {fieldErrors['address.street'] && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors['address.street']}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Město a PSČ *</label>
-                      <input
-                        type="text"
-                        name="address.city"
-                        value={formData.address.city}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold"
-                        required
-                      />
+                      <input type="text" name="address.city" value={formData.address.city} onChange={handleInputChange} onBlur={handleBlur}
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold ${fieldErrors['address.city'] ? 'border-red-400' : 'border-slate-100'}`} required />
+                      {fieldErrors['address.city'] && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors['address.city']}</p>}
                     </div>
                   </div>
                 </div>
@@ -407,49 +400,29 @@ export default function CampApplications() {
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
-                      <input
-                        type="text"
-                        name="guardianName"
-                        value={formData.guardianName}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
-                        required
-                      />
+                      <input type="text" name="guardianName" value={formData.guardianName} onChange={handleInputChange} onBlur={handleBlur}
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400 ${fieldErrors.guardianName ? 'border-red-400' : 'border-slate-100'}`} required />
+                      {fieldErrors.guardianName && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.guardianName}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Mobilní telefon *</label>
-                      <input
-                        type="tel"
-                        name="guardianPhone"
-                        value={formData.guardianPhone}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
-                        required
-                      />
+                      <input type="tel" name="guardianPhone" value={formData.guardianPhone} onChange={handleInputChange} onBlur={handleBlur}
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400 ${fieldErrors.guardianPhone ? 'border-red-400' : 'border-slate-100'}`} required />
+                      {fieldErrors.guardianPhone && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.guardianPhone}</p>}
                     </div>
 
                     <div className="md:col-span-2 space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Email pro komunikaci *</label>
-                      <input
-                        type="email"
-                        name="guardianEmail"
-                        value={formData.guardianEmail}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
-                        required
-                      />
+                      <input type="email" name="guardianEmail" value={formData.guardianEmail} onChange={handleInputChange} onBlur={handleBlur}
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400 ${fieldErrors.guardianEmail ? 'border-red-400' : 'border-slate-100'}`} required />
+                      {fieldErrors.guardianEmail && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.guardianEmail}</p>}
                     </div>
 
                     <div className="md:col-span-2 space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jiná adresa (pokud se liší)</label>
-                      <input
-                        type="text"
-                        name="guardianAddress"
-                        value={formData.guardianAddress}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold"
-                      />
+                      <input type="text" name="guardianAddress" value={formData.guardianAddress} onChange={handleInputChange}
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold" />
                     </div>
                   </div>
                 </div>
@@ -463,26 +436,16 @@ export default function CampApplications() {
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Jméno a příjmení *</label>
-                      <input
-                        type="text"
-                        name="secondContactName"
-                        value={formData.secondContactName}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
-                        required
-                      />
+                      <input type="text" name="secondContactName" value={formData.secondContactName} onChange={handleInputChange} onBlur={handleBlur}
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400 ${fieldErrors.secondContactName ? 'border-red-400' : 'border-slate-100'}`} required />
+                      {fieldErrors.secondContactName && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.secondContactName}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Telefon *</label>
-                      <input
-                        type="tel"
-                        name="secondContactPhone"
-                        value={formData.secondContactPhone}
-                        onChange={handleInputChange}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400"
-                        required
-                      />
+                      <input type="tel" name="secondContactPhone" value={formData.secondContactPhone} onChange={handleInputChange} onBlur={handleBlur}
+                        className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl focus:ring-4 focus:ring-[#0070af]/10 focus:border-[#0070af] transition-all font-bold placeholder:text-slate-400 ${fieldErrors.secondContactPhone ? 'border-red-400' : 'border-slate-100'}`} required />
+                      {fieldErrors.secondContactPhone && <p className="text-xs text-red-500 font-bold ml-2">{fieldErrors.secondContactPhone}</p>}
                     </div>
                   </div>
                 </div>

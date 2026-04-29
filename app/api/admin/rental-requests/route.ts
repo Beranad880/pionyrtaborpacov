@@ -7,6 +7,7 @@ import { validateDateRange, isValidEmail, isValidPhone, parseStatusFilter } from
 import { checkRateLimit, FORM_MAX } from '@/lib/rate-limit';
 import { dbError, isValidationError, validationError } from '@/lib/api-response';
 import { sendRentalNotification } from '@/lib/mailer';
+import { logAction } from '@/lib/audit';
 // GET - Načíst žádosti o pronájem (pouze pro adminy)
 export async function GET(request: NextRequest) {
   const authError = await requireAuth(request);
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     const { page, limit, skip } = parsePagination(searchParams);
     const status = searchParams.get('status');
 
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = { isDeleted: { $ne: true } };
     const validStatus = parseStatusFilter(status);
     if (validStatus) filter.status = validStatus;
 
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
 // POST - Vytvořit novou žádost o pronájem (veřejné API)
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
-  const rateCheck = checkRateLimit(`rental-request:${ip}`, FORM_MAX);
+  const rateCheck = await checkRateLimit(`rental-request:${ip}`, FORM_MAX);
   if (!rateCheck.allowed) {
     return NextResponse.json(
       { success: false, message: `Příliš mnoho požadavků. Zkuste to znovu za ${rateCheck.retryAfter} sekund.` },
@@ -130,6 +131,14 @@ export async function POST(request: NextRequest) {
     });
 
     await rentalRequest.save();
+
+    logAction({
+      action: 'Nová žádost o pronájem',
+      entity: 'rental-request',
+      entityId: rentalRequest._id?.toString(),
+      entityTitle: body.name,
+      user: 'veřejný web',
+    }).catch(() => {});
 
     sendRentalNotification({
       name: body.name,
