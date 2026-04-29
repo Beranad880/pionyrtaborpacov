@@ -116,25 +116,35 @@ export default function AdminLayout({
 
           {/* Footer User Section */}
           <div className="mt-auto pt-6 border-t border-slate-100">
-            <div className="flex items-center gap-3 mb-4 px-2">
+            <div className="flex items-center gap-3 px-2">
               <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-600 font-bold border border-slate-200">
-                {user?.username?.[0]?.toUpperCase() ?? 'A'}
+                A
               </div>
               <div className="min-w-0">
-                <p className="font-bold text-sm truncate text-slate-900">{user?.username ?? 'Administrátor'}</p>
+                <p className="font-bold text-sm truncate text-slate-900">adam</p>
                 <p className="text-[10px] text-slate-400 truncate uppercase tracking-wider font-bold">Online v systému</p>
               </div>
             </div>
-            
-            <div className="flex gap-2">
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+        {/* Desktop Header - Simple and clean */}
+        <header className="hidden md:flex flex-col bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
+          <div className="px-8 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                Systém připraven
+              </div>
+              <div className="h-4 w-px bg-slate-200"></div>
               <Link
                 href="/"
                 target="_blank"
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-slate-50 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all text-xs font-bold border border-slate-200"
+                className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
                 Web
               </Link>
               <button
@@ -144,31 +154,16 @@ export default function AdminLayout({
                     router.push('/admin/login');
                   }
                 }}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all text-xs font-bold border border-red-100"
+                className="text-xs font-bold text-red-500 hover:text-red-700 transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
                 Odhlásit
               </button>
             </div>
           </div>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        {/* Desktop Header - Simple and clean */}
-        <header className="hidden md:flex bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 sticky top-0 z-30 justify-end">
-          <div className="flex items-center gap-6">
-             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-               <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-               Systém připraven
-             </div>
-             <div className="h-4 w-px bg-slate-200"></div>
-             <div className="text-xs font-bold text-slate-500 italic">
-               {new Date().toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-             </div>
+          <div className="px-8 py-2 bg-slate-50/50 border-t border-slate-100 flex justify-end">
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+              {new Date().toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
           </div>
         </header>
 

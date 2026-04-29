@@ -127,12 +127,6 @@ export default function FotkyZAkciPage() {
                         <p className="text-slate-800 mt-4 text-lg font-medium max-w-2xl">{gallery.description}</p>
                       )}
                     </div>
-                    <div className="flex-shrink-0">
-                      <div className="bg-[#0070af]/5 px-6 py-4 rounded-2xl">
-                        <span className="text-[#0070af] font-black text-2xl">{gallery.photos.length}</span>
-                        <span className="text-[#0070af] font-bold text-xs uppercase tracking-widest ml-2">Fotografií</span>
-                      </div>
-                    </div>
                   </div>
 
                   {gallery.photos.length > 0 ? (
