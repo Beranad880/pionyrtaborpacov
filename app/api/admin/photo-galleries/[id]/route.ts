@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectToMongoose from '@/lib/mongoose';
 import PhotoGallery from '@/models/PhotoGallery';
 import { requireAuth, getUserFromToken } from '@/lib/auth-middleware';
 import { dbError, isValidationError, validationError } from '@/lib/api-response';
+
+function invalidId() {
+  return NextResponse.json({ success: false, message: 'Neplatné ID galerie' }, { status: 400 });
+}
 
 // GET - Načíst konkrétní galerii
 export async function GET(
@@ -15,6 +20,8 @@ export async function GET(
   try {
     await connectToMongoose();
     const { id } = await params;
+
+    if (!mongoose.isValidObjectId(id)) return invalidId();
 
     const gallery = await PhotoGallery.findById(id);
 
@@ -44,6 +51,8 @@ export async function PUT(
   try {
     await connectToMongoose();
     const { id } = await params;
+
+    if (!mongoose.isValidObjectId(id)) return invalidId();
 
     const body = await request.json();
     const gallery = await PhotoGallery.findById(id);
@@ -89,6 +98,8 @@ export async function DELETE(
   try {
     await connectToMongoose();
     const { id } = await params;
+
+    if (!mongoose.isValidObjectId(id)) return invalidId();
 
     const gallery = await PhotoGallery.findByIdAndDelete(id);
 

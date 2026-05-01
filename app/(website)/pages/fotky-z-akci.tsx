@@ -16,6 +16,7 @@ interface PhotoGallery {
   event: string;
   date: string;
   photos: Photo[];
+  photosCount: number;
   coverPhoto?: string;
   isPublic: boolean;
 }
@@ -26,6 +27,7 @@ export default function FotkyZAkciPage() {
   const [selectedGallery, setSelectedGallery] = useState<PhotoGallery | null>(null);
   const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [loadingFullGallery, setLoadingFullGallery] = useState(false);
 
   useEffect(() => {
     fetchGalleries();
@@ -33,7 +35,7 @@ export default function FotkyZAkciPage() {
 
   const fetchGalleries = async () => {
     try {
-      const response = await fetch('/api/admin/photo-galleries?isPublic=true');
+      const response = await fetch('/api/photo-galleries');
       const result = await response.json();
 
       if (result.success) {
@@ -50,6 +52,28 @@ export default function FotkyZAkciPage() {
     setSelectedGallery(gallery);
     setLightboxPhoto(gallery.photos[index]);
     setLightboxIndex(index);
+  };
+
+  const openFullGallery = async (gallery: PhotoGallery) => {
+    setSelectedGallery(gallery);
+    setLightboxPhoto(gallery.photos[0]);
+    setLightboxIndex(0);
+
+    if (gallery.photosCount > gallery.photos.length) {
+      setLoadingFullGallery(true);
+      try {
+        const response = await fetch(`/api/photo-galleries/${gallery._id}`);
+        const result = await response.json();
+        if (result.success) {
+          setSelectedGallery(result.data);
+          setLightboxPhoto(result.data.photos[0]);
+        }
+      } catch {
+        // zůstane s náhledovými fotkami
+      } finally {
+        setLoadingFullGallery(false);
+      }
+    }
   };
 
   const closeLightbox = () => {
@@ -152,13 +176,13 @@ export default function FotkyZAkciPage() {
                         ))}
                       </div>
 
-                      {gallery.photos.length > 8 && (
+                      {(gallery.photosCount ?? gallery.photos.length) > 8 && (
                         <div className="mt-12 text-center">
                           <button
-                            onClick={() => openLightbox(gallery, 0)}
+                            onClick={() => openFullGallery(gallery)}
                             className="inline-flex items-center gap-3 bg-slate-900 text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-[#0070af] transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10 hover:shadow-[#0070af]/20"
                           >
-                            <span>Zobrazit celou galerii ({gallery.photos.length})</span>
+                            <span>Zobrazit celou galerii ({gallery.photosCount ?? gallery.photos.length})</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                           </button>
                         </div>
@@ -256,9 +280,16 @@ export default function FotkyZAkciPage() {
 
           {/* Bottom Bar */}
           <div className="p-8 text-center">
+            {loadingFullGallery ? (
+              <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full text-white text-sm font-black tracking-widest uppercase">
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
+                <span>Načítám celou galerii...</span>
+              </div>
+            ) : (
               <div className="inline-flex items-center gap-4 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full text-white text-sm font-black tracking-widest uppercase">
                 {lightboxIndex + 1} <span className="opacity-40">/</span> {selectedGallery.photos.length}
               </div>
+            )}
           </div>
         </div>
       )}

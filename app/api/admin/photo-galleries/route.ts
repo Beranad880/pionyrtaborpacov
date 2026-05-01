@@ -26,20 +26,21 @@ export async function GET(request: NextRequest) {
     if (isPublicParam === 'true') filter.isPublic = true;
     else if (isPublicParam === 'false') filter.isPublic = false;
 
-    const galleries = await PhotoGallery.find(filter)
-      .sort({ date: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
-    const total = await PhotoGallery.countDocuments(filter);
+    const [galleries, total] = await Promise.all([
+      PhotoGallery.find(filter)
+        .sort({ date: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      PhotoGallery.countDocuments(filter),
+    ]);
 
     return NextResponse.json({
       success: true,
       data: {
         galleries,
         pagination: paginationMeta(page, limit, total),
-      }
+      },
     });
   } catch (error) {
     return dbError(error, 'GET /api/admin/photo-galleries error:');
@@ -68,6 +69,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const parsedDate = new Date(body.date);
+    if (isNaN(parsedDate.getTime())) {
+      return NextResponse.json(
+        { success: false, message: 'Neplatný formát data' },
+        { status: 400 }
+      );
+    }
+
     const slug = await uniqueSlug(PhotoGallery, body.title);
 
     const gallery = new PhotoGallery({
@@ -75,7 +84,7 @@ export async function POST(request: NextRequest) {
       slug,
       description: body.description,
       event: body.event,
-      date: new Date(body.date),
+      date: parsedDate,
       photos: body.photos || [],
       coverPhoto: body.coverPhoto,
       isPublic: body.isPublic !== false,

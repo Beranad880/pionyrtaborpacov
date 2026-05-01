@@ -109,13 +109,12 @@ const PhotoGallerySchema = new Schema<IPhotoGallery>(
 
 // Indexes for better query performance
 // PhotoGallerySchema.index({ slug: 1 }); // Already unique: true
-PhotoGallerySchema.index({ isPublic: 1 });
-PhotoGallerySchema.index({ date: -1 });
+PhotoGallerySchema.index({ isPublic: 1, date: -1 }); // složený index pro veřejný výpis (filter + sort)
 PhotoGallerySchema.index({ event: 1 });
-PhotoGallerySchema.index({ 'photos.tags': 1 });
 
 // Pre-save middleware to generate slug and set cover photo
 PhotoGallerySchema.pre('save', function() {
+  // Slug se generuje POUZE při prvním uložení — záměrně, aby URL galerií zůstaly stabilní po přejmenování
   if (this.isModified('title') && !this.slug) {
     this.slug = this.title
       .toLowerCase()

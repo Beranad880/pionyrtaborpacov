@@ -64,7 +64,7 @@ export default function PhotosAdminPage() {
   const fetchGalleries = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/photo-galleries');
+      const response = await fetch('/api/admin/photo-galleries?limit=100');
       const result = await response.json();
 
       if (result.success) {
