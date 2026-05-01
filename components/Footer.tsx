@@ -112,6 +112,21 @@ export default function Footer() {
                 />
               </a>
             </div>
+            <div className="flex flex-col items-center w-40">
+              <p className="text-sm text-slate-600 mb-3">Web vytvořil</p>
+              <a
+                href="https://humbletech.cz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center h-16 w-full hover:opacity-80 transition-opacity"
+              >
+                <span className="group flex items-center justify-center h-16 w-full rounded bg-blue-700 hover:bg-black transition-colors duration-200 px-3">
+                  <span className="font-bold text-lg tracking-tight">
+                    <span className="text-white group-hover:text-blue-700 transition-colors duration-200">humble</span><span className="text-black group-hover:text-white transition-colors duration-200">tech</span>
+                  </span>
+                </span>
+              </a>
+            </div>
           </div>
           <div className="border-t border-slate-300 w-full" />
           <div className="flex justify-between w-full">
