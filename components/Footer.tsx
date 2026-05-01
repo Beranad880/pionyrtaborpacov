@@ -112,17 +112,6 @@ export default function Footer() {
                 />
               </a>
             </div>
-            <div className="flex flex-col items-center w-40">
-              <p className="text-sm text-slate-600 mb-3">Vytvořil s ❤️</p>
-              <a
-                href="https://humbletech.cz"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center h-16 w-full bg-black hover:bg-white border border-black text-white hover:text-black transition-all duration-300 rounded-2xl text-base font-bold"
-              >
-                humbletech.cz
-              </a>
-            </div>
           </div>
           <div className="border-t border-slate-300 w-full" />
           <div className="flex justify-between w-full">
